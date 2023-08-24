@@ -1,11 +1,9 @@
-## built-in modules
-import os
-
-## third-party modules
-from discord.ext import commands 
-from discord import app_commands
-
+## third-party libraries
 import discord
+
+## custom libraries
+from modules.toolkit import toolkit
+from modules.fileHandler import fileHandler
 
 ##-------------------start-of-Kanrisha--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -41,14 +39,13 @@ class Kanrisha(discord.Client):
 
         super().__init__(intents=intents)
 
-        self.synced = False
-
-        activity = discord.Activity(name='/translate', type=discord.ActivityType.watching)
-
-        self.activity = activity
-
         self.tree = discord.app_commands.CommandTree(self)
 
+        self.activity = discord.Activity(name='you all.', type=discord.ActivityType.watching)
+
+        self.synced = False
+
+        self.toolkit = toolkit()
     
 ##-------------------start-of-on_ready()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -98,6 +95,6 @@ async def translate_menu(interaction: discord.Interaction, message: discord.Mess
 
 ##-------------------start-of-run()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-token = ""
+token = client.toolkit.get_token()
 
 client.run(token=token)
