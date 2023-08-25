@@ -78,10 +78,26 @@ client = Kanrisha()
 #-------------------start-of-on_message()--------------------------------------------------------------
 
 @client.event
-async def on_message(message):
+async def on_message(message:discord.Message):
+
+    message_to_send = ""
+    author = str(message.author).rstrip('#0')
+
+    match = True
     
     if(message.content == "hi"):
-        await message.channel.send('Hello, world!')
+        
+        message_to_send = f"Fuck you {author}."
+
+    elif(message.content == "bet"):
+
+        message_to_send = "See you tonight then."
+
+    else:
+        match = False
+
+    if(match):
+        await message.channel.send(message_to_send)
 
 @client.tree.command(name="translate", description="Translates a message from Japanese to English")
 async def translate(interaction: discord.Interaction, message: str):
