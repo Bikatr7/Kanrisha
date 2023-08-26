@@ -82,16 +82,23 @@ async def on_message(message:discord.Message):
 
     message_to_send = ""
     author = str(message.author).rstrip('#0')
+    user_message = message.content.lower()
 
     match = True
     
-    if(message.content == "hi"):
+    if(user_message == "hi"):
         
         message_to_send = f"Fuck you {author}."
 
-    elif(message.content == "bet"):
+    elif(user_message == "bet"):
 
         message_to_send = "See you tonight then."
+
+    elif(user_message == "wild"):
+        message_to_send = f"Shut the fuck up {author}"
+
+    elif(user_message == "kys"):
+        message_to_send = f"No u"
 
     else:
         match = False
