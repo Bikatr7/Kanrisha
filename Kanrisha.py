@@ -100,6 +100,9 @@ async def on_message(message:discord.Message):
     elif(user_message == "kys"):
         message_to_send = f"No u"
 
+    elif(user_message == "idk"):
+        message_to_send = "Retard"
+
     else:
         match = False
 
