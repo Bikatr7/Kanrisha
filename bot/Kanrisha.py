@@ -5,6 +5,7 @@ import discord
 from modules.toolkit import toolkit
 
 from handlers.slashCommandHandler import slashCommandHandler
+from handlers.interactionHandler import interactionHandler
 
 ##-------------------start-of-Kanrisha--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -49,6 +50,7 @@ class Kanrisha(discord.Client):
         self.toolkit = toolkit()
 
         self.slash_command_handler = slashCommandHandler(self)
+        self.interaction_handler = interactionHandler()
     
 ##-------------------start-of-on_ready()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

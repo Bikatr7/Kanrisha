@@ -57,7 +57,9 @@ class slashCommandHandler:
 
             """
 
-            await interaction.response.send_message(spin_wheel())
+            spin_result = spin_wheel()
+
+            await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, spin_result)
 
         ##-------------------start-of-multispin()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -81,4 +83,4 @@ class slashCommandHandler:
             for i in range(0, 10):
                 multi_spin += spin_wheel()
 
-            await interaction.response.send_message(multi_spin)
+            await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, multi_spin)
