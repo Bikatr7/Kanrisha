@@ -35,16 +35,20 @@ class fileHandler():
         else:  # Linux
             self.config_dir = os.path.join(os.path.expanduser("~"), "KanrishaConfig")
 
-        ## log file
-        self.log_path = os.path.join(self.config_dir, "debug log.txt")
 
-        self.token_path = os.path.join(self.config_dir, "token.txt")
+        self.bot_details_dir = os.path.join(self.config_dir, "bot details")
+
+        self.log_path = os.path.join(self.bot_details_dir, "debug log.txt")
+
+        self.token_path = os.path.join(self.bot_details_dir, "token.txt")
 
         ##---------------------------------------------------------------------------------
 
         self.logger = logger(self.log_path)
 
         self.standard_create_directory(self.config_dir)
+
+        self.standard_create_directory(self.bot_details_dir)
 
         self.modified_create_file(self.token_path, "token")
 
@@ -119,6 +123,19 @@ class fileHandler():
 ##-------------------start-of-handle_critical_exception()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     def handle_critical_exception(self, critical_exception:Exception) -> None:
+
+        """
+
+        Handles a critical exception.\n
+
+        Parameters:\n
+        self (object - fileHandler) : the fileHandler object.\n
+        critical_exception (Exception) : the exception that is critical.\n
+
+        Returns:\n
+        None.\n
+
+        """
 
         ## if crash, catch and log, then throw
         self.logger.log_action("--------------------------------------------------------------")

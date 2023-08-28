@@ -40,32 +40,44 @@ class slashCommandHandler:
 
         kanrisha_client = inc_kanrisha_client
 
-
-        ##-------------------start-of-translate_menu()--------------------------------------------------------------
-
-        @kanrisha_client.tree.command(name="translate", description="Translates a message from Japanese to English")
-        async def translate(interaction: discord.Interaction, message: str):
-            await interaction.response.send_message(str(message) + " was altered", ephemeral=True)
-
-        ##-------------------start-of-translate_menu()--------------------------------------------------------------
-
-        @kanrisha_client.tree.context_menu(name = "translate")
-        async def translate_menu(interaction: discord.Interaction, message: discord.Message):
-            await interaction.response.send_message(str(message.content) + " was altered", ephemeral=True) 
-
-        ##-------------------start-of-spin()------------------------------------------------------------------------
+        ##-------------------start-of-spin()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.tree.command(name="spin", description="Spins a wheel")
         async def spin(interaction: discord.Interaction):
 
+            """
+            
+            Spins a wheel.\n
+
+            Parameters:\n
+            interaction (object - discord.Interaction) : the interaction object.\n
+
+            Returns:\n
+            None.\n
+
+            """
 
             await interaction.response.send_message(spin_wheel())
 
+        ##-------------------start-of-multispin()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.tree.command(name="multispin", description="Spins a wheel 10 times")
         async def multi_spin(interaction: discord.Interaction):
 
+            """
+
+            Spins a wheel 10 times.\n
+
+            Parameters:\n
+            interaction (object - discord.Interaction) : the interaction object.\n
+
+            Returns:\n
+            None.\n
+
+            """
+
             multi_spin = ""
+            
             for i in range(0, 10):
                 multi_spin += spin_wheel()
 
