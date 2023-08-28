@@ -11,6 +11,8 @@ import discord
 if(typing.TYPE_CHECKING): ## used for cheating the circular import issue that occurs when i need to type check some things
     from bot.Kanrisha import Kanrisha
 
+from handlers.gachaHandler import spin_wheel
+
 class slashCommandHandler:
 
     """
@@ -56,17 +58,15 @@ class slashCommandHandler:
         @kanrisha_client.tree.command(name="spin", description="Spins a wheel")
         async def spin(interaction: discord.Interaction):
 
-            chances = {"<:shining:1144089713934864444>": 0.05, "<:glowing:1144089680934080512>": 0.12, "<:common:1144089649174814730>": 0.83}
-            
-            # Generate a random number between 0 and 1
-            random_number = random.random()
-            
-            # Initialize a variable to keep track of the cumulative probability
-            cumulative_probability = 0
-            
-            # Iterate through the chances and select a value based on the probabilities
-            for value, probability in chances.items():
-                cumulative_probability += probability
-                if(random_number < cumulative_probability):
-                    await interaction.response.send_message(value)
-                    break
+
+            await interaction.response.send_message(spin_wheel())
+
+
+        @kanrisha_client.tree.command(name="multispin", description="Spins a wheel 10 times")
+        async def multi_spin(interaction: discord.Interaction):
+
+            multi_spin = ""
+            for i in range(0, 10):
+                multi_spin += spin_wheel()
+
+            await interaction.response.send_message(multi_spin)
