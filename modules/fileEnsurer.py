@@ -3,7 +3,7 @@ import os
 import shutil
 
 ## custom modules
-from modules.fileHandler import fileHandler
+from handlers.fileHandler import fileHandler
 
 from modules.logger import logger
 
@@ -43,7 +43,9 @@ class fileEnsurer:
 
       self.bot_details_dir = os.path.join(self.config_dir, "bot details")
       self.members_dir = os.path.join(self.config_dir, "members")
+      self.images_dir = os.path.join(self.config_dir, "images")
 
+      self.bot_images_dir = os.path.join(self.images_dir, "bot images")
 
       ##----------------------------------------------------------------paths----------------------------------------------------------------
 
@@ -51,6 +53,9 @@ class fileEnsurer:
       self.log_path = os.path.join(self.bot_details_dir, "debug log.txt")
 
       self.token_path = os.path.join(self.bot_details_dir, "token.txt")
+
+      self.bot_thumbnail_path = os.path.join(self.bot_images_dir, "kanrisha thumbnail.png")
+      self.bot_thumbnail_url = "https://cdn.discordapp.com/app-icons/1144166968979628072/7f4e6d14a104149d59624d5cc2897b94.png?size=256"
 
       ##----------------------------------------------------------------functions----------------------------------------------------------------
 
@@ -109,4 +114,7 @@ class fileEnsurer:
 
       self.file_handler.standard_create_directory(self.bot_details_dir)
       self.file_handler.standard_create_directory(self.members_dir)
+      self.file_handler.standard_create_directory(self.images_dir)
+
+      self.file_handler.standard_create_directory(self.bot_images_dir)
                

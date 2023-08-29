@@ -1,3 +1,6 @@
+## built-in libraries
+import typing
+
 ## third-party libraries
 import discord
 
@@ -35,7 +38,7 @@ class interactionHandler:
 
 ##-------------------start-of-send_response_filter_channel()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def send_response_filter_channel(self, interaction:discord.Interaction, response:str, admin_only=False) -> None:
+    async def send_response_filter_channel(self, interaction:discord.Interaction, response:str, embed:typing.Optional[discord.Embed], view:typing.Optional[discord.ui.View], admin_only=False) -> None:
 
         """
 
@@ -59,7 +62,15 @@ class interactionHandler:
 
         ## if correct channel or admin, send response
         if(interaction.channel_id in self.whitelisted_channel_ids or interaction.user.id in self.admin_user_ids):
-            await interaction.response.send_message(response)
+
+            if(embed and view):
+                await interaction.response.send_message(embed=embed, view=view)
+
+            elif(embed):
+                await interaction.response.send_message(embed=embed)
+            
+            else:
+                await interaction.response.send_message(response)
 
         else:
             await interaction.response.send_message(f"Please use {self.whitelisted_channel_names[0]} for this command.", delete_after=3.0)

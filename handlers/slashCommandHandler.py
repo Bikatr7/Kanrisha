@@ -58,7 +58,7 @@ class slashCommandHandler:
 
             spin_result = kanrisha_client.gacha_handler.spin_wheel()
 
-            await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, spin_result)
+            await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, spin_result, embed=None, view=None)
 
         ##-------------------start-of-multispin()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -83,16 +83,43 @@ class slashCommandHandler:
             for i in range(0, 10):
                 multi_spin += kanrisha_client.gacha_handler.spin_wheel()
 
-            await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, multi_spin)
+            await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, multi_spin, embed=None, view=None)
 
         ##-------------------start-of-register()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        @kanrisha_client.tree.command(name="register", description="Registers a user to the bot (IN TESTING)")
+        @kanrisha_client.tree.command(name="register", description="Registers a user to the bot.")
         async def register(interaction: discord.Interaction):
 
             """
+            
+            Registers a user to the bot, currently only admits the user to the bot's testing phase.\n
 
-            Registers a user to the bot.\n
+            """
+
+            register_message = """
+            By clicking this button you acknowledge and agree to the following:\n
+            - Your Discord username and ID will be stored in a database.\n
+            - Your Discord username and ID will be used for bot functionality.\n
+            - You will be using the bot during its testing phase, and any and all data may be wiped/lost at any time.\n
+            - You will not hold the bot owner responsible for any data loss.\n
+            """
+
+            embed = discord.Embed(title="Register", description=register_message, color=0xC0C0C0)
+            embed.set_thumbnail(url=kanrisha_client.file_ensurer.bot_thumbnail_url)
+            embed.set_footer(text="This message will be deleted in 60 seconds.")
+
+            view = discord.ui.View().add_item(discord.ui.Button(style=discord.ButtonStyle.green, custom_id="register", label="Register"))
+
+            await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, response="", embed=embed, view=view, admin_only=True)
+
+        ##-------------------start-of-on_interaction()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        @kanrisha_client.event
+        async def on_interaction(interaction: discord.Interaction):
+
+            """
+
+            Handles button interactions.\n
 
             Parameters:\n
             self (object - slashCommandHandler) : the slashCommandHandler object.\n
@@ -103,4 +130,19 @@ class slashCommandHandler:
 
             """
 
-            await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, "This command is currently in testing.", admin_only=True)
+
+            ## check if it's a button press
+            if(interaction.type == discord.InteractionType.component):  
+
+                ## get the custom id of the button
+                custom_id = interaction.data.get("custom_id") if interaction.data else None
+
+                ## if register button was pressed
+                if(custom_id == "register"):
+
+                    ## acknowledge the interaction immediately
+                    await interaction.response.defer()
+
+                    await interaction.followup.send("You clicked the register button!")
+
+
