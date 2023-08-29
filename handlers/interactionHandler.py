@@ -38,7 +38,7 @@ class interactionHandler:
 
 ##-------------------start-of-send_response_filter_channel()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def send_response_filter_channel(self, interaction:discord.Interaction, response:str, embed:typing.Optional[discord.Embed], view:typing.Optional[discord.ui.View], admin_only=False) -> None:
+    async def send_response_filter_channel(self, interaction:discord.Interaction, response: str | None = None, embed: discord.Embed | None = None, view: discord.ui.View | None = None, is_admin_only:bool = False, delete_after: float | None = None, is_ephemeral:bool = False) -> None:
 
         """
 
@@ -56,28 +56,32 @@ class interactionHandler:
         """
 
         ## admin check
-        if(interaction.user.id not in self.admin_user_ids and admin_only):
-            await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0)
+        if(interaction.user.id not in self.admin_user_ids and is_admin_only):
+            await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
+            return
 
 
         ## if correct channel or admin, send response
         if(interaction.channel_id in self.whitelisted_channel_ids or interaction.user.id in self.admin_user_ids):
 
             if(embed and view):
-                await interaction.response.send_message(embed=embed, view=view)
+                await interaction.response.send_message(embed=embed, view=view, delete_after=delete_after, ephemeral=is_ephemeral)
 
             elif(embed):
-                await interaction.response.send_message(embed=embed)
+                await interaction.response.send_message(embed=embed, delete_after=delete_after, ephemeral=is_ephemeral)
             
+            elif(response):
+                await interaction.response.send_message(response, delete_after=delete_after, ephemeral=is_ephemeral)
+
             else:
-                await interaction.response.send_message(response)
+                raise Exception("No response, embed, or view was provided.")
 
         else:
-            await interaction.response.send_message(f"Please use {self.whitelisted_channel_names[0]} for this command.", delete_after=3.0)
+            await interaction.response.send_message(f"Please use {self.whitelisted_channel_names[0]} for this command.", delete_after=5.0, ephemeral=True)
 
 ##-------------------start-of-send_response_no_filter_channel()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def send_response_no_filter_channel(self, interaction:discord.Interaction, response:str, admin_only=False) -> None:
+    async def send_response_no_filter_channel(self, interaction:discord.Interaction, response: str | None = None, embed: discord.Embed | None = None, view: discord.ui.View | None = None, is_admin_only:bool = False, delete_after: float | None = None, is_ephemeral:bool = False) -> None:
 
         """
 
@@ -95,8 +99,21 @@ class interactionHandler:
         """
 
         ## admin check
-        if(interaction.user.id not in self.admin_user_ids and admin_only):
-            await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0)
+        if(interaction.user.id not in self.admin_user_ids and is_admin_only):
+            await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
+            return
 
-        await interaction.response.send_message(response)
+        else:
+
+            if(embed and view):
+                await interaction.response.send_message(embed=embed, view=view, delete_after=delete_after, ephemeral=is_ephemeral)
+
+            elif(embed):
+                await interaction.response.send_message(embed=embed, delete_after=delete_after, ephemeral=is_ephemeral)
+            
+            elif(response):
+                await interaction.response.send_message(response, delete_after=delete_after, ephemeral=is_ephemeral)
+
+            else:
+                raise Exception("No response, embed, or view was provided.")
     

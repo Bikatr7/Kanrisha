@@ -8,6 +8,8 @@ from modules.toolkit import toolkit
 from handlers.slashCommandHandler import slashCommandHandler
 from handlers.interactionHandler import interactionHandler
 from handlers.gachaHandler import gachaHandler
+from handlers.memberHandler import memberHandler
+from handlers.localHandler import localHandler
 
 ##-------------------start-of-Kanrisha--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -67,6 +69,10 @@ class Kanrisha(discord.Client):
         self.slash_command_handler = slashCommandHandler(self)
         self.interaction_handler = interactionHandler()
         self.gacha_handler = gachaHandler()
+
+        self.local_handler = localHandler()
+        self.member_handler = memberHandler()
+
     
 ##-------------------start-of-on_ready()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

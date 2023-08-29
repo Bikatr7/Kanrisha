@@ -91,15 +91,20 @@ class slashCommandHandler:
         async def register(interaction: discord.Interaction):
 
             """
-            
+
             Registers a user to the bot, currently only admits the user to the bot's testing phase.\n
+
+            Parameters:\n
+            self (object - slashCommandHandler) : the slashCommandHandler object.\n
+            interaction (object - discord.Interaction) : the interaction object.\n
+
+            Returns:\n
+            None.\n
 
             """
 
             register_message = """
             By clicking this button you acknowledge and agree to the following:\n
-            - Your Discord username and ID will be stored in a database.\n
-            - Your Discord username and ID will be used for bot functionality.\n
             - You will be using the bot during its testing phase, and any and all data may be wiped/lost at any time.\n
             - You will not hold the bot owner responsible for any data loss.\n
             """
@@ -108,12 +113,13 @@ class slashCommandHandler:
             embed.set_thumbnail(url=kanrisha_client.file_ensurer.bot_thumbnail_url)
             embed.set_footer(text="This message will be deleted in 60 seconds.")
 
-            view = discord.ui.View().add_item(discord.ui.Button(style=discord.ButtonStyle.green, custom_id="register", label="Register"))
+            # Store the user's ID as a custom attribute of the button
+            view = discord.ui.View().add_item(discord.ui.Button(style=discord.ButtonStyle.green, custom_id=f"register_{interaction.user.id}", label="Register"))
 
-            await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, response="", embed=embed, view=view, admin_only=True)
+            await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, embed=embed, view=view, delete_after=60.0, is_admin_only=True)
 
         ##-------------------start-of-on_interaction()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-        
+
         @kanrisha_client.event
         async def on_interaction(interaction: discord.Interaction):
 
@@ -130,19 +136,24 @@ class slashCommandHandler:
 
             """
 
-
             ## check if it's a button press
             if(interaction.type == discord.InteractionType.component):  
 
                 ## get the custom id of the button
                 custom_id = interaction.data.get("custom_id") if interaction.data else None
 
-                ## if register button was pressed
-                if(custom_id == "register"):
+                ## if register button was pressed by the correct user
+                if custom_id == f"register_{interaction.user.id}":
 
                     ## acknowledge the interaction immediately
                     await interaction.response.defer()
 
                     await interaction.followup.send("You clicked the register button!")
+
+                ## if register button was pressed by the wrong user
+                elif custom_id and custom_id.startswith("register_"):
+
+                    await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not authorized to use this button.", delete_after=3.0, is_ephemeral=True)
+
 
 
