@@ -84,3 +84,23 @@ class slashCommandHandler:
                 multi_spin += kanrisha_client.gacha_handler.spin_wheel()
 
             await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, multi_spin)
+
+        ##-------------------start-of-register()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        @kanrisha_client.tree.command(name="register", description="Registers a user to the bot (IN TESTING)")
+        async def register(interaction: discord.Interaction):
+
+            """
+
+            Registers a user to the bot.\n
+
+            Parameters:\n
+            self (object - slashCommandHandler) : the slashCommandHandler object.\n
+            interaction (object - discord.Interaction) : the interaction object.\n
+
+            Returns:\n
+            None.\n
+
+            """
+
+            await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, "This command is currently in testing.", admin_only=True)
