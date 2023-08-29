@@ -14,45 +14,23 @@ class fileHandler():
     """
 ##--------------------start-of-__init__()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def __init__(self) -> None:
+    def __init__(self, inc_logger:logger) -> None:
 
         """
         
         Initializes the fileHandler class.\n
 
         Parameters:\n
-        self (object - fileHandler) : the fileHandler object.\n
+        logger (object - logger) : the logger object.\n
 
         Returns:\n
         None.\n
 
         """
 
-        self.script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-        if(os.name == 'nt'):  # Windows
-            self.config_dir = os.path.join(os.environ['USERPROFILE'],"KanrishaConfig")
-        else:  # Linux
-            self.config_dir = os.path.join(os.path.expanduser("~"), "KanrishaConfig")
-
-
-        self.bot_details_dir = os.path.join(self.config_dir, "bot details")
-
-        self.log_path = os.path.join(self.bot_details_dir, "debug log.txt")
-
-        self.token_path = os.path.join(self.bot_details_dir, "token.txt")
-
         ##---------------------------------------------------------------------------------
 
-        self.logger = logger(self.log_path)
-
-        self.standard_create_directory(self.config_dir)
-
-        self.standard_create_directory(self.bot_details_dir)
-
-        self.modified_create_file(self.token_path, "token")
-
-        self.logger.clear_log_file()
+        self.logger = inc_logger
 
 ##--------------------start-of-standard_create_directory()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -139,7 +117,7 @@ class fileHandler():
 
         ## if crash, catch and log, then throw
         self.logger.log_action("--------------------------------------------------------------")
-        self.logger.log_action("Kudasai has crashed")
+        self.logger.log_action("Kanrisha has crashed")
 
         traceback_str = traceback.format_exc()
         

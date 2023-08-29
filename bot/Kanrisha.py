@@ -1,11 +1,13 @@
 ## third-party libraries
 import discord
 
-## custom libraries
+## custom modules
+from modules.fileEnsurer import fileEnsurer
 from modules.toolkit import toolkit
 
 from handlers.slashCommandHandler import slashCommandHandler
 from handlers.interactionHandler import interactionHandler
+from handlers.gachaHandler import gachaHandler
 
 ##-------------------start-of-Kanrisha--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -41,16 +43,30 @@ class Kanrisha(discord.Client):
 
         super().__init__(intents=intents)
 
+        #------------------------------------------------------
+
+
+        ## tree for slash commands
         self.tree = discord.app_commands.CommandTree(self)
 
+        ## sets the activity currently "Watching you all."
         self.activity = discord.Activity(name='you all.', type=discord.ActivityType.watching)
 
         self.synced = False
 
-        self.toolkit = toolkit()
+        #------------------------------------------------------
+
+        self.file_ensurer = fileEnsurer()
+
+        self.file_ensurer.ensure_files()
+
+        self.toolkit = toolkit(self.file_ensurer)
+
+        #------------------------------------------------------
 
         self.slash_command_handler = slashCommandHandler(self)
         self.interaction_handler = interactionHandler()
+        self.gacha_handler = gachaHandler()
     
 ##-------------------start-of-on_ready()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

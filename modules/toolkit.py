@@ -3,7 +3,7 @@ import os
 import msvcrt
 
 ## custom modules
-from modules.fileHandler import fileHandler
+from modules.fileEnsurer import fileEnsurer
 
 class toolkit():
 
@@ -15,21 +15,21 @@ class toolkit():
 
 ##-------------------start-of-__init__()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def __init__(self) -> None:
+    def __init__(self, inc_file_ensurer:fileEnsurer) -> None:
 
         """
         
         Constructor for the toolkit class.\n
 
         Parameters:\n
-        None.\n
+        inc_file_ensurer (object - fileEnsurer) : the fileEnsurer object.\n
 
         Returns:\n
         None.\n
 
         """
 
-        self.file_handler = fileHandler()
+        self.file_handler = inc_file_ensurer
 
 ##-------------------start-of-clear_console()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

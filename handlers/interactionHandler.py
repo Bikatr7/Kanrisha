@@ -39,6 +39,7 @@ class interactionHandler:
         Sends a response to a channel.\n
 
         Parameters:\n
+        self (object - interactionHandler) : the interactionHandler object.\n
         interaction (object - discord.Interaction) : the interaction object.\n
         response (str) : the response to send.\n
 
@@ -62,6 +63,7 @@ class interactionHandler:
         Sends a response to a channel.\n
 
         Parameters:\n
+        self (object - interactionHandler) : the interactionHandler object.\n
         interaction (object - discord.Interaction) : the interaction object.\n
         response (str) : the response to send.\n
 
