@@ -1,6 +1,5 @@
 ## built-in modules
 import os
-import msvcrt
 
 ## custom modules
 from modules.logger import logger
@@ -69,6 +68,8 @@ class toolkit():
         print(message)  ## Print the custom message
         
         if(os.name == 'nt'):  ## Windows
+
+            import msvcrt
             
             msvcrt.getch() 
 
