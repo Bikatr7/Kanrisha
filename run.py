@@ -3,8 +3,12 @@ from bot.Kanrisha import Kanrisha
 
 ##-------------------start-of-main()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-client = Kanrisha()
+def main():
+    client = Kanrisha()
 
-token = client.file_ensurer.get_token()
+    token = client.file_ensurer.get_token()
 
-client.run(token=token)
+    client.run(token=token)
+
+if __name__ == "__main__":
+    main()
