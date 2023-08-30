@@ -29,9 +29,9 @@ class interactionHandler:
 
         """
 
-        self.whitelisted_channel_names = ["#general-bot", "#bot-testing"]
+        self.whitelisted_channel_names = ["#general-bot", "#bot-testing", "#gamemaster-testing"] # "#gamemaster-testing" is in Tommy's server for testing
 
-        self.whitelisted_channel_ids = [1144136660691460126, 1146174110548901979]
+        self.whitelisted_channel_ids = [1144136660691460126, 1146174110548901979, 1049144043008950322]
 
         self.admin_user_ids = [957451091748986972]
         self.admin_usernames = ["seinu"]
