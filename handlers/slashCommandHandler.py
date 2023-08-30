@@ -8,6 +8,7 @@ import random
 import discord
 
 ## custom libraries
+from handlers.eventHandler import eventHandler
 if(typing.TYPE_CHECKING): ## used for cheating the circular import issue that occurs when i need to type check some things
     from bot.Kanrisha import Kanrisha
 
@@ -37,6 +38,10 @@ class slashCommandHandler:
         """
 
         kanrisha_client = inc_kanrisha_client
+
+        ##-------------------event-handler--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        kanrisha_client.message_handler = eventHandler(kanrisha_client)
 
         ##-------------------start-of-spin()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -10,7 +10,6 @@ from handlers.interactionHandler import interactionHandler
 from handlers.gachaHandler import gachaHandler
 from handlers.memberHandler import memberHandler
 from handlers.localHandler import localHandler
-from handlers.eventHandler import eventHandler
 
 ##-------------------start-of-Kanrisha--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -73,8 +72,6 @@ class Kanrisha(discord.Client):
 
         self.local_handler = localHandler(self.file_ensurer, self.toolkit)
         self.member_handler = memberHandler(self.file_ensurer, self.toolkit)
-
-        self.message_handler = eventHandler(self)
 
 
 ##-------------------start-of-run_post_init_tasks()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
