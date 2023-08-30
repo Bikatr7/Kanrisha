@@ -60,8 +60,6 @@ class Kanrisha(discord.Client):
 
         self.file_ensurer = fileEnsurer()
 
-        self.file_ensurer.ensure_files()
-
         self.toolkit = toolkit(self.file_ensurer.logger)
 
         #------------------------------------------------------
@@ -75,6 +73,28 @@ class Kanrisha(discord.Client):
         self.local_handler = localHandler(self.file_ensurer, self.toolkit)
         self.member_handler = memberHandler(self.file_ensurer, self.toolkit)
 
+
+##-------------------start-of-run_post_init_tasks()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    async def run_post_init_tasks(self):
+
+        """
+        
+        Runs the post initialization tasks.\n
+
+        Parameters:\n
+        self (object - Kanrisha): The Kanrisha client.\n
+
+        Returns:\n
+        None.\n
+
+        """
+
+        await self.file_ensurer.ensure_files()
+
+        self.file_ensurer.logger.clear_log_file()
+
+        self.member_handler.load_members()
     
 ##-------------------start-of-on_ready()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -97,5 +117,7 @@ class Kanrisha(discord.Client):
         if(not self.synced):
             await self.tree.sync()
             self.synced = True
+
+        await self.run_post_init_tasks()
 
         print('The Gamemaster is ready.')

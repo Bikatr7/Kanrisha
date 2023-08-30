@@ -109,6 +109,15 @@ class slashCommandHandler:
             - You will not hold the bot owner responsible for any data loss.\n
             """
 
+            already_registered_member_ids = [member.member_id for member in kanrisha_client.member_handler.members]
+
+            if(interaction.user.id in already_registered_member_ids):
+                error_message = "You are already registered."
+
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, response=error_message, delete_after=5.0, is_ephemeral=True)
+
+                return
+
             embed = discord.Embed(title="Register", description=register_message, color=0xC0C0C0)
             embed.set_thumbnail(url=kanrisha_client.file_ensurer.bot_thumbnail_url)
             embed.set_footer(text="This message will be deleted in 60 seconds.")
@@ -137,7 +146,7 @@ class slashCommandHandler:
             """
 
             ## check if it's a button press
-            if(interaction.type == discord.InteractionType.component):  
+            if(interaction.type == discord.InteractionType.component):
 
                 ## get the custom id of the button
                 custom_id = interaction.data.get("custom_id") if interaction.data else None
@@ -148,12 +157,16 @@ class slashCommandHandler:
                     ## acknowledge the interaction immediately
                     await interaction.response.defer()
 
-                    await interaction.followup.send("You clicked the register button!")
+                    await kanrisha_client.member_handler.add_new_member(interaction.user.id)
+
+                    await interaction.delete_original_response()
+
+                    await interaction.followup.send("You have been registered.", ephemeral=True)
 
                 ## if register button was pressed by the wrong user
                 elif custom_id and custom_id.startswith("register_"):
 
-                    await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not authorized to use this button.", delete_after=3.0, is_ephemeral=True)
+                    await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not authorized to use this button.", delete_after=5.0, is_ephemeral=True)
 
 
 

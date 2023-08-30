@@ -35,7 +35,7 @@ class fileHandler():
 
 ##--------------------start-of-standard_create_directory()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def standard_create_directory(self, directory_path:str) -> None:
+    async def standard_create_directory(self, directory_path:str) -> None:
 
         """
 
@@ -56,7 +56,7 @@ class fileHandler():
 
 ##--------------------start-of-standard_create_file()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def standard_create_file(self, file_path:str) -> None:
+    async def standard_create_file(self, file_path:str) -> None:
 
         """
 
@@ -78,7 +78,7 @@ class fileHandler():
 
 ##--------------------start-of-modified_create_file()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def modified_create_file(self, file_path:str, content_to_write:str) -> None:
+    async def modified_create_file(self, file_path:str, content_to_write:str) -> None:
 
         """
 
@@ -101,7 +101,7 @@ class fileHandler():
 
 ##--------------------start-of-write_sei_line()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def write_sei_line(self, sei_file_path:str, items_to_write:typing.List[str]) -> None:
+    async def write_sei_line(self, sei_file_path:str, items_to_write:typing.List[str]) -> None:
 
         """
         
@@ -124,7 +124,7 @@ class fileHandler():
 
 ##-------------------start-of-read_sei_file()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def edit_sei_line(self, file_path:str, target_line:int, column_number:int, value_to_replace_to:str) -> None:
+    async def edit_sei_line(self, file_path:str, target_line:int, column_number:int, value_to_replace_to:str) -> None:
         
         """
 
@@ -159,7 +159,7 @@ class fileHandler():
 
 ##-------------------start-of-read_sei_file()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def read_sei_file(self, sei_file_path:str, target_line:int, column:int) -> str:
+    async def read_sei_file(self, sei_file_path:str, target_line:int, column:int) -> str:
 
         """
 
@@ -200,7 +200,7 @@ class fileHandler():
 
 ##-------------------start-of-delete_sei_line()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def delete_sei_line(self, sei_file_path:str, target_line:int) -> None:
+    async def delete_sei_line(self, sei_file_path:str, target_line:int) -> None:
 
         """
 
@@ -226,7 +226,7 @@ class fileHandler():
 
 ##--------------------start-of-delete_all_occurrences_of_id()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def delete_all_occurrences_of_id(self, file_path:str, id_index:int, id_value:int) -> None:
+    async def delete_all_occurrences_of_id(self, file_path:str, id_index:int, id_value:int) -> None:
 
         """
         
@@ -252,8 +252,10 @@ class fileHandler():
 
         while(i < line_count):
 
-            if(int(self.read_sei_file(file_path, i + 1, id_index)) == id_value):
-                self.delete_sei_line(file_path, i + 1)
+            id = int(await self.read_sei_file(file_path, i + 1, id_index))
+
+            if(id == id_value):
+                await self.delete_sei_line(file_path, i + 1)
                 line_count -= 1
                 
             else:

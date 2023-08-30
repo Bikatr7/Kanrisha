@@ -71,8 +71,6 @@ class fileEnsurer:
       ## logger for all actions taken by Seisen.\n
       self.logger = logger(self.log_path)
 
-      self.logger.clear_log_file()
-
       self.logger.log_action("Initialization")
       self.logger.log_action("--------------------------------------------------------------")
 
@@ -80,7 +78,7 @@ class fileEnsurer:
 
 ##--------------------start-of-ensure_files()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-   def ensure_files(self) -> None:
+   async def ensure_files(self) -> None:
 
       """
 
@@ -94,11 +92,12 @@ class fileEnsurer:
       
       """
 
-      self.create_needed_base_directories()
+      await self.create_needed_base_directories()
+      await self.ensure_member_files()
 
 ##--------------------start-of-create_needed_base_directories()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-   def create_needed_base_directories(self) -> None:
+   async def create_needed_base_directories(self) -> None:
 
       """
       
@@ -112,16 +111,16 @@ class fileEnsurer:
       
       """
 
-      self.file_handler.standard_create_directory(self.bot_details_dir)
-      self.file_handler.standard_create_directory(self.members_dir)
-      self.file_handler.standard_create_directory(self.images_dir)
+      await self.file_handler.standard_create_directory(self.bot_details_dir)
+      await self.file_handler.standard_create_directory(self.members_dir)
+      await self.file_handler.standard_create_directory(self.images_dir)
 
-      self.file_handler.standard_create_directory(self.bot_images_dir)
+      await self.file_handler.standard_create_directory(self.bot_images_dir)
 
 
 ##--------------------start-of-ensure_bot_files()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-   def ensure_member_files(self) -> None:
+   async def ensure_member_files(self) -> None:
        
       """
       
@@ -137,7 +136,7 @@ class fileEnsurer:
 
       self.member_path = os.path.join(self.members_dir, "members.txt")
 
-      self.file_handler.standard_create_file(self.member_path)
+      await self.file_handler.standard_create_file(self.member_path)
        
 
                
