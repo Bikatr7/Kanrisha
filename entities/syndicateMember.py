@@ -19,7 +19,7 @@ class syndicateMember:
         Initializes the syndicateMember object.\n
 
         Parameters:\n
-        None.\n
+        inc_member_id (int): The ID of the member.\n
 
         Returns:\n
         None.\n

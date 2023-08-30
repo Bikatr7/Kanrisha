@@ -117,4 +117,60 @@ class fileEnsurer:
       self.file_handler.standard_create_directory(self.images_dir)
 
       self.file_handler.standard_create_directory(self.bot_images_dir)
+
+
+##--------------------start-of-ensure_bot_files()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   def ensure_member_files(self) -> None:
+       
+      """
+      
+      Ensures that the member files are present and ready to be used.\n
+
+      Parameters:\n
+      self (object - fileEnsurer) : the fileEnsurer object.\n
+
+      Returns:\n
+      None.\n
+      
+      """
+
+      self.member_path = os.path.join(self.members_dir, "members.txt")
+
+      self.file_handler.standard_create_file(self.member_path)
+       
+
                
+##-------------------start-of-get_elapsed_time()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   def get_token(self) -> str:
+
+      """
+
+      Gets the token from the token.txt file for Kanrisha.\n
+
+      Parameters:\n
+      self (object - fileEnsurer) : the fileEnsurer object.\n
+
+      Returns:\n
+      token (str) : the token for Kanrisha.\n
+
+      """
+      
+      token = ""
+
+      try:
+         with open(self.token_path, 'r', encoding='utf-8') as file: 
+               token = file.read()
+
+         assert token != "" and token != "token"
+
+      except Exception as e: ## else try to get api key manually
+
+         token = input("DO NOT DELETE YOUR COPY OF THE TOKEN\n\nPlease enter the token of 'The Gamemaster' : ")
+
+         with open(self.token_path, 'w+', encoding='utf-8') as file: 
+               file.write(token)
+               
+      finally:
+            return token

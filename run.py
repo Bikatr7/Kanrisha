@@ -5,6 +5,6 @@ from bot.Kanrisha import Kanrisha
 
 client = Kanrisha()
 
-token = client.toolkit.get_token()
+token = client.file_ensurer.get_token()
 
 client.run(token=token)

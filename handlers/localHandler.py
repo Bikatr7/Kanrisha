@@ -1,3 +1,6 @@
+## custom modules
+from modules.fileEnsurer import fileEnsurer
+from modules.toolkit import toolkit
 
 class localHandler:
 
@@ -9,7 +12,7 @@ class localHandler:
 
 ##-------------------start-of-__init__()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def __init__(self) -> None:
+    def __init__(self, inc_file_ensurer:fileEnsurer, inc_toolkit:toolkit) -> None:
 
         """
 
@@ -23,4 +26,5 @@ class localHandler:
 
         """
 
-        pass
+        self.file_ensurer = inc_file_ensurer
+        self.toolkit = inc_toolkit

@@ -62,16 +62,18 @@ class Kanrisha(discord.Client):
 
         self.file_ensurer.ensure_files()
 
-        self.toolkit = toolkit(self.file_ensurer)
+        self.toolkit = toolkit(self.file_ensurer.logger)
 
         #------------------------------------------------------
 
+        ## Kanrisha and the slash command handler are coupled, as the slash command handler needs an instance of Kanrisha for it's function decorators to work
         self.slash_command_handler = slashCommandHandler(self)
+
         self.interaction_handler = interactionHandler()
         self.gacha_handler = gachaHandler()
 
-        self.local_handler = localHandler()
-        self.member_handler = memberHandler()
+        self.local_handler = localHandler(self.file_ensurer, self.toolkit)
+        self.member_handler = memberHandler(self.file_ensurer, self.toolkit)
 
     
 ##-------------------start-of-on_ready()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
