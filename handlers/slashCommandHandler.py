@@ -191,8 +191,6 @@ class slashCommandHandler:
                 await asyncio.sleep(1)
                 await interaction.followup.send(f"Banning in {10 - i} seconds...")
 
-
-
             for member in marked_for_death:
                 
                 try:
@@ -202,7 +200,7 @@ class slashCommandHandler:
                     pass
 
                 try:
-                    await member.ban(reason=ban_reason)
+                    await member.ban(reason=ban_reason, delete_message_days=0)
                 except:
                     pass
 
