@@ -42,6 +42,22 @@ class slashCommandHandler:
 
         kanrisha_client = inc_kanrisha_client
 
+        ##-------------------start-of-check_if_registered()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        async def check_if_registered(self, interaction:discord.Interaction):
+
+            registered_member_ids = [member.member_id for member in kanrisha_client.member_handler.members]
+
+            if(interaction.user.id not in registered_member_ids):
+                error_message = "You are not registered. Please use the /register command to register."
+
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, response=error_message, delete_after=5.0, is_ephemeral=True)
+
+                return False
+            
+            else:
+                return True
+
         ##-------------------start-of-spin()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.tree.command(name="spin", description="Spins a wheel")
@@ -60,13 +76,7 @@ class slashCommandHandler:
 
             """
 
-            registered_member_ids = [member.member_id for member in kanrisha_client.member_handler.members]
-
-            if(interaction.user.id not in registered_member_ids):
-                error_message = "You are not registered. Please use the /register command to register."
-
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, response=error_message, delete_after=5.0, is_ephemeral=True)
-
+            if(await check_if_registered(self, interaction) == False):
                 return
 
             spin_result = kanrisha_client.gacha_handler.spin_wheel()
@@ -91,13 +101,7 @@ class slashCommandHandler:
 
             """
 
-            registered_member_ids = [member.member_id for member in kanrisha_client.member_handler.members]
-
-            if(interaction.user.id not in registered_member_ids):
-                error_message = "You are not registered. Please use the /register command to register."
-
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, response=error_message, delete_after=5.0, is_ephemeral=True)
-
+            if(await check_if_registered(self, interaction) == False):
                 return
 
             multi_spin = ""
@@ -132,9 +136,7 @@ class slashCommandHandler:
             - You may have to register multiple times during the testing phase.\n
             """
 
-            already_registered_member_ids = [member.member_id for member in kanrisha_client.member_handler.members]
-
-            if(interaction.user.id in already_registered_member_ids):
+            if(await check_if_registered(self, interaction) == True):
                 error_message = "You are already registered."
 
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, response=error_message, delete_after=5.0, is_ephemeral=True)
@@ -271,7 +273,7 @@ class slashCommandHandler:
                     ## acknowledge the interaction immediately
                     await interaction.response.defer()
 
-                    await kanrisha_client.member_handler.add_new_member(interaction.user.id, interaction.user.name)
+                    await kanrisha_client.member_handler.add_new_member(interaction.user.id, interaction.user.name, tuple([0,0,0]),0)
 
                     await interaction.delete_original_response()
 
@@ -285,4 +287,71 @@ class slashCommandHandler:
                     await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not authorized to use this button.", delete_after=5.0, is_ephemeral=True)
 
 
+        ##-------------------start-of-profile()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+        @kanrisha_client.tree.command(name="profile", description="Sends the user's profile.")
+        async def profile(interaction: discord.Interaction, member:discord.Member | None):
+
+            """
+            
+            Sends the user's profile.\n
+
+            Parameters:\n
+            self (object - slashCommandHandler) : the slashCommandHandler object.\n
+            interaction (object - discord.Interaction) : the interaction object.\n
+
+            Returns:\n
+            None.\n
+
+            """
+
+            if(await check_if_registered(self, interaction) == False):
+                return
+
+            target_member = None
+            target_member_id = None
+            image_url = None
+
+            self_request = False
+            is_ephemeral = True
+
+            if(member):
+
+                target_member_id = member.id
+                image_url = member.display_avatar.url
+                
+    
+            else:
+                self_request = True
+                target_member_id = interaction.user.id
+                image_url = interaction.user.display_avatar.url
+
+            for syndicate_member in kanrisha_client.member_handler.members:
+                    
+                    if(target_member_id == syndicate_member.member_id):
+                        target_member = syndicate_member
+
+            if(target_member == None):
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That user is not registered.", delete_after=5.0, is_ephemeral=True)
+                return
+            
+            ## if user is admin or if user is requesting their own profile
+            if(self_request or interaction.user.id in kanrisha_client.interaction_handler.admin_user_ids):
+
+                profile_message = f"""
+                **Name:** {target_member.member_name}
+                \n**Credits:** {target_member.credits}
+                """
+            
+            else:
+
+                is_ephemeral = False
+
+                profile_message = f"""
+                **Name:** {target_member.member_name}\n
+                """
+
+            embed = discord.Embed(title="Profile", description=profile_message, color=0xC0C0C0)
+            embed.set_thumbnail(url=image_url)
+
+            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, profile_message, embed=embed, is_admin_only=True, is_ephemeral=is_ephemeral)
