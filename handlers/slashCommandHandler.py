@@ -259,6 +259,3 @@ class slashCommandHandler:
                 elif custom_id and custom_id.startswith("register_"):
 
                     await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not authorized to use this button.", delete_after=5.0, is_ephemeral=True)
-
-
-
