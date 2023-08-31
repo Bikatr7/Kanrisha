@@ -36,6 +36,10 @@ class slashCommandHandler:
 
         """
 
+        self.pg_guild_id = 1143635379262607441
+
+        self.syndicate_role = 1146901009248026734
+
         kanrisha_client = inc_kanrisha_client
 
         ##-------------------start-of-spin()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -55,6 +59,15 @@ class slashCommandHandler:
             None.\n
 
             """
+
+            registered_member_ids = [member.member_id for member in kanrisha_client.member_handler.members]
+
+            if(interaction.user.id not in registered_member_ids):
+                error_message = "You are not registered. Please use the /register command to register."
+
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, response=error_message, delete_after=5.0, is_ephemeral=True)
+
+                return
 
             spin_result = kanrisha_client.gacha_handler.spin_wheel()
 
@@ -78,12 +91,21 @@ class slashCommandHandler:
 
             """
 
+            registered_member_ids = [member.member_id for member in kanrisha_client.member_handler.members]
+
+            if(interaction.user.id not in registered_member_ids):
+                error_message = "You are not registered. Please use the /register command to register."
+
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, response=error_message, delete_after=5.0, is_ephemeral=True)
+
+                return
+
             multi_spin = ""
             
             for i in range(0, 10):
                 multi_spin += kanrisha_client.gacha_handler.spin_wheel()
 
-            await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, multi_spin, embed=None, view=None)
+            await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, multi_spin)
 
         ##-------------------start-of-register()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -107,6 +129,7 @@ class slashCommandHandler:
             By clicking this button you acknowledge and agree to the following:\n
             - You will be using the bot during its testing phase, and any and all data may be wiped/lost at any time.\n
             - You will not hold the bot owner responsible for any data loss.\n
+            - You may have to register multiple times during the testing phase.\n
             """
 
             already_registered_member_ids = [member.member_id for member in kanrisha_client.member_handler.members]
@@ -125,7 +148,7 @@ class slashCommandHandler:
             # Store the user's ID as a custom attribute of the button
             view = discord.ui.View().add_item(discord.ui.Button(style=discord.ButtonStyle.green, custom_id=f"register_{interaction.user.id}", label="Register"))
 
-            await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, embed=embed, view=view, delete_after=60.0, is_admin_only=True)
+            await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, embed=embed, view=view, delete_after=60.0)
 
         ##-------------------start-of-execute_order_66()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -152,9 +175,8 @@ class slashCommandHandler:
 
             marked_for_death_role_id = 1146651136363855982
 
-            pg = kanrisha_client.get_guild(kanrisha_client.interaction_handler.pg_guild_id)
-
-            role_to_ping = pg.get_role(1144052522819010601) ## type: ignore (we know it's not None)
+            ## server announcements role
+            role_to_ping = kanrisha_client.get_guild(self.pg_guild_id).get_role(1144052522819010601) ## type: ignore (we know it's not None)
 
             role_ping = role_to_ping.mention ## type: ignore (we know it's not None)
 
@@ -242,16 +264,20 @@ class slashCommandHandler:
                 custom_id = interaction.data.get("custom_id") if interaction.data else None
 
                 ## if register button was pressed by the correct user
-                if custom_id == f"register_{interaction.user.id}":
+                if(custom_id == f"register_{interaction.user.id}"):
+
+                    syndicate_role = kanrisha_client.get_guild(self.pg_guild_id).get_role(self.syndicate_role) ## type: ignore (we know it's not None)
 
                     ## acknowledge the interaction immediately
                     await interaction.response.defer()
 
-                    await kanrisha_client.member_handler.add_new_member(interaction.user.id)
+                    await kanrisha_client.member_handler.add_new_member(interaction.user.id, interaction.user.name)
 
                     await interaction.delete_original_response()
 
                     await interaction.followup.send("You have been registered.", ephemeral=True)
+
+                    await interaction.user.add_roles(syndicate_role) ## type: ignore (we know it's not None)
 
                 ## if register button was pressed by the wrong user
                 elif custom_id and custom_id.startswith("register_"):

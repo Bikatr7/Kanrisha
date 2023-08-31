@@ -1,4 +1,5 @@
-
+## built-in libraries
+import typing
 
 class syndicateMember:
 
@@ -12,7 +13,7 @@ class syndicateMember:
 
 ##-------------------start-of-__init__()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def __init__(self, inc_member_id:int):
+    def __init__(self, inc_member_id:int, inc_member_name:str, inc_spin_scores:typing.Tuple[int,int,int]) -> None:
 
         """
 
@@ -20,6 +21,7 @@ class syndicateMember:
 
         Parameters:\n
         inc_member_id (int): The ID of the member.\n
+        inc_member_name (str): The name of the member.\n
 
         Returns:\n
         None.\n
@@ -27,3 +29,6 @@ class syndicateMember:
         """
 
         self.member_id = inc_member_id
+        self.member_name = inc_member_name
+
+        self.spin_scores = inc_spin_scores

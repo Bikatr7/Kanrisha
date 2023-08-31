@@ -31,9 +31,7 @@ class interactionHandler:
 
         self.whitelisted_channel_names = ["#general-bot", "#bot-testing"]
 
-        self.whitelisted_channel_ids = [1144136660691460126, 1146174110548901979]
-
-        self.pg_guild_id = 1143635379262607441
+        self.whitelisted_channel_ids = [1144136660691460126, 1146174110548901979, 1146922710698557560]  
 
         self.admin_user_ids = [957451091748986972]
         self.admin_usernames = ["seinu"]
@@ -61,8 +59,7 @@ class interactionHandler:
         if(interaction.user.id not in self.admin_user_ids and is_admin_only):
             await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
             return
-
-
+        
         ## if correct channel or admin, send response
         if(interaction.channel_id in self.whitelisted_channel_ids or interaction.user.id in self.admin_user_ids):
 
@@ -118,4 +115,3 @@ class interactionHandler:
 
             else:
                 raise Exception("No response, embed, or view was provided.")
-    
