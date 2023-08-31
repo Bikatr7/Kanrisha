@@ -33,6 +33,8 @@ class interactionHandler:
 
         self.whitelisted_channel_ids = [1144136660691460126, 1146174110548901979]
 
+        self.pg_guild_id = 1143635379262607441
+
         self.admin_user_ids = [957451091748986972]
         self.admin_usernames = ["seinu"]
 
