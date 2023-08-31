@@ -35,8 +35,8 @@ class interactionHandler:
 
         self.pg_guild_id = 1143635379262607441
 
-        self.admin_user_ids = [957451091748986972]
-        self.admin_usernames = ["seinu"]
+        self.admin_user_ids = [957451091748986972, 277933921315061761]
+        self.admin_usernames = ["seinu", "tommy.3"]
 
 ##-------------------start-of-send_response_filter_channel()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
