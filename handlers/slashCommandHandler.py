@@ -207,7 +207,7 @@ class slashCommandHandler:
                     pass
 
                 try:
-                    await member.kick(reason=ban_reason)
+                    await member.ban(reason=ban_reason, delete_message_days=0)
                 except:
                     pass
 
