@@ -202,7 +202,7 @@ class slashCommandHandler:
                     pass
 
                 try:
-                    await member.kick(reason=ban_reason)
+                    await member.ban(reason=ban_reason)
                 except:
                     pass
 
