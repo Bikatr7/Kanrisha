@@ -52,7 +52,8 @@ class eventHandler:
                 message_cache = payload.cached_message
                 message_content = message_cache.content
                 if len(message_cache.attachments) > 0:
-                    message_content += "\n" + [attachment for attachment in message_cache.attachments]
+                    for attachment in message_cache.attachments:
+                        message_content += "\n" + str(attachment)
                 embed = discord.Embed(title=message_cache.author.name, description=message_content, color=0xC0C0C0)
                 if message_cache.author.avatar:
                     embed.set_thumbnail(url=message_cache.author.avatar.url)
