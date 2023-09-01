@@ -11,9 +11,10 @@ if(typing.TYPE_CHECKING): ## used for cheating the circular import issue that oc
     from bot.Kanrisha import Kanrisha
 
 class eventHandler:
+
     """
     
-    Handles events, besides the interaction event.\n
+    Handles events.\n
     
     """
 
@@ -35,30 +36,49 @@ class eventHandler:
 
         kanrisha_client = inc_kanrisha_client
 
-        ##-------------------start-of-on_message()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        archive_channel_id = 1146979933416067163
 
-        # does nothing yet, but can easily be configured to do so
-
-        @kanrisha_client.event
-        async def on_message(message: discord.message):
-            pass
+        self.syndicate_role = 1146901009248026734
 
         ##-------------------start-of-on_raw_message_delete()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.event
         async def on_raw_message_delete(payload: discord.RawMessageDeleteEvent):
-            if payload.cached_message and not payload.cached_message.author.bot:
-                store_channel = kanrisha_client.get_channel(1146979933416067163)
+
+            """
+
+            Stores deleted messages in a channel for later.\n
+
+            Parameters:\n
+            self (object) : the eventHandler object.\n
+
+            Returns:\n
+            None.\n
+
+            """
+
+            ## check if the message was cached and if it was not sent by a bot
+            if(payload.cached_message and not payload.cached_message.author.bot):
+                store_channel = kanrisha_client.get_channel(archive_channel_id)
+
                 message_cache = payload.cached_message
                 message_content = message_cache.content
-                if len(message_cache.attachments) > 0:
+
+                if(len(message_cache.attachments) > 0):
                     for attachment in message_cache.attachments:
                         message_content += "\n" + str(attachment)
+
                 embed = discord.Embed(title=message_cache.author.name, description=message_content, color=0xC0C0C0)
-                if message_cache.author.avatar:
+
+                if(message_cache.author.avatar):
                     embed.set_thumbnail(url=message_cache.author.avatar.url)
-                embed.set_footer(text=f'Deleted in #{message_cache.channel.name} at {message_cache.created_at.now().strftime("%Y-%m-%d %H:%M:%S")}')
-                await store_channel.send(message_cache.channel.id, embed=embed)
+
+                embed.set_footer(text=f'Deleted in #{message_cache.channel.name} at {message_cache.created_at.now().strftime("%Y-%m-%d %H:%M:%S")}') ## type: ignore (we know it's not None)
+                embed.add_field(name="Channel ID", value=message_cache.channel.id)
+                embed.add_field(name="User ID", value=message_cache.author.id)
+
+
+                await kanrisha_client.interaction_handler.send_message_to_channel(store_channel, embed=embed) ## type: ignore (we know it's not None)
 
         ##-------------------start-of-on_interaction()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -85,16 +105,20 @@ class eventHandler:
                 custom_id = interaction.data.get("custom_id") if interaction.data else None
 
                 ## if register button was pressed by the correct user
-                if custom_id == f"register_{interaction.user.id}":
+                if(custom_id == f"register_{interaction.user.id}"):
+
+                    syndicate_role = kanrisha_client.get_guild(interaction.guild_id).get_role(self.syndicate_role) ## type: ignore (we know it's not None)
 
                     ## acknowledge the interaction immediately
                     await interaction.response.defer()
 
-                    await kanrisha_client.member_handler.add_new_member(interaction.user.id)
+                    await kanrisha_client.member_handler.add_new_member(interaction.user.id, interaction.user.name, tuple([0,0,0]),0)
 
                     await interaction.delete_original_response()
 
                     await interaction.followup.send("You have been registered.", ephemeral=True)
+
+                    await interaction.user.add_roles(syndicate_role) ## type: ignore (we know it's not None)
 
                 ## if register button was pressed by the wrong user
                 elif custom_id and custom_id.startswith("register_"):

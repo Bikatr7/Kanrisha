@@ -28,9 +28,8 @@ class interactionHandler:
         None.\n
 
         """
-
+        
         self.whitelisted_channel_names = ["#general-bot", "#bot-testing", "#syndicate-bot"]
-
         self.whitelisted_channel_ids = [1144136660691460126, 1146174110548901979, 1146922710698557560]  
 
         self.admin_user_ids = [957451091748986972, 277933921315061761]
@@ -116,3 +115,43 @@ class interactionHandler:
 
             else:
                 raise Exception("No response, embed, or view was provided.")
+            
+##-------------------start-of-send_response_no_filter_channel()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    async def send_message_to_channel(self, channel:discord.channel.GroupChannel | discord.Thread, response: str | None = None, embed: discord.Embed | None = None, view: discord.ui.View | None = None, delete_after: float | None = None) -> None:
+
+        """
+
+        Sends a response to a channel.\n
+
+        Parameters:\n
+        self (object - interactionHandler) : the interactionHandler object.\n
+        channel (object - discord.TextChannel) : the channel object.\n
+        response (str) : the response to send.\n
+        embed (object - discord.Embed) : the embed to send.\n
+        view (object - discord.ui.View) : the view to send.\n
+        delete_after (float | optional) : how long to wait before deleting the message.\n
+    
+        Returns:\n
+        None.\n
+
+        """
+
+        ## magic dict bullshit to make this work
+        send_args = {}
+
+        if(embed):
+            send_args['embed'] = embed
+
+        if(view):
+            send_args['view'] = view
+
+        if(delete_after):
+            send_args['delete_after'] = delete_after
+
+        ## Send the message based on the provided arguments
+        if(embed or view or response):
+            await channel.send(response or "", **send_args)
+
+        else:
+            raise Exception("No response, embed, or view was provided.")

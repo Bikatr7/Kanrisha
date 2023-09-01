@@ -24,7 +24,7 @@ class Kanrisha(discord.Client):
 
 ##-------------------start-of-__init__()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         """
 
@@ -46,7 +46,6 @@ class Kanrisha(discord.Client):
         super().__init__(intents=intents)
 
         #------------------------------------------------------
-
 
         ## tree for slash commands
         self.tree = discord.app_commands.CommandTree(self)
@@ -75,7 +74,7 @@ class Kanrisha(discord.Client):
 
 ##-------------------start-of-run_post_init_tasks()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def run_post_init_tasks(self):
+    async def run_post_init_tasks(self) -> None:
 
         """
         
@@ -97,7 +96,7 @@ class Kanrisha(discord.Client):
     
 ##-------------------start-of-on_ready()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def on_ready(self):
+    async def on_ready(self) -> None:
 
         """
 

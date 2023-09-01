@@ -41,16 +41,11 @@ class slashCommandHandler:
 
         """
 
-        self.pg_guild_id = 1143635379262607441
-
-        self.syndicate_role = 1146901009248026734
-
         kanrisha_client = inc_kanrisha_client
 
+        archive_channel_id = 1146979933416067163
 
-        ##-------------------event-handler--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-        kanrisha_client.event_handler = eventHandler(kanrisha_client)
+        self.event_handler = eventHandler(kanrisha_client)
 
         self.admin_command_handler = adminCommandHandler(kanrisha_client)
     
@@ -217,69 +212,50 @@ class slashCommandHandler:
 
             await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, embed=embed, view=view, delete_after=60.0)
 
-        ##-------------------start-of-on_interaction()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+         ##-------------------start-of-snipe()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        @kanrisha_client.event
-        async def on_interaction(interaction: discord.Interaction):
+        @kanrisha_client.tree.command(name="snipe", description="Nobody's safe.")
+        async def snipe(interaction: discord.Interaction):
 
             """
 
-            Handles button interactions.\n
+            Snipes the last deleted message in the channel.\n
 
             Parameters:\n
             self (object - slashCommandHandler) : the slashCommandHandler object.\n
-            interaction (object - discord.Interaction) : the interaction object.\n
 
             Returns:\n
             None.\n
 
             """
 
-            ## check if it's a button press
-            if(interaction.type == discord.InteractionType.component):
+            try:
 
-                ## get the custom id of the button
-                custom_id = interaction.data.get("custom_id") if interaction.data else None
+                store_channel = kanrisha_client.get_channel(archive_channel_id)
 
-                ## if register button was pressed by the correct user
-                if(custom_id == f"register_{interaction.user.id}"):
+                deleted_message = None
 
-                    syndicate_role = kanrisha_client.get_guild(self.pg_guild_id).get_role(self.syndicate_role) ## type: ignore (we know it's not None)
+                messages = [message async for message in store_channel.history(limit=25)]  ## type: ignore
 
-                    ## acknowledge the interaction immediately
-                    await interaction.response.defer()
+                for message in messages:
 
-                    await kanrisha_client.member_handler.add_new_member(interaction.user.id, interaction.user.name, tuple([0,0,0]),0)
+                    if(message.embeds and message.embeds[0].fields[0].value == str(interaction.channel_id)):
+                        deleted_message = message
+                        break
 
-                    await interaction.delete_original_response()
+                if(not deleted_message):
+                    error_message = "No recent deleted messages in this channel."
+                    raise Exception(error_message)
+                
+                embed = discord.Embed(title=deleted_message.embeds[0].title, description=deleted_message.embeds[0].description, color=0xC0C0C0)
+                embed.set_thumbnail(url=deleted_message.embeds[0].thumbnail.url)
+                embed.set_footer(text=deleted_message.embeds[0].footer.text)
 
-                    await interaction.followup.send("You have been registered.", ephemeral=True)
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)
+                
+            except:
 
-                    await interaction.user.add_roles(syndicate_role) ## type: ignore (we know it's not None)
-
-                ## if register button was pressed by the wrong user
-                elif custom_id and custom_id.startswith("register_"):
-
-                    await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not authorized to use this button.", delete_after=5.0, is_ephemeral=True)
-
-
-
-         ##-------------------start-of-execute_order_66()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-        @kanrisha_client.tree.command(name="snipe", description="Nobody's safe.")
-        async def snipe(interaction: discord.Interaction):
-            store_channel = kanrisha_client.get_channel(1146979933416067163)
-            messages = [message async for message in store_channel.history(limit=25)]
-            deleted_message = None
-            for message in messages:
-                if int(message.content) == interaction.channel.id:
-                    deleted_message = message
-                    break
-            if not deleted_message:
-                await interaction.response.send_message("Message unavailable.", delete_after=3.0, ephemeral=True)
-                return
-            deleted_message_embed = deleted_message.embeds[0]
-            await interaction.response.send_message("", embed=deleted_message_embed)
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, error_message, delete_after=3.0, is_ephemeral=True) ## type: ignore (we know it's not unbound)
 
         ##-------------------start-of-profile()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

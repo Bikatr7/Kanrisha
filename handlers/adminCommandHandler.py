@@ -51,12 +51,14 @@ class adminCommandHandler:
             self (object - slashCommandHandler) : the slashCommandHandler object.\n
             interaction (object - discord.Interaction) : the interaction object.\n
             ban_reason (str) : the reason for the ban.\n
+            ban_message (str) : the message to send to the banned users.\n
 
             Returns:\n
             None.\n
 
             """
 
+            ## admin check
             if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
                 await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
                 return
@@ -64,7 +66,7 @@ class adminCommandHandler:
             marked_for_death_role_id = 1146651136363855982
 
             ## server announcements role
-            role_to_ping = kanrisha_client.get_guild(self.pg_guild_id).get_role(1144052522819010601) ## type: ignore (we know it's not None)
+            role_to_ping = kanrisha_client.get_guild(interaction.guild_id).get_role(1144052522819010601) ## type: ignore (we know it's not None)
 
             role_ping = role_to_ping.mention ## type: ignore (we know it's not None)
 
@@ -82,18 +84,21 @@ class adminCommandHandler:
                         marked_for_death.append(member)
                         execution_message += f"{member.mention}\n"
 
-            execution_message += f"\n\nPinging : {role_ping}"
-
             if(len(marked_for_death) == 0):
                 execution_message = "No users have been marked for death."
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, execution_message, delete_after=5.0, is_ephemeral=True)
                 return
             
+            mention_content = f"\nPinging : {role_ping}"
+            
             embed = discord.Embed(title="Order 66.", description=execution_message, color=0xC0C0C0)
             embed.set_thumbnail(url=kanrisha_client.file_ensurer.bot_thumbnail_url)
             embed.set_footer(text=f"Ban Reason : {ban_reason}\n\nBanning in 30 seconds, please standby...") 
 
+            target_channel = kanrisha_client.get_channel(interaction.channel_id) ## type: ignore (we know it's not None)
+
             await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)
+            await kanrisha_client.interaction_handler.send_message_to_channel(target_channel, mention_content) ## type: ignore (we know it's not None)
 
             await asyncio.sleep(20)
 

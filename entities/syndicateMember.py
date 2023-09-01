@@ -23,6 +23,7 @@ class syndicateMember:
         inc_member_id (int): The ID of the member.\n
         inc_member_name (str): The name of the member.\n
         inc_spin_scores (tuple): The spin scores of the member.\n
+        inc_credits (int): The credits of the member.\n
 
         Returns:\n
         None.\n
