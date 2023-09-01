@@ -46,7 +46,7 @@ class eventHandler:
         ##-------------------start-of-on_raw_message_delete()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.event
-        async def on_raw_message_delete(payload: discord.RawMessageDeleteEvent | None = None):
+        async def on_raw_message_delete(payload: discord.RawMessageDeleteEvent):
             if payload.cached_message and not payload.cached_message.author.bot:
                 store_channel = kanrisha_client.get_channel(1146979933416067163)
                 message_cache = payload.cached_message
