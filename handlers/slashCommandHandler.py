@@ -288,25 +288,21 @@ class slashCommandHandler:
             
             ## if user is admin or if user is requesting their own profile
             if(self_request or interaction.user.id in kanrisha_client.interaction_handler.admin_user_ids):
-
-                profile_message = f"""
-                **Name:** {target_member.member_name}
-                **Credits:** {target_member.credits}
-                \n**Shining Rolls:** {target_member.spin_scores[0]}
-                **Glowing Rolls:** {target_member.spin_scores[1]}
-                **Common Rolls:** {target_member.spin_scores[2]}
-                """
-            
+                profile_message = (
+                    f"**Name:** {target_member.member_name}\n"
+                    f"**Credits:** {target_member.credits}\n"
+                    f"**Shining Rolls:** {target_member.spin_scores[0]}\n"
+                    f"**Glowing Rolls:** {target_member.spin_scores[1]}\n"
+                    f"**Common Rolls:** {target_member.spin_scores[2]}"
+                )
             else:
-
                 is_ephemeral = False
-
-                profile_message = f"""
-                **Name:** {target_member.member_name}\n
-                \n**Shining Rolls:** {target_member.spin_scores[0]}
-                **Glowing Rolls:** {target_member.spin_scores[1]}
-                **Common Rolls:** {target_member.spin_scores[2]}
-                """
+                profile_message = (
+                    f"**Name:** {target_member.member_name}\n"
+                    f"**Shining Rolls:** {target_member.spin_scores[0]}\n"
+                    f"**Glowing Rolls:** {target_member.spin_scores[1]}\n"
+                    f"**Common Rolls:** {target_member.spin_scores[2]}"
+                )
 
             embed = discord.Embed(title="Profile", description=profile_message, color=0xC0C0C0)
             embed.set_thumbnail(url=image_url)
