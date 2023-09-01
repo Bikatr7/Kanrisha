@@ -8,6 +8,7 @@ import asyncio
 import discord
 
 ## custom libraries
+from handlers.eventHandler import eventHandler
 if(typing.TYPE_CHECKING): ## used for cheating the circular import issue that occurs when i need to type check some things
     from bot.Kanrisha import Kanrisha
 
@@ -45,6 +46,11 @@ class slashCommandHandler:
         self.syndicate_role = 1146901009248026734
 
         kanrisha_client = inc_kanrisha_client
+
+
+        ##-------------------event-handler--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        kanrisha_client.event_handler = eventHandler(kanrisha_client)
 
         self.admin_command_handler = adminCommandHandler(kanrisha_client)
     
@@ -256,6 +262,24 @@ class slashCommandHandler:
 
                     await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not authorized to use this button.", delete_after=5.0, is_ephemeral=True)
 
+
+
+         ##-------------------start-of-execute_order_66()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        @kanrisha_client.tree.command(name="snipe", description="Nobody's safe.")
+        async def snipe(interaction: discord.Interaction):
+            store_channel = kanrisha_client.get_channel(1146979933416067163)
+            messages = [message async for message in store_channel.history(limit=25)]
+            deleted_message = None
+            for message in messages:
+                if int(message.content) == interaction.channel.id:
+                    deleted_message = message
+                    break
+            if not deleted_message:
+                await interaction.response.send_message("Message unavailable.", delete_after=3.0, ephemeral=True)
+                return
+            deleted_message_embed = deleted_message.embeds[0]
+            await interaction.response.send_message("", embed=deleted_message_embed)
 
         ##-------------------start-of-profile()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
