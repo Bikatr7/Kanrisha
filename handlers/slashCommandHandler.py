@@ -228,7 +228,7 @@ class slashCommandHandler:
 
         @kanrisha_client.tree.command(name="snipe", description="Nobody's safe.")
         async def snipe(interaction: discord.Interaction):
-            store_channel = kanrisha_client.get_channel(1146969965786837023)
+            store_channel = kanrisha_client.get_channel(1146979933416067163)
             last_message_id = store_channel.last_message_id
             if last_message_id:
                 deleted_message = await store_channel.fetch_message(last_message_id)
