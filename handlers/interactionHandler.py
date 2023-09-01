@@ -35,6 +35,8 @@ class interactionHandler:
         self.admin_user_ids = [957451091748986972, 277933921315061761]
         self.admin_usernames = ["seinu", "tommy.3"]
 
+        self.owner_id = 957451091748986972
+
 ##-------------------start-of-send_response_filter_channel()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     async def send_response_filter_channel(self, interaction:discord.Interaction, response: str | None = None, embed: discord.Embed | None = None, view: discord.ui.View | None = None, is_admin_only:bool = False, delete_after: float | None = None, is_ephemeral:bool = False) -> None:

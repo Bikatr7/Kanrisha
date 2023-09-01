@@ -55,6 +55,8 @@ class Kanrisha(discord.Client):
 
         self.synced = False
 
+        self.pg = 1143635379262607441
+
         #------------------------------------------------------
 
         self.file_ensurer = fileEnsurer()
