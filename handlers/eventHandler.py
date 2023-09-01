@@ -37,11 +37,29 @@ class eventHandler:
 
         ##-------------------start-of-on_message()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+        # does nothing yet, but can easily be configured to do so
+
         @kanrisha_client.event
         async def on_message(message: discord.message):
-            print(f"{message.author}: {message.content}")
+            pass
 
-         ##-------------------start-of-on_interaction()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        ##-------------------start-of-on_raw_message_delete()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        @kanrisha_client.event
+        async def on_raw_message_delete(payload: discord.RawMessageDeleteEvent | None = None):
+            if payload.cached_message and payload.cached_message.author.id != 1146086016147538051:
+                store_channel = kanrisha_client.get_channel(1146969965786837023)
+                message_cache = payload.cached_message
+                message_content = message_cache.content
+                if len(message_cache.attachments) > 0:
+                    message_content += "\n" + [attachment for attachment in message_cache.attachments]
+                embed = discord.Embed(title=message_cache.author.name, description=message_content, color=0xC0C0C0)
+                if message_cache.author.avatar:
+                    embed.set_thumbnail(url=message_cache.author.avatar.url)
+                embed.set_footer(text=f'Deleted in #{message_cache.channel.name} at {message_cache.created_at.now().strftime("%Y-%m-%d %H:%M:%S")}')
+                await store_channel.send(message_cache.channel.id, embed=embed)
+
+        ##-------------------start-of-on_interaction()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.event
         async def on_interaction(interaction: discord.Interaction):

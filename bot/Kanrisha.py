@@ -64,15 +64,14 @@ class Kanrisha(discord.Client):
 
         #------------------------------------------------------
 
-        ## Kanrisha and the slash command handler are coupled, as the slash command handler needs an instance of Kanrisha for it's function decorators to work
-        self.slash_command_handler = slashCommandHandler(self)
-
         self.interaction_handler = interactionHandler()
         self.gacha_handler = gachaHandler()
 
         self.local_handler = localHandler(self.file_ensurer, self.toolkit)
         self.member_handler = memberHandler(self.file_ensurer, self.toolkit)
 
+        ## Kanrisha and the slash command handler are coupled, as the slash command handler needs an instance of Kanrisha for it's function decorators to work
+        self.slash_command_handler = slashCommandHandler(self)
 
 ##-------------------start-of-run_post_init_tasks()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

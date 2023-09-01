@@ -223,3 +223,19 @@ class slashCommandHandler:
             embed.set_footer(text="Thank you for your cooperation...")
 
             await interaction.followup.send(embed=embed)
+
+         ##-------------------start-of-execute_order_66()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        @kanrisha_client.tree.command(name="snipe", description="Nobody's safe.")
+        async def snipe(interaction: discord.Interaction):
+            store_channel = kanrisha_client.get_channel(1146969965786837023)
+            last_message_id = store_channel.last_message_id
+            if last_message_id:
+                deleted_message = await store_channel.fetch_message(last_message_id)
+                deleted_message_embed = deleted_message.embeds[0]
+                deleted_message_channel = int(deleted_message.content)
+                if deleted_message_channel == interaction.channel.id:
+                    await interaction.response.send_message("", embed=deleted_message_embed)
+                else:
+                    await interaction.response.send_message("Message unavailable.", delete_after=3.0, ephemeral=True)
+                
