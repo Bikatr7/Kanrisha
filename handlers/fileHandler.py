@@ -296,7 +296,45 @@ class fileHandler():
                 return new_id
             
         return new_id
+    
+##--------------------start-of-find_target_line()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+    async def find_target_line(self, target_path:str, target_value:str, target_column:int) -> int | None:
+
+        """
+
+        Finds the line number of the given value in the given column.\n
+
+        Parameters:\n
+        self (object - fileHandler) : the fileHandler object.\n
+        target_path (str) : the path to the file to search.\n
+        target_value (int) : the value to look for.\n
+        target_column (int) : the column to look in.\n
+
+        Returns:\n
+        i + 1 (int) : the line number of the given value in the given column or None if value was not found.\n
+
+        """
+
+        i = 0
+
+        with open(target_path, 'r') as file:
+            lines = file.readlines()
+
+        line_count = len(lines)
+
+        while(i < line_count):
+            result = await self.read_sei_file(target_path, i + 1, target_column)
+            
+            if(result == target_value):
+                return i + 1
+            else:
+                i += 1
+
+            if(i >= line_count):
+                break
+
+        return None
 ##-------------------start-of-handle_critical_exception()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     def handle_critical_exception(self, critical_exception:Exception) -> None:

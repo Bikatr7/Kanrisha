@@ -29,7 +29,7 @@ class interactionHandler:
 
         """
 
-        self.whitelisted_channel_names = ["#general-bot", "#bot-testing"]
+        self.whitelisted_channel_names = ["#general-bot", "#bot-testing", "#syndicate-bot"]
 
         self.whitelisted_channel_ids = [1144136660691460126, 1146174110548901979, 1146922710698557560]  
 
@@ -76,7 +76,8 @@ class interactionHandler:
                 raise Exception("No response, embed, or view was provided.")
 
         else:
-            await interaction.response.send_message(f"Please use {self.whitelisted_channel_names[0]} for this command.", delete_after=5.0, ephemeral=True)
+
+            await interaction.response.send_message(f"Please use {str(self.whitelisted_channel_names)} for this command.", delete_after=5.0, ephemeral=True)
 
 ##-------------------start-of-send_response_no_filter_channel()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
