@@ -229,13 +229,14 @@ class slashCommandHandler:
         @kanrisha_client.tree.command(name="snipe", description="Nobody's safe.")
         async def snipe(interaction: discord.Interaction):
             store_channel = kanrisha_client.get_channel(1146979933416067163)
-            last_message_id = store_channel.last_message_id
-            if last_message_id:
-                deleted_message = await store_channel.fetch_message(last_message_id)
-                deleted_message_embed = deleted_message.embeds[0]
-                deleted_message_channel = int(deleted_message.content)
-                if deleted_message_channel == interaction.channel.id:
-                    await interaction.response.send_message("", embed=deleted_message_embed)
-                else:
-                    await interaction.response.send_message("Message unavailable.", delete_after=3.0, ephemeral=True)
-                
+            messages = [message async for message in store_channel.history(limit=25)]
+            deleted_message = None
+            for message in messages:
+                if int(message.content) == interaction.channel.id:
+                    deleted_message = message
+                    break
+            if not deleted_message:
+                await interaction.response.send_message("Message unavailable.", delete_after=3.0, ephemeral=True)
+                return
+            deleted_message_embed = deleted_message.embeds[0]
+            await interaction.response.send_message("", embed=deleted_message_embed)
