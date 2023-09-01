@@ -1,4 +1,5 @@
 import random
+import typing
 
 class gachaHandler:
 
@@ -30,7 +31,7 @@ class gachaHandler:
 
 ##-------------------start-of-spin_wheel()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def spin_wheel(self) -> str:
+    def spin_wheel(self) -> typing.Tuple[str,int]:
 
         """
 
@@ -44,18 +45,31 @@ class gachaHandler:
 
         """
 
-        chances = {"<:shining:1144089713934864444>": 0.05, "<:glowing:1144089680934080512>": 0.12, "<:common:1144089649174814730>": 0.83}
+        chances = {
+            "<:shining:1144089713934864444>": 0.05,
+            "<:glowing:1144089680934080512>": 0.12,
+            "<:common:1144089649174814730>": 0.83
+        }
+
+        value_to_return = ""
         
-        # Generate a random number between 0 and 1
         random_number = random.random()
-        
-        # Initialize a variable to keep track of the cumulative probability
+
         cumulative_probability = 0
-        
-        # Iterate through the chances and select a value based on the probabilities
+
         for value, probability in chances.items():
             cumulative_probability += probability
-            if(random_number < cumulative_probability):
-                return value
 
-        return ""
+            if(random_number <= cumulative_probability):
+                value_to_return = value
+                break
+
+        if value_to_return == "<:shining:1144089713934864444>":
+            spin_index = 0
+        elif value_to_return == "<:glowing:1144089680934080512>":
+            spin_index = 1
+        else:
+            spin_index = 2
+
+        return value_to_return, spin_index
+

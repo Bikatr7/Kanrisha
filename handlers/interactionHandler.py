@@ -29,11 +29,9 @@ class interactionHandler:
 
         """
 
-        self.whitelisted_channel_names = ["#general-bot", "#bot-testing", "#gamemaster-testing"] # "#gamemaster-testing" is in Tommy's server for testing
+        self.whitelisted_channel_names = ["#general-bot", "#bot-testing", "#syndicate-bot"]
 
-        self.whitelisted_channel_ids = [1144136660691460126, 1146174110548901979, 1049144043008950322]
-
-        self.pg_guild_id = 1143635379262607441
+        self.whitelisted_channel_ids = [1144136660691460126, 1146174110548901979, 1146922710698557560]  
 
         self.admin_user_ids = [957451091748986972, 277933921315061761]
         self.admin_usernames = ["seinu", "tommy.3"]
@@ -61,8 +59,7 @@ class interactionHandler:
         if(interaction.user.id not in self.admin_user_ids and is_admin_only):
             await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
             return
-
-
+        
         ## if correct channel or admin, send response
         if(interaction.channel_id in self.whitelisted_channel_ids or interaction.user.id in self.admin_user_ids):
 
@@ -79,7 +76,8 @@ class interactionHandler:
                 raise Exception("No response, embed, or view was provided.")
 
         else:
-            await interaction.response.send_message(f"Please use {self.whitelisted_channel_names[0]} for this command.", delete_after=5.0, ephemeral=True)
+
+            await interaction.response.send_message(f"Please use {str(self.whitelisted_channel_names)} for this command.", delete_after=5.0, ephemeral=True)
 
 ##-------------------start-of-send_response_no_filter_channel()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -118,4 +116,3 @@ class interactionHandler:
 
             else:
                 raise Exception("No response, embed, or view was provided.")
-    
