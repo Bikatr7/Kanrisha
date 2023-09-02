@@ -107,7 +107,10 @@ class adminCommandHandler:
                 await asyncio.sleep(1)
                 
                 for member in marked_for_death:
-                    if member.typing:
+                    
+                    member_role_ids = [role.id for role in member.roles]
+
+                    if member.typing and mark_of_silence_role_id not in member_role_ids:
 
                         silence_message = f"{member.mention} has been silenced..."
 
