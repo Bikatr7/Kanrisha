@@ -64,9 +64,12 @@ class adminCommandHandler:
                 return
 
             marked_for_death_role_id = 1146651136363855982
+            mark_of_silence_role_id = 1147336187888021524
 
             ## server announcements role
-            role_to_ping = kanrisha_client.get_guild(interaction.guild_id).get_role(1144052522819010601) ## type: ignore (we know it's not None)
+            role_to_ping = kanrisha_client.get_guild(interaction.guild_id).get_role(1147346384178131034) ## type: ignore (we know it's not None)
+
+            mark_of_silence_role = kanrisha_client.get_guild(interaction.guild_id).get_role(mark_of_silence_role_id) ## type: ignore (we know it's not None)
 
             role_ping = role_to_ping.mention ## type: ignore (we know it's not None)
 
@@ -100,11 +103,20 @@ class adminCommandHandler:
             await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)
             await kanrisha_client.interaction_handler.send_message_to_channel(target_channel, mention_content) ## type: ignore (we know it's not None)
 
-            await asyncio.sleep(20)
-
-            for i in range(10):
+            for i in range(30):
                 await asyncio.sleep(1)
-                await interaction.followup.send(f"Banning in {10 - i} seconds...")
+                
+                for member in marked_for_death:
+                    if member.typing:
+
+                        silence_message = f"{member.mention} has been silenced..."
+
+                        await member.add_roles(mark_of_silence_role)  # type: ignore (we know it's not None)
+                        await kanrisha_client.interaction_handler.send_message_to_channel(target_channel, silence_message) ## type: ignore (we know it's not None)
+                
+                if(20 <= i < 30):
+                    await interaction.followup.send(f"Banning in {30 - i} seconds...")
+
 
             for member in marked_for_death:
                 
@@ -118,7 +130,6 @@ class adminCommandHandler:
                     await member.ban(reason=ban_reason, delete_message_days=0)
                 except:
                     pass
-
 
             member_string1 = "The following users have been banned:\n"
 

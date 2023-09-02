@@ -39,9 +39,16 @@ class eventHandler:
 
         archive_channel_id = 1146979933416067163
 
-        self.syndicate_role = 1146901009248026734
+        self.syndicate_role = 1146901009248026734 
 
-        self.banned_messages = ["https://discord.gg/", "https://discord.com/invite/", "https://media.discordapp.net/attachments/1144133989494444063/1147240008902770769/image.png", "https://cdn.discordapp.com/attachments/1143635379262607444/1147228177710731386/IMG_2051.png"]
+        self.banned_messages = [
+            "https://discord.gg/", 
+            "https://discord.com/invite/", 
+            "https://media.discordapp.net/attachments/1144133989494444063/1147240008902770769/image.png", 
+            "https://cdn.discordapp.com/attachments/1143635379262607444/1147228177710731386/IMG_2051.png",
+            "https://cdn.discordapp.com/attachments/1146223708743139379/1147340019011436554/Media_230831_155422.gif"
+            ]
+        
 
         ##-------------------start-of-on_message()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
