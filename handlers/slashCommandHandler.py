@@ -129,7 +129,7 @@ class slashCommandHandler:
             if(await check_if_registered(self, interaction) == False):
                 return
 
-            spin_result, spin_index = kanrisha_client.gacha_handler.spin_wheel()
+            spin_result, spin_index = kanrisha_client.gacha_handler.spin_wheel(interaction.user.id)
 
             target_member, _, _, _ = await get_member_id(interaction) 
 
@@ -163,7 +163,7 @@ class slashCommandHandler:
             multi_spin = ""
             
             for i in range(0, 10):
-                spin_result, spin_index = kanrisha_client.gacha_handler.spin_wheel()
+                spin_result, spin_index = kanrisha_client.gacha_handler.spin_wheel(interaction.user.id)
 
                 multi_spin += f"{spin_result}"
 
@@ -308,3 +308,57 @@ class slashCommandHandler:
             embed.set_thumbnail(url=image_url)
 
             await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, profile_message, embed=embed, is_ephemeral=is_ephemeral)
+
+
+        ##-------------------start-of-leaderboard()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        @kanrisha_client.tree.command(name="leaderboard", description="Sends the leaderboard.")
+        async def leaderboard(interaction: discord.Interaction):
+
+            """
+            
+            Sends the leaderboard.\n
+
+            Parameters:\n
+            self (object - slashCommandHandler) : the slashCommandHandler object.\n
+            interaction (object - discord.Interaction) : the interaction object.\n
+
+            Returns:\n
+            None.\n
+
+            """
+
+            if(await check_if_registered(self, interaction) == False):
+                return
+
+            ## Calculate scores for each member and store them in a list with the member's name
+            scores_with_members = []
+            for member in kanrisha_client.member_handler.members:
+                score = round((member.spin_scores[0] * 20 + member.spin_scores[1] * 8.33 + member.spin_scores[2] * 1.20) / (sum(member.spin_scores) if sum(member.spin_scores) != 0 else 1),3)
+                scores_with_members.append((score, member.member_name))
+
+            ## Sort the list based on the scores in descending order
+            scores_with_members.sort(key=lambda x: x[0], reverse=True)
+
+            # #Find the rank of the user calling the command
+            user_rank = None
+            for rank, (score, member_name) in enumerate(scores_with_members, 1):
+                if member_name == interaction.user.name:  ## Assuming member_name is the same as the discord username
+                    user_rank = rank
+                    break
+
+            ## Extract the top 10 scores and members
+            top_10_scores_with_members = scores_with_members[:10]
+
+            ## Construct the leaderboard message
+            leaderboard_message = ""
+            for score, member_name in top_10_scores_with_members:
+                leaderboard_message += f"**{member_name}** - {score}\n"
+
+            embed = discord.Embed(title="Luck Leaderboard", description=leaderboard_message, color=0xC0C0C0)
+            embed.set_thumbnail(url=kanrisha_client.file_ensurer.bot_thumbnail_url)
+            embed.set_footer(text=f"Your rank is #{user_rank}.")
+
+            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, leaderboard_message, embed=embed)
+
+

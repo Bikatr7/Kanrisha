@@ -2,6 +2,7 @@
 from __future__ import annotations ## used for cheating the circular import issue that occurs when i need to type check some things
 
 import typing
+import re
 
 ## third-party libraries
 import discord
@@ -49,6 +50,25 @@ class eventHandler:
 
             """
 
+            Handles messages.\n
+
+            Parameters:\n
+            self (object) : the eventHandler object.\n
+            message (object) : the message object.\n
+
+            Returns:\n
+            None.\n
+
+            """
+
+            await check_banned_messages(message)
+
+        ##-------------------start-of-check_banned_messages()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        async def check_banned_messages(message:discord.Message):
+
+            """
+
             Checks for banned messages and deletes them.\n
 
             Parameters:\n
@@ -78,7 +98,7 @@ class eventHandler:
                     await message.delete()
 
                     await member.send(f"Your banned message has been deleted in {channel.name}. You will be muted when admins come online.") ## type: ignore (we know it's not None)
-                    await seinu.send(f"You need to timeout {member.name} for sending a banned message in {channel.name}.") ## type: ignore (we know it's not None) 
+                    await seinu.send(f"You need to timeout {member.name} for sending a banned message in {channel.name}.") ## type: ignore (we know it's not None)  
 
         ##-------------------start-of-on_raw_message_delete()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
