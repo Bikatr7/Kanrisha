@@ -50,8 +50,6 @@ class connectionHandler():
 
         ##----------------------------------------------------------------paths----------------------------------------------------------------
 
-        ## the path to the file that stores the database credentials
-
         ##----------------------------------------------------------------other----------------------------------------------------------------
 
         ## the database connection, can either be itself or none
@@ -59,7 +57,7 @@ class connectionHandler():
 
 ##--------------------start-of-check_connection()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def ready_connection(self, host_name:str) -> None:
+    async def ready_connection(self, host_name:str,user_name:str) -> None:
 
         """
         
@@ -74,12 +72,12 @@ class connectionHandler():
         """
 
 
-        self.connection, self.cursor = await self.initialize_database_connection(host_name)
+        self.connection, self.cursor = await self.initialize_database_connection(host_name, user_name)
 
 ##-------------------start-of-initialize_database_connection()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    async def initialize_database_connection(self, host_name:str) -> typing.Tuple[typing.Union[mysql.connector.connection.MySQLConnection, mysql.connector.pooling.PooledMySQLConnection, None], typing.Union[cursor.MySQLCursor, None]]:
+    async def initialize_database_connection(self, host_name:str, user_name:str) -> typing.Tuple[typing.Union[mysql.connector.connection.MySQLConnection, mysql.connector.pooling.PooledMySQLConnection, None], typing.Union[cursor.MySQLCursor, None]]:
 
         """
 
@@ -94,9 +92,6 @@ class connectionHandler():
 
         """
 
-        connection = None
-        cursor = None
-
         try:
 
             ## get saved connection credentials if exists
@@ -106,7 +101,7 @@ class connectionHandler():
                 database_name = base64.b64decode((credentials[0].strip()).encode('utf-8')).decode('utf-8')
                 password = base64.b64decode((credentials[1].strip()).encode('utf-8')).decode('utf-8')
 
-            connection = self.create_database_connection(host_name, "root", database_name, password)
+            connection = self.create_database_connection(host_name, user_name, database_name, password)
             cursor = connection.cursor()
 
             self.file_ensurer.logger.log_action("Used saved credentials in " + self.file_ensurer.credentials_path)
@@ -117,17 +112,17 @@ class connectionHandler():
             ## if valid save the credentials
             try:
 
-                database_name = self.toolkit.user_confirm("Please enter the name of the database you have")
+                database_name = input("Please enter the name of the database you have")
 
                 self.toolkit.clear_console()
 
-                password = self.toolkit.user_confirm("Please enter the root password for your local database you have")
+                password = input("Please enter the root password for your local database you have")
 
                 credentials = [
                     base64.b64encode(database_name.encode('utf-8')).decode('utf-8'),
                         base64.b64encode(password.encode('utf-8')).decode('utf-8')]
                 
-                connection = self.create_database_connection("localhost", "root", database_name, password)
+                connection = self.create_database_connection(host_name, user_name, database_name, password)
                 cursor = connection.cursor()
                             
                 await self.file_ensurer.file_handler.standard_create_file(self.file_ensurer.credentials_path) 
@@ -139,20 +134,15 @@ class connectionHandler():
                 with open(self.file_ensurer.credentials_path, "w+",encoding='utf-8') as file:
                     file.writelines(credentials)
 
-            ## if user presses z and cancels
-            except toolkit.UserCancelError:
-                
-                self.toolkit.clear_console()
-
             ## if invalid break
             except Exception as e: 
                         
-                self.toolkit.clear_console()
-
                 print(str(e))
                 print("\nError with creating connection object, please double check your password and database name\n")
 
                 self.toolkit.pause_console()
+                
+                exit()
             
         return connection, cursor
     

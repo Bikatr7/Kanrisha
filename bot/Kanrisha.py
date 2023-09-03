@@ -93,13 +93,7 @@ class Kanrisha(discord.Client):
 
         """
 
-        await self.file_ensurer.ensure_files()
-
-        self.file_ensurer.logger.clear_log_file()
-
         self.member_handler.load_members()
-
-        await self.remote_handler.connection_handler.ready_connection(host_name=self.file_ensurer.get_host_name())
 
         await self.slash_command_handler.event_handler.setup_moderation()
     

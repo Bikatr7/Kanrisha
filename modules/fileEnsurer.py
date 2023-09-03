@@ -1,6 +1,6 @@
 ## built-in modules
 import os
-import shutil
+import typing
 
 ## custom modules
 from handlers.fileHandler import fileHandler
@@ -54,6 +54,7 @@ class fileEnsurer:
 
       self.token_path = os.path.join(self.bot_details_dir, "token.txt")
       self.host_name_path = os.path.join(self.bot_details_dir, "host name.txt")
+      self.user_name_path = os.path.join(self.bot_details_dir, "user name.txt")
 
       self.bot_thumbnail_url = "https://cdn.discordapp.com/app-icons/1144166968979628072/7f4e6d14a104149d59624d5cc2897b94.png?size=256"
 
@@ -221,7 +222,7 @@ class fileEnsurer:
       
 ##-------------------start-of-get_host_name()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-   def get_host_name(self) -> str:
+   def get_db_credentials(self) -> typing.Tuple[str,str]:
        
       """
 
@@ -236,6 +237,7 @@ class fileEnsurer:
       """
 
       host_name = ""
+      user_name = ""
 
       try:
 
@@ -244,12 +246,27 @@ class fileEnsurer:
 
          assert host_name != "" and host_name != "host_name"
 
-      except Exception as e: ## else try to get api key manually
+      except Exception as e: ## else try to host name manually
 
          host_name = input("Please enter the host name of 'The Gamemaster's Database : ")
 
          with open(self.host_name_path, 'w+', encoding='utf-8') as file: 
                file.write(host_name)
 
+      try:
+          
+         with open(self.user_name_path, 'r', encoding='utf-8') as file: 
+            user_name = file.read()
+
+         assert user_name != "" and user_name != "user_name"
+
+      except Exception as e: ## else try to get user name manually
+          
+         user_name = input("Please enter your username : ")
+
+         with open(self.user_name_path, 'w+', encoding='utf-8') as file: 
+            file.write(user_name)
+
+
       finally:
-            return host_name
+         return host_name, user_name
