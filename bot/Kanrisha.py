@@ -99,6 +99,8 @@ class Kanrisha(discord.Client):
 
         self.member_handler.load_members()
 
+        await self.remote_handler.connection_handler.ready_connection(host_name=self.file_ensurer.get_host_name())
+
         await self.slash_command_handler.event_handler.setup_moderation()
     
 ##-------------------start-of-on_ready()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------

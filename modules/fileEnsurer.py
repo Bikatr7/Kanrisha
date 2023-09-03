@@ -45,7 +45,6 @@ class fileEnsurer:
       self.members_dir = os.path.join(self.config_dir, "members")
       self.images_dir = os.path.join(self.config_dir, "images")
       self.lib_dir = os.path.join(self.config_dir, "lib")
-
       self.bot_images_dir = os.path.join(self.images_dir, "bot images")
 
       ##----------------------------------------------------------------paths----------------------------------------------------------------
@@ -54,8 +53,8 @@ class fileEnsurer:
       self.log_path = os.path.join(self.bot_details_dir, "debug log.txt")
 
       self.token_path = os.path.join(self.bot_details_dir, "token.txt")
+      self.host_name_path = os.path.join(self.bot_details_dir, "host name.txt")
 
-      self.bot_thumbnail_path = os.path.join(self.bot_images_dir, "kanrisha thumbnail.png")
       self.bot_thumbnail_url = "https://cdn.discordapp.com/app-icons/1144166968979628072/7f4e6d14a104149d59624d5cc2897b94.png?size=256"
 
       ##----------------------------------------------------------------functions----------------------------------------------------------------
@@ -94,6 +93,7 @@ class fileEnsurer:
       """
 
       await self.create_needed_base_directories()
+      await self.ensure_bot_files()
       await self.ensure_member_files()
       await self.ensure_lib_files()
 
@@ -114,12 +114,34 @@ class fileEnsurer:
       """
 
       await self.file_handler.standard_create_directory(self.bot_details_dir)
+
       await self.file_handler.standard_create_directory(self.members_dir)
       await self.file_handler.standard_create_directory(self.images_dir)
 
       await self.file_handler.standard_create_directory(self.bot_images_dir)
       await self.file_handler.standard_create_directory(self.lib_dir)
 
+##--------------------start-of-ensure_bot_files()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   async def ensure_bot_files(self) -> None:
+       
+      """
+       
+      Ensures that the bot files are present and ready to be used.\n
+
+      Parameters:\n
+      self (object - fileEnsurer) : the fileEnsurer object.\n
+
+      Returns:\n
+      None.\n
+
+      """
+
+      self.credentials_path = os.path.join(self.bot_details_dir, "credentials.txt")
+
+      await self.file_handler.modified_create_file(self.token_path, "token")
+      await self.file_handler.modified_create_file(self.host_name_path, "host_name")
+      
 
 ##--------------------start-of-ensure_bot_files()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -196,3 +218,38 @@ class fileEnsurer:
                
       finally:
             return token
+      
+##-------------------start-of-get_host_name()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   def get_host_name(self) -> str:
+       
+      """
+
+      Gets the host name from the host_name.txt file.\n
+
+      Parameters:\n
+      self (object - fileEnsurer) : the fileEnsurer object.\n
+
+      Returns:\n
+      host_name (str) : the host name.\n
+
+      """
+
+      host_name = ""
+
+      try:
+
+         with open(self.host_name_path, 'r', encoding='utf-8') as file: 
+               host_name = file.read()
+
+         assert host_name != "" and host_name != "host_name"
+
+      except Exception as e: ## else try to get api key manually
+
+         host_name = input("Please enter the host name of 'The Gamemaster's Database : ")
+
+         with open(self.host_name_path, 'w+', encoding='utf-8') as file: 
+               file.write(host_name)
+
+      finally:
+            return host_name
