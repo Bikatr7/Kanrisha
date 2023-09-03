@@ -260,7 +260,7 @@ class slashCommandHandler:
         ##-------------------start-of-profile()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.tree.command(name="profile", description="Sends the user's profile.")
-        async def profile(interaction: discord.Interaction, member:discord.Member | None):
+        async def profile(interaction: discord.Interaction, member:typing.Union[discord.Member , None]):
 
             """
             

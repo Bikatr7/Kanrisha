@@ -142,6 +142,8 @@ class fileEnsurer:
 
       await self.file_handler.modified_create_file(self.token_path, "token")
       await self.file_handler.modified_create_file(self.host_name_path, "host_name")
+
+      await self.file_handler.standard_create_file(self.credentials_path)
       
 
 ##--------------------start-of-ensure_bot_files()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -183,6 +185,8 @@ class fileEnsurer:
       self.moderation_dir = os.path.join(self.lib_dir, "moderation")
 
       self.banned_links_path = os.path.join(self.moderation_dir, "banned links.txt")
+
+      await self.file_handler.standard_create_directory(self.moderation_dir)
 
       await self.file_handler.standard_create_file(self.banned_links_path)
                
