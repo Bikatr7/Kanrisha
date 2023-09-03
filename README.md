@@ -1,6 +1,6 @@
 ## The Gamemaster
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 
-Intended to be a replacement for Chairman Sakayanagi#5006 due to current events on RoyalMTLs.
+Intended to be a substitute for Chairman Sakayanagi#5006.
 
 Work in Progress
