@@ -47,6 +47,7 @@ class eventHandler:
             "https://media.discordapp.net/attachments/1144133989494444063/1147240008902770769/image.png", 
             "https://cdn.discordapp.com/attachments/1143635379262607444/1147228177710731386/IMG_2051.png",
             "https://cdn.discordapp.com/attachments/1146223708743139379/1147340019011436554/Media_230831_155422.gif"
+            "https://cdn.discordapp.com/attachments/1145507021882392576/1147708188376973392/image.png"
             ]
         
 

@@ -335,6 +335,7 @@ class fileHandler():
                 break
 
         return None
+    
 ##-------------------start-of-handle_critical_exception()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     def handle_critical_exception(self, critical_exception:Exception) -> None:

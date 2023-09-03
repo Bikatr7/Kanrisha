@@ -6,10 +6,13 @@ from modules.fileEnsurer import fileEnsurer
 from modules.toolkit import toolkit
 
 from handlers.slashCommandHandler import slashCommandHandler
+
 from handlers.interactionHandler import interactionHandler
 from handlers.gachaHandler import gachaHandler
+
+from handlers.remoteHandler import remoteHandler
+
 from handlers.memberHandler import memberHandler
-from handlers.localHandler import localHandler
 
 ##-------------------start-of-Kanrisha--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -68,7 +71,7 @@ class Kanrisha(discord.Client):
         self.interaction_handler = interactionHandler()
         self.gacha_handler = gachaHandler()
 
-        self.local_handler = localHandler(self.file_ensurer, self.toolkit)
+        self.remote_handler = remoteHandler(self.file_ensurer, self.toolkit)
         self.member_handler = memberHandler(self.file_ensurer, self.toolkit)
 
         ## Kanrisha and the slash command handler are coupled, as the slash command handler needs an instance of Kanrisha for it's function decorators to work
