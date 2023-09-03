@@ -39,7 +39,7 @@ class interactionHandler:
 
 ##-------------------start-of-send_response_filter_channel()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def send_response_filter_channel(self, interaction:discord.Interaction, response: str | None = None, embed: discord.Embed | None = None, view: discord.ui.View | None = None, is_admin_only:bool = False, delete_after: float | None = None, is_ephemeral:bool = False) -> None:
+    async def send_response_filter_channel(self, interaction:discord.Interaction, response: typing.Union[str, None] = None, embed: typing.Union[discord.Embed, None] = None, view: typing.Union[discord.ui.View , None] = None, is_admin_only:bool = False, delete_after: typing.Union[float , None] = None, is_ephemeral:bool = False) -> None:
 
         """
 
@@ -82,7 +82,7 @@ class interactionHandler:
 
 ##-------------------start-of-send_response_no_filter_channel()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def send_response_no_filter_channel(self, interaction:discord.Interaction, response: str | None = None, embed: discord.Embed | None = None, view: discord.ui.View | None = None, is_admin_only:bool = False, delete_after: float | None = None, is_ephemeral:bool = False) -> None:
+    async def send_response_no_filter_channel(self, interaction:discord.Interaction, response: typing.Union[str , None] = None, embed: typing.Union[discord.Embed , None] = None, view: typing.Union[discord.ui.View , None] = None, is_admin_only:bool = False, delete_after: typing.Union[float , None] = None, is_ephemeral:bool = False) -> None:
 
         """
 
@@ -120,7 +120,7 @@ class interactionHandler:
             
 ##-------------------start-of-send_response_no_filter_channel()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def send_message_to_channel(self, channel:discord.channel.GroupChannel | discord.Thread, response: str | None = None, embed: discord.Embed | None = None, view: discord.ui.View | None = None, delete_after: float | None = None) -> None:
+    async def send_message_to_channel(self, channel:typing.Union[discord.channel.GroupChannel , discord.Thread], response: typing.Union[str , None] = None, embed: typing.Union[discord.Embed , None] = None, view: typing.Union[discord.ui.View , None] = None, delete_after: typing.Union[float , None] = None) -> None:
 
         """
 

@@ -299,7 +299,7 @@ class fileHandler():
     
 ##--------------------start-of-find_target_line()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def find_target_line(self, target_path:str, target_value:str, target_column:int) -> int | None:
+    async def find_target_line(self, target_path:str, target_value:str, target_column:int) -> typing.Union[int , None]:
 
         """
 
