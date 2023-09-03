@@ -44,6 +44,7 @@ class fileEnsurer:
       self.bot_details_dir = os.path.join(self.config_dir, "bot details")
       self.members_dir = os.path.join(self.config_dir, "members")
       self.images_dir = os.path.join(self.config_dir, "images")
+      self.lib_dir = os.path.join(self.config_dir, "lib")
 
       self.bot_images_dir = os.path.join(self.images_dir, "bot images")
 
@@ -94,6 +95,7 @@ class fileEnsurer:
 
       await self.create_needed_base_directories()
       await self.ensure_member_files()
+      await self.ensure_lib_files()
 
 ##--------------------start-of-create_needed_base_directories()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -116,6 +118,7 @@ class fileEnsurer:
       await self.file_handler.standard_create_directory(self.images_dir)
 
       await self.file_handler.standard_create_directory(self.bot_images_dir)
+      await self.file_handler.standard_create_directory(self.lib_dir)
 
 
 ##--------------------start-of-ensure_bot_files()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -138,7 +141,27 @@ class fileEnsurer:
 
       await self.file_handler.standard_create_file(self.member_path)
        
+##--------------------start-of-ensure_lib_files()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+   async def ensure_lib_files(self) -> None:
+       
+      """
+      
+      Ensures that the lib files are present and ready to be used.\n
+
+      Parameters:\n
+      self (object - fileEnsurer) : the fileEnsurer object.\n
+
+      Returns:\n
+      None.\n
+      
+      """
+
+      self.moderation_dir = os.path.join(self.lib_dir, "moderation")
+
+      self.banned_links_path = os.path.join(self.moderation_dir, "banned links.txt")
+
+      await self.file_handler.standard_create_file(self.banned_links_path)
                
 ##-------------------start-of-get_elapsed_time()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

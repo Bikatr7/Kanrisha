@@ -37,20 +37,14 @@ class eventHandler:
 
         kanrisha_client = inc_kanrisha_client
 
+        self.file_ensurer = kanrisha_client.file_ensurer
+
         archive_channel_id = 1146979933416067163
 
         self.syndicate_role = 1146901009248026734 
 
-        self.banned_messages = [
-            "https://discord.gg/", 
-            "https://discord.com/invite/", 
-            "https://media.discordapp.net/attachments/1144133989494444063/1147240008902770769/image.png", 
-            "https://cdn.discordapp.com/attachments/1143635379262607444/1147228177710731386/IMG_2051.png",
-            "https://cdn.discordapp.com/attachments/1146223708743139379/1147340019011436554/Media_230831_155422.gif"
-            "https://cdn.discordapp.com/attachments/1145507021882392576/1147708188376973392/image.png"
-            ]
-        
-
+        self.banned_messages = []
+    
         ##-------------------start-of-on_message()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.event
@@ -198,3 +192,21 @@ class eventHandler:
                     await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not authorized to use this button.", delete_after=5.0, is_ephemeral=True)
 
 
+    ##-------------------start-of-setup_moderation()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    async def setup_moderation(self) -> None:
+
+        """
+
+        Reads the banned links file.\n
+
+        Parameters:\n
+        self (object) : the eventHandler object.\n
+
+        Returns:\n
+        None.\n
+
+        """
+
+        with open(self.file_ensurer.banned_links_path, "r") as file:
+            self.banned_messages = file.read().splitlines()

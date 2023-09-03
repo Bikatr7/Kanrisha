@@ -98,6 +98,8 @@ class Kanrisha(discord.Client):
         self.file_ensurer.logger.clear_log_file()
 
         self.member_handler.load_members()
+
+        await self.slash_command_handler.event_handler.setup_moderation()
     
 ##-------------------start-of-on_ready()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
