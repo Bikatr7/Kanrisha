@@ -112,11 +112,9 @@ class connectionHandler():
             ## if valid save the credentials
             try:
 
-                database_name = input("Please enter the name of the database you have")
+                database_name = input("Please enter the name of the database you are connecting to : ")
 
-                self.toolkit.clear_console()
-
-                password = input("Please enter the root password for your local database you have")
+                password = input("Please enter the password for your account you have : ")
 
                 credentials = [
                     base64.b64encode(database_name.encode('utf-8')).decode('utf-8'),

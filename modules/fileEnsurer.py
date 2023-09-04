@@ -142,6 +142,7 @@ class fileEnsurer:
 
       await self.file_handler.modified_create_file(self.token_path, "token")
       await self.file_handler.modified_create_file(self.host_name_path, "host_name")
+      await self.file_handler.modified_create_file(self.user_name_path, "user_name")
 
       await self.file_handler.standard_create_file(self.credentials_path)
       
@@ -243,19 +244,7 @@ class fileEnsurer:
       host_name = ""
       user_name = ""
 
-      try:
-
-         with open(self.host_name_path, 'r', encoding='utf-8') as file: 
-               host_name = file.read()
-
-         assert host_name != "" and host_name != "host_name"
-
-      except Exception as e: ## else try to host name manually
-
-         host_name = input("Please enter the host name of 'The Gamemaster's Database : ")
-
-         with open(self.host_name_path, 'w+', encoding='utf-8') as file: 
-               file.write(host_name)
+      host_name = input("Please enter the host name of 'The Gamemaster's Database : ")
 
       try:
           
@@ -273,4 +262,5 @@ class fileEnsurer:
 
 
       finally:
+         
          return host_name, user_name

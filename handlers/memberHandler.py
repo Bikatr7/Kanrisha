@@ -1,11 +1,15 @@
 ## build-in libraries
 import typing
 
+## third party libraries
+from pymongo.collection import Collection
+
 ## custom modules
 from entities.syndicateMember import syndicateMember
 
 from modules.fileEnsurer import fileEnsurer
 from modules.toolkit import toolkit
+
 
 class memberHandler:
 
@@ -17,7 +21,7 @@ class memberHandler:
 
 ##-------------------start-of-__init__()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def __init__(self, inc_file_ensurer:fileEnsurer, inc_toolkit:toolkit) -> None:
+    def __init__(self, inc_file_ensurer:fileEnsurer, inc_toolkit:toolkit, member_collection:) -> None:
 
         """
 

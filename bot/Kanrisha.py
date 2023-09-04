@@ -12,8 +12,6 @@ from handlers.gachaHandler import gachaHandler
 
 from handlers.remoteHandler import remoteHandler
 
-from handlers.memberHandler import memberHandler
-
 ##-------------------start-of-Kanrisha--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 class Kanrisha(discord.Client):
@@ -72,7 +70,6 @@ class Kanrisha(discord.Client):
         self.gacha_handler = gachaHandler()
 
         self.remote_handler = remoteHandler(self.file_ensurer, self.toolkit)
-        self.member_handler = memberHandler(self.file_ensurer, self.toolkit)
 
         ## Kanrisha and the slash command handler are coupled, as the slash command handler needs an instance of Kanrisha for it's function decorators to work
         self.slash_command_handler = slashCommandHandler(self)
@@ -93,7 +90,7 @@ class Kanrisha(discord.Client):
 
         """
 
-        self.member_handler.load_members()
+        
 
         await self.slash_command_handler.event_handler.setup_moderation()
     

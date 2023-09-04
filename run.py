@@ -6,20 +6,22 @@ from bot.Kanrisha import Kanrisha
 
 ##-------------------start-of-main()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-async def main():
+def main():
 
     client = Kanrisha()
 
-    await client.file_ensurer.ensure_files()
+    loop = asyncio.get_event_loop()
+
+    loop.run_until_complete(client.file_ensurer.ensure_files())
 
     token = client.file_ensurer.get_token()
 
     host, user = client.file_ensurer.get_db_credentials()
 
-    await client.remote_handler.connection_handler.ready_connection(host,user)
+    loop.run_until_complete(client.remote_handler.connection_handler.ready_connection(host,user))
 
     client.run(token=token)
 
 ##---------------------------------/
 
-asyncio.run(main())
+main()
