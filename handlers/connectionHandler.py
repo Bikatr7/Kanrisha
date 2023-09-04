@@ -1,5 +1,4 @@
 ## built-in modules
-import os
 import time
 import typing
 import base64
@@ -65,12 +64,13 @@ class connectionHandler():
 
         Parameters:\n
         self (object - connectionHandler) : The connection handler object.\n
+        host_name (str) : The host name of the database.\n
+        user_name (str) : The username for the person connecting to the database.\n
 
         Returns:\n
         None.\n
 
         """
-
 
         self.connection, self.cursor = await self.initialize_database_connection(host_name, user_name)
 
@@ -85,6 +85,8 @@ class connectionHandler():
 
         Parameters:\n
         self (object - connectionHandler) : The connection handler object.\n
+        host_name (str) : The host name of the database.\n
+        user_name (str) : The username for the person connecting to the database.\n
 
         Returns:\n
         connection (object - mysql.connector.connect.MySQLConnection) or (object - mysql.connector.pooling.PooledMySQLConnection) or None : The connection object to the database.\n

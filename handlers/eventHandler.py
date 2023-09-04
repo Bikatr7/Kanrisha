@@ -2,7 +2,6 @@
 from __future__ import annotations ## used for cheating the circular import issue that occurs when i need to type check some things
 
 import typing
-import re
 
 ## third-party libraries
 import discord
@@ -97,10 +96,15 @@ class eventHandler:
 
             for banned_message in self.banned_messages:
                 if(banned_message in message.content):
-                    await message.delete()
 
-                    await member.send(f"Your banned message has been deleted in {channel.name}. You will be muted when admins come online.") ## type: ignore (we know it's not None)
-                    await seinu.send(f"You need to timeout {member.name} for sending a banned message in {channel.name}.") ## type: ignore (we know it's not None)  
+                    try:
+                        await message.delete()
+
+                        await member.send(f"Your banned message has been deleted in {channel.name}. You will be muted when admins come online.") ## type: ignore (we know it's not None)
+                        await seinu.send(f"You need to timeout {member.name} for sending a banned message in {channel.name}.") ## type: ignore (we know it's not None)  
+
+                    except:
+                        pass
 
         ##-------------------start-of-on_raw_message_delete()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -113,6 +117,7 @@ class eventHandler:
 
             Parameters:\n
             self (object) : the eventHandler object.\n
+            payload (object) : the payload object.\n
 
             Returns:\n
             None.\n
@@ -178,7 +183,7 @@ class eventHandler:
                     ## acknowledge the interaction immediately
                     await interaction.response.defer()
 
-                    await kanrisha_client.member_handler.add_new_member(interaction.user.id, interaction.user.name, tuple([0,0,0]),0)
+                    await kanrisha_client.remote_handler.member_handler.add_new_member(interaction.user.id, interaction.user.name, tuple([0,0,0]),0)
 
                     await interaction.delete_original_response()
 

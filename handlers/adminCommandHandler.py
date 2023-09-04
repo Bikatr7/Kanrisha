@@ -63,15 +63,15 @@ class adminCommandHandler:
                 await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
                 return
 
+            ## marked ids
             marked_for_death_role_id = 1146651136363855982
             mark_of_silence_role_id = 1147336187888021524
 
             ## server announcements role
             role_to_ping = kanrisha_client.get_guild(interaction.guild_id).get_role(1147346384178131034) ## type: ignore (we know it's not None)
+            role_ping = role_to_ping.mention ## type: ignore (we know it's not None)
 
             mark_of_silence_role = kanrisha_client.get_guild(interaction.guild_id).get_role(mark_of_silence_role_id) ## type: ignore (we know it's not None)
-
-            role_ping = role_to_ping.mention ## type: ignore (we know it's not None)
 
             marked_for_death: typing.List[discord.Member] = []
 
@@ -87,6 +87,7 @@ class adminCommandHandler:
                         marked_for_death.append(member)
                         execution_message += f"{member.mention}\n"
 
+            ## no one to ban 
             if(len(marked_for_death) == 0):
                 execution_message = "No users have been marked for death."
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, execution_message, delete_after=5.0, is_ephemeral=True)
@@ -103,6 +104,7 @@ class adminCommandHandler:
             await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)
             await kanrisha_client.interaction_handler.send_message_to_channel(target_channel, mention_content) ## type: ignore (we know it's not None)
 
+            ## ban loop
             for i in range(30):
                 await asyncio.sleep(1)
                 

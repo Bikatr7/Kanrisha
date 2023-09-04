@@ -54,6 +54,7 @@ class gachaHandler:
 
         Parameters:\n
         self (object - gachaHandler) : the gachaHandler object.\n
+        user_id (int) : the id of the user.\n
 
         Returns:\n
         result (str) : the result of the spin.\n

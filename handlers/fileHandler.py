@@ -264,39 +264,6 @@ class fileHandler():
             if(i >= line_count):
                 break
 
-##--------------------start-of-get_new_id()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    def get_new_id(self, id_list:typing.List[int]) -> int:
-
-        """
-
-        Generates a new id.\n 
-
-        Parameters:\n
-        self (object - fileHandler) : the fileHandler object.\n
-        id_list (list - ints) : a list of already active ids.\n
-
-        Returns:\n
-        new_id (int) : a new id.\n
-
-        """
-
-        id_list = [id for id in id_list]
-
-        id_list.sort()
-
-        new_id = 1
-
-        for num in id_list:
-            if(num < new_id):
-                continue
-            elif(num == new_id):
-                new_id += 1
-            else:
-                return new_id
-            
-        return new_id
-    
 ##--------------------start-of-find_target_line()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     async def find_target_line(self, target_path:str, target_value:str, target_column:int) -> typing.Union[int , None]:
@@ -335,6 +302,39 @@ class fileHandler():
                 break
 
         return None
+
+##--------------------start-of-get_new_id()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    def get_new_id(self, id_list:typing.List[int]) -> int:
+
+        """
+
+        Generates a new id.\n 
+
+        Parameters:\n
+        self (object - fileHandler) : the fileHandler object.\n
+        id_list (list - ints) : a list of already active ids.\n
+
+        Returns:\n
+        new_id (int) : a new id.\n
+
+        """
+
+        id_list = [id for id in id_list]
+
+        id_list.sort()
+
+        new_id = 1
+
+        for num in id_list:
+            if(num < new_id):
+                continue
+            elif(num == new_id):
+                new_id += 1
+            else:
+                return new_id
+            
+        return new_id
     
 ##-------------------start-of-handle_critical_exception()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

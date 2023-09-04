@@ -21,14 +21,15 @@ class memberHandler:
 
 ##-------------------start-of-__init__()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def __init__(self, inc_file_ensurer:fileEnsurer, inc_toolkit:toolkit, member_collection:) -> None:
+    def __init__(self, inc_file_ensurer:fileEnsurer, inc_toolkit:toolkit) -> None:
 
         """
 
         Constructor for the memberHandler class.\n
 
         Parameters:\n
-        None.\n
+        inc_file_ensurer (object - fileEnsurer) : the fileEnsurer object.\n
+        inc_toolkit (object - toolkit) : the toolkit object.\n
 
         Returns:\n
         None.\n

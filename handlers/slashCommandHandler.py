@@ -53,7 +53,7 @@ class slashCommandHandler:
 
         async def check_if_registered(self, interaction:discord.Interaction, register_check:bool = False):
 
-            registered_member_ids = [member.member_id for member in kanrisha_client.member_handler.members]
+            registered_member_ids = [member.member_id for member in kanrisha_client.remote_handler.member_handler.members]
 
             if(interaction.user.id not in registered_member_ids):
 
@@ -101,7 +101,7 @@ class slashCommandHandler:
                 target_member_id = interaction.user.id
                 image_url = interaction.user.display_avatar.url
 
-            for syndicate_member in kanrisha_client.member_handler.members:
+            for syndicate_member in kanrisha_client.remote_handler.member_handler.members:
                     
                     if(target_member_id == syndicate_member.member_id):
                         target_member = syndicate_member
@@ -333,7 +333,7 @@ class slashCommandHandler:
 
             ## Calculate scores for each member and store them in a list with the member's name
             scores_with_members = []
-            for member in kanrisha_client.member_handler.members:
+            for member in kanrisha_client.remote_handler.member_handler.members:
                 score = round((member.spin_scores[0] * 20 + member.spin_scores[1] * 8.33 + member.spin_scores[2] * 1.20) / (sum(member.spin_scores) if sum(member.spin_scores) != 0 else 1),3)
                 scores_with_members.append((score, member.member_name))
 

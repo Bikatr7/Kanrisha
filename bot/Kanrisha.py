@@ -69,6 +69,7 @@ class Kanrisha(discord.Client):
         self.interaction_handler = interactionHandler()
         self.gacha_handler = gachaHandler()
 
+        
         self.remote_handler = remoteHandler(self.file_ensurer, self.toolkit)
 
         ## Kanrisha and the slash command handler are coupled, as the slash command handler needs an instance of Kanrisha for it's function decorators to work
@@ -90,8 +91,6 @@ class Kanrisha(discord.Client):
 
         """
 
-        
-
         await self.slash_command_handler.event_handler.setup_moderation()
     
 ##-------------------start-of-on_ready()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -110,12 +109,12 @@ class Kanrisha(discord.Client):
 
         """
 
+        await self.run_post_init_tasks()
+
         await self.wait_until_ready()
 
         if(not self.synced):
             await self.tree.sync()
             self.synced = True
-
-        await self.run_post_init_tasks()
 
         print('The Gamemaster is ready.')

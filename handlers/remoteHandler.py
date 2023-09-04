@@ -1,18 +1,10 @@
 ## built-in modules
-from datetime import datetime
-
-import os
-import shutil
-import time
 
 ## custom modules
-
-
 from modules.toolkit import toolkit
-
 from modules.fileEnsurer import fileEnsurer
-
 from handlers.connectionHandler import connectionHandler
+from handlers.memberHandler import memberHandler
 
 class remoteHandler():
 
@@ -45,6 +37,8 @@ class remoteHandler():
         self.toolkit = toolkit
 
         self.connection_handler = connectionHandler(self.fileEnsurer, self.toolkit)
+
+        self.member_handler = memberHandler(self.fileEnsurer, self.toolkit)
 
         ##----------------------------------------------------------------dir----------------------------------------------------------------
 

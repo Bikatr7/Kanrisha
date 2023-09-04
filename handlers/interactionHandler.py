@@ -48,8 +48,10 @@ class interactionHandler:
         Parameters:\n
         self (object - interactionHandler) : the interactionHandler object.\n
         interaction (object - discord.Interaction) : the interaction object.\n
-        response (str) : the response to send.\n
-        admin_only (bool | optional) : whether or not to restrict the command to admins only.\n
+        response (str | optional) : the response to send.\n
+        is_admin_only (bool | optional) : whether or not to restrict the command to admins only.\n
+        delete_after (float | optional) : how long to wait before deleting the message.\n
+        is_ephemeral (bool | optional) : whether or not to make the message ephemeral.\n
 
         Returns:\n
         None.\n
@@ -86,13 +88,15 @@ class interactionHandler:
 
         """
 
-        Sends a response to a channel.\n
+        Sends a response to a channel without filtering.\n
 
         Parameters:\n
         self (object - interactionHandler) : the interactionHandler object.\n
         interaction (object - discord.Interaction) : the interaction object.\n
-        response (str) : the response to send.\n
-        admin_only (bool | optional) : whether or not to restrict the command to admins only.\n
+        response (str | optional) : the response to send.\n
+        is_admin_only (bool | optional) : whether or not to restrict the command to admins only.\n
+        delete_after (float | optional) : how long to wait before deleting the message.\n
+        is_ephemeral (bool | optional) : whether or not to make the message ephemeral.\n
 
         Returns:\n
         None.\n
@@ -128,10 +132,8 @@ class interactionHandler:
 
         Parameters:\n
         self (object - interactionHandler) : the interactionHandler object.\n
-        channel (object - discord.TextChannel) : the channel object.\n
-        response (str) : the response to send.\n
-        embed (object - discord.Embed) : the embed to send.\n
-        view (object - discord.ui.View) : the view to send.\n
+        channel (object - discord.channel.GroupChannel | discord.Thread) : the channel to send the message to.\n
+        response (str | optional) : the response to send.\n
         delete_after (float | optional) : how long to wait before deleting the message.\n
     
         Returns:\n
