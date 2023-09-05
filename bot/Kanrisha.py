@@ -91,6 +91,8 @@ class Kanrisha(discord.Client):
 
         """
 
+        self.remote_handler.member_handler.load_members()
+
         await self.slash_command_handler.event_handler.setup_moderation()
     
 ##-------------------start-of-on_ready()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
