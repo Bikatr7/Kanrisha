@@ -316,7 +316,7 @@ class slashCommandHandler:
         async def leaderboard(interaction: discord.Interaction):
 
             """
-            
+
             Sends the leaderboard.\n
 
             Parameters:\n
@@ -328,37 +328,46 @@ class slashCommandHandler:
 
             """
 
-            if(await check_if_registered(self, interaction) == False):
+            ## Check if the user is registered
+            if(not await check_if_registered(self, interaction)):
                 return
 
-            ## Calculate scores for each member and store them in a list with the member's name
+            ## Calculate scores for each member who has spun at least once and store them in a list with the member's name
             scores_with_members = []
             for member in kanrisha_client.remote_handler.member_handler.members:
-                score = round((member.spin_scores[0] * 20 + member.spin_scores[1] * 8.33 + member.spin_scores[2] * 1.20) / (sum(member.spin_scores) if sum(member.spin_scores) != 0 else 1),3)
-                scores_with_members.append((score, member.member_name))
+
+                total_spins = sum(member.spin_scores)
+
+                if(total_spins > 0):
+                    score = round((member.spin_scores[0] * 20 + member.spin_scores[1] * 8.33 + member.spin_scores[2] * 1.20) / total_spins, 3)
+                    scores_with_members.append((score, member.member_name))
 
             ## Sort the list based on the scores in descending order
             scores_with_members.sort(key=lambda x: x[0], reverse=True)
 
-            # #Find the rank of the user calling the command
+            ## Find the rank of the user calling the command
             user_rank = None
             for rank, (score, member_name) in enumerate(scores_with_members, 1):
-                if member_name == interaction.user.name:  ## Assuming member_name is the same as the discord username
+                if(member_name == interaction.user.name):
                     user_rank = rank
                     break
 
-            ## Extract the top 10 scores and members
-            top_10_scores_with_members = scores_with_members[:10]
+            ## Calculate rank for users who haven't spun yet
+            no_spin_rank = len(scores_with_members) + 1
 
             ## Construct the leaderboard message
             leaderboard_message = ""
-            for score, member_name in top_10_scores_with_members:
+            for rank, (score, member_name) in enumerate(scores_with_members, 1):
+                if(member_name == interaction.user.name):
+                    user_rank = rank
                 leaderboard_message += f"**{member_name}** - {score}\n"
 
             embed = discord.Embed(title="Luck Leaderboard", description=leaderboard_message, color=0xC0C0C0)
             embed.set_thumbnail(url=kanrisha_client.file_ensurer.bot_thumbnail_url)
-            embed.set_footer(text=f"Your rank is #{user_rank}.")
+            
+            if(user_rank is not None):
+                embed.set_footer(text=f"Your rank is #{user_rank}.")
+            else:
+                embed.set_footer(text=f"Your rank is #{no_spin_rank} (haven't spun yet).")
 
-            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, leaderboard_message, embed=embed)
-
-
+            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "", embed=embed)
