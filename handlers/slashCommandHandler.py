@@ -133,7 +133,7 @@ class slashCommandHandler:
 
             target_member, _, _, _ = await get_member_id(interaction) 
 
-            await kanrisha_client.member_handler.update_spin_value(target_member.member_id, 1, spin_index) ## type: ignore (we know it's not None)
+            await kanrisha_client.remote_handler.member_handler.update_spin_value(target_member.member_id, 1, spin_index) ## type: ignore (we know it's not None)
 
             await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, spin_result, embed=None, view=None)
 
@@ -167,7 +167,7 @@ class slashCommandHandler:
 
                 multi_spin += f"{spin_result}"
 
-                await kanrisha_client.member_handler.update_spin_value(target_member.member_id, 1, spin_index) ## type: ignore (we know it's not None)
+                await kanrisha_client.remote_handler.member_handler.update_spin_value(target_member.member_id, 1, spin_index) ## type: ignore (we know it's not None)
 
             await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, multi_spin)
 
