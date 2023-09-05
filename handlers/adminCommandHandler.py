@@ -37,6 +37,33 @@ class adminCommandHandler:
         """
 
         kanrisha_client = inc_kanrisha_client
+
+        ##-------------------start-of-force-remote-reset()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        @kanrisha_client.tree.command(name="force-remote-reset", description="Resets the remote storage.")
+        async def force_remote_reset(interaction:discord.Interaction):
+
+            """
+            
+            Resets the remote storage.\n
+
+            Parameters:\n
+            self (object - slashCommandHandler) : the slashCommandHandler object.\n
+            interaction (object - discord.Interaction) : the interaction object.\n
+
+            Returns:\n
+            None.\n
+
+            """
+
+            ## admin check
+            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
+                await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
+                return
+
+            await kanrisha_client.remote_handler.reset_remote_storage()
+
+            await interaction.response.send_message("Remote storage has been reset.", delete_after=3.0, ephemeral=True)
     
         ##-------------------start-of-execute_order_66()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

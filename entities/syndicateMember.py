@@ -31,8 +31,9 @@ class syndicateMember:
         """
 
         self.member_id = inc_member_id
-        self.credits = inc_credits
 
         self.member_name = inc_member_name
 
         self.spin_scores = inc_spin_scores
+
+        self.credits = inc_credits

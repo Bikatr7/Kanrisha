@@ -103,7 +103,7 @@ class connectionHandler():
                 database_name = base64.b64decode((credentials[0].strip()).encode('utf-8')).decode('utf-8')
                 password = base64.b64decode((credentials[1].strip()).encode('utf-8')).decode('utf-8')
 
-            connection = self.create_database_connection(host_name, user_name, database_name, password)
+            connection = await self.create_database_connection(host_name, user_name, database_name, password)
             cursor = connection.cursor()
 
             self.file_ensurer.logger.log_action("Used saved credentials in " + self.file_ensurer.credentials_path)
@@ -122,7 +122,7 @@ class connectionHandler():
                     base64.b64encode(database_name.encode('utf-8')).decode('utf-8'),
                         base64.b64encode(password.encode('utf-8')).decode('utf-8')]
                 
-                connection = self.create_database_connection(host_name, user_name, database_name, password)
+                connection = await self.create_database_connection(host_name, user_name, database_name, password)
                 cursor = connection.cursor()
                             
                 await self.file_ensurer.file_handler.standard_create_file(self.file_ensurer.credentials_path) 
@@ -148,7 +148,7 @@ class connectionHandler():
     
 ##--------------------start-of-create_database_connection()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def create_database_connection(self, host_name:str, user_name:str, db_name:str, user_password:str) -> typing.Union[mysql.connector.connection.MySQLConnection, pooling.PooledMySQLConnection]:
+    async def create_database_connection(self, host_name:str, user_name:str, db_name:str, user_password:str) -> typing.Union[mysql.connector.connection.MySQLConnection, pooling.PooledMySQLConnection]:
 
         """
 
@@ -178,7 +178,7 @@ class connectionHandler():
     
 ##--------------------start-of-clear_credentials_File()---------------------------S---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def clear_credentials_file(self) -> None:
+    async def clear_credentials_file(self) -> None:
 
         """
         
@@ -197,7 +197,7 @@ class connectionHandler():
 
 ##--------------------start-of-execute_query()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def execute_query(self, query:str) -> None:
+    async def execute_query(self, query:str) -> None:
 
         """
 
@@ -227,7 +227,7 @@ class connectionHandler():
 
 ##--------------------start-of-read_single_column_query()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def read_single_column_query(self, query:str) -> typing.List[str]:
+    async def read_single_column_query(self, query:str) -> typing.List[str]:
 
         """
 
@@ -255,7 +255,7 @@ class connectionHandler():
     
 ##--------------------start-of-insert_into_table()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def insert_into_table(self, table_name, data) -> None:
+    async def insert_into_table(self, table_name, data) -> None:
 
         """
         
@@ -276,11 +276,11 @@ class connectionHandler():
 
         query = f"INSERT INTO {table_name} ({columns}) VALUES ({values})"
 
-        self.execute_query(query)
+        await self.execute_query(query)
 
 ##--------------------start-of-read_multi_column_query()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def read_multi_column_query(self, query:str) -> typing.List[typing.List[str]]:
+    async def read_multi_column_query(self, query:str) -> typing.List[typing.List[str]]:
 
         """
 

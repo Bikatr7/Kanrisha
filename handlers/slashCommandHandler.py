@@ -129,7 +129,7 @@ class slashCommandHandler:
             if(await check_if_registered(self, interaction) == False):
                 return
 
-            spin_result, spin_index = kanrisha_client.gacha_handler.spin_wheel(interaction.user.id)
+            spin_result, spin_index = await kanrisha_client.gacha_handler.spin_wheel(interaction.user.id)
 
             target_member, _, _, _ = await get_member_id(interaction) 
 
@@ -163,7 +163,7 @@ class slashCommandHandler:
             multi_spin = ""
             
             for i in range(0, 10):
-                spin_result, spin_index = kanrisha_client.gacha_handler.spin_wheel(interaction.user.id)
+                spin_result, spin_index = await kanrisha_client.gacha_handler.spin_wheel(interaction.user.id)
 
                 multi_spin += f"{spin_result}"
 

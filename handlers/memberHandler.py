@@ -1,10 +1,9 @@
 ## build-in libraries
 import typing
 
-## third party libraries
-from pymongo.collection import Collection
-
 ## custom modules
+from handlers.connectionHandler import connectionHandler
+
 from entities.syndicateMember import syndicateMember
 
 from modules.fileEnsurer import fileEnsurer
@@ -21,7 +20,7 @@ class memberHandler:
 
 ##-------------------start-of-__init__()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def __init__(self, inc_file_ensurer:fileEnsurer, inc_toolkit:toolkit) -> None:
+    def __init__(self, inc_file_ensurer:fileEnsurer, inc_toolkit:toolkit, connection_handler:connectionHandler) -> None:
 
         """
 
@@ -30,6 +29,7 @@ class memberHandler:
         Parameters:\n
         inc_file_ensurer (object - fileEnsurer) : the fileEnsurer object.\n
         inc_toolkit (object - toolkit) : the toolkit object.\n
+        connection_handler (object - connectionHandler) : the connectionHandler object.\n
 
         Returns:\n
         None.\n
@@ -38,16 +38,17 @@ class memberHandler:
 
         self.file_ensurer = inc_file_ensurer
         self.toolkit = inc_toolkit
+        self.connection_handler = connection_handler
 
         self.members: typing.List[syndicateMember] = [] 
 
 ##-------------------start-of-load_members()---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def load_members(self) -> None:
+    async def load_members(self) -> None:
 
         """
 
-        Loads the members from the members folder.\n
+        Loads the members from the local db.\n
 
         Parameters:\n
         None.\n
@@ -57,18 +58,19 @@ class memberHandler:
 
         """
 
-        with open(self.file_ensurer.member_path, "r", encoding="utf-8") as file:
+        self.members.clear()
 
-            for line in file:
+        id_list, name_list, spin_scores_list, credits_list = await self.connection_handler.read_multi_column_query("select member_id, member_name, spin_scores, credits from members")
 
-                values = line.strip().split(',')
+        for i in range(len(id_list)):
 
-                spin_scores = tuple([int(score) for score in values[2].strip('"').split('.')[:3]])
+            spin_scores = spin_scores_list[i].strip("(").strip(")").split(",")
 
-                self.members.append(syndicateMember(int(values[0]), values[1], spin_scores, int(values[3])))
+            spin_scores = (int(spin_scores[0]), int(spin_scores[1]), int(spin_scores[2]))
 
-                self.file_ensurer.logger.log_action(f"Loaded member {values[0]}, {values[1]}, {spin_scores}, {values[4]}.")
-
+            new_member = syndicateMember(int(id_list[i]), name_list[i], spin_scores, int(credits_list[i]))
+            self.members.append(new_member)
+        
 ##-------------------start-of-add_new_member()---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     async def add_new_member(self, inc_member_id:int, inc_member_name:str, inc_spin_scores:typing.Tuple[int,int,int], inc_credits:int) -> None:
@@ -91,13 +93,10 @@ class memberHandler:
 
         member_details = [str(inc_member_id), inc_member_name, score_string, str(inc_credits)]
 
-        await self.file_ensurer.file_handler.write_sei_line(self.file_ensurer.member_path, member_details)
-
         ## adds new member to current instance of bot
         new_member = syndicateMember(inc_member_id, inc_member_name, inc_spin_scores, inc_credits)
 
         self.members.append(new_member)
-
 
 ##-------------------start-of-update_spin_value()---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -129,9 +128,3 @@ class memberHandler:
                 member.spin_scores = tuple(spin_scores_list)
                 
                 break
-
-        # Usage:
-        target_line = await self.file_ensurer.file_handler.find_target_line(self.file_ensurer.member_path, str(target_member_id), 1)
-
-        ## update member in file
-        await self.file_ensurer.file_handler.edit_sei_line(self.file_ensurer.member_path, target_line, 3, tuple_string)  # type: ignore

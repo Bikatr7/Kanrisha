@@ -1,4 +1,6 @@
 ## third-party libraries
+from discord.ext import tasks
+
 import discord
 
 ## custom modules
@@ -69,7 +71,6 @@ class Kanrisha(discord.Client):
         self.interaction_handler = interactionHandler()
         self.gacha_handler = gachaHandler()
 
-        
         self.remote_handler = remoteHandler(self.file_ensurer, self.toolkit)
 
         ## Kanrisha and the slash command handler are coupled, as the slash command handler needs an instance of Kanrisha for it's function decorators to work
@@ -91,7 +92,7 @@ class Kanrisha(discord.Client):
 
         """
 
-        self.remote_handler.member_handler.load_members()
+        await self.remote_handler.member_handler.load_members()
 
         await self.slash_command_handler.event_handler.setup_moderation()
     
@@ -119,4 +120,27 @@ class Kanrisha(discord.Client):
             await self.tree.sync()
             self.synced = True
 
+        self.refresh_remote_storage.start()
+
         print('The Gamemaster is ready.')
+
+##-------------------start-of-refresh_remote_storage()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    @tasks.loop(seconds=300)
+    async def refresh_remote_storage(self):
+
+        """
+
+        Refreshes the remote storage.\n
+        Runs every 5 minutes.\n
+
+        Parameters:\n
+        self (object - Kanrisha): The Kanrisha client.\n
+
+        Returns:\n
+        None.\n
+
+        """
+
+        await self.remote_handler.reset_remote_storage()
+        print("Remote storage has been reset.")

@@ -20,6 +20,8 @@ def main():
 
     loop.run_until_complete(client.remote_handler.connection_handler.ready_connection(host,user))
 
+    client.toolkit.clear_console()
+
     client.run(token=token)
 
 ##---------------------------------/

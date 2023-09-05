@@ -46,7 +46,7 @@ class gachaHandler:
 
 ##-------------------start-of-spin_wheel()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def spin_wheel(self, user_id:int) -> typing.Tuple[str,int]:
+    async def spin_wheel(self, user_id:int) -> typing.Tuple[str,int]:
 
         """
 
