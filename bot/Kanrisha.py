@@ -122,7 +122,9 @@ class Kanrisha(discord.Client):
 
         self.refresh_remote_storage.start()
 
-        print('The Gamemaster is ready.')
+        timestamp = self.toolkit.get_timestamp("INFO", "Kanrisha")
+
+        print(timestamp + " Kanrisha is ready.")
 
 ##-------------------start-of-refresh_remote_storage()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -143,4 +145,3 @@ class Kanrisha(discord.Client):
         """
 
         await self.remote_handler.reset_remote_storage()
-        print("Remote storage has been reset.")

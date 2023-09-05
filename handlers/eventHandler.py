@@ -144,7 +144,7 @@ class eventHandler:
                 if(message_cache.author.avatar):
                     embed.set_thumbnail(url=message_cache.author.avatar.url)
 
-                embed.set_footer(text=f'Deleted in #{message_cache.channel.name} at {message_cache.created_at.now().strftime("%Y-%m-%d-1 %H:%M:%S")}') ## type: ignore (we know it's not None)
+                embed.set_footer(text=f'Deleted in #{message_cache.channel.name} at {int(message_cache.created_at.now().timestamp())}') ## type: ignore (we know it's not None)
                 embed.add_field(name="Channel ID", value=message_cache.channel.id)
                 embed.add_field(name="User ID", value=message_cache.author.id)
 

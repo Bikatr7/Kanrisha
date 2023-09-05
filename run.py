@@ -1,5 +1,6 @@
 ## built-in modules
 import asyncio
+import os
 
 ## custom modules
 from bot.Kanrisha import Kanrisha
@@ -9,6 +10,8 @@ from bot.Kanrisha import Kanrisha
 def main():
 
     client = Kanrisha()
+
+    os.system("title " + "Kanrisha")
 
     loop = asyncio.get_event_loop()
 
