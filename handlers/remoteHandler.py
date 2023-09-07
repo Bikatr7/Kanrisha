@@ -78,7 +78,7 @@ class remoteHandler():
         await self.create_remote_storage()
         await self.fill_remote_storage()
 
-        timestamp = self.toolkit.get_timestamp("INFO", "remoteHandler")
+        timestamp = await self.toolkit.get_timestamp("INFO", "remoteHandler")
 
         print(timestamp + " Remote storage has been reset.")
 

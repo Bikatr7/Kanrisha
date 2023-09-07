@@ -183,7 +183,7 @@ class eventHandler:
                     ## acknowledge the interaction immediately
                     await interaction.response.defer()
 
-                    await kanrisha_client.remote_handler.member_handler.add_new_member(interaction.user.id, interaction.user.name, tuple([0,0,0]),0)
+                    await kanrisha_client.remote_handler.member_handler.add_new_member(interaction.user.id, interaction.user.name, tuple([0,0,0]),0) # type: ignore
 
                     await interaction.delete_original_response()
 

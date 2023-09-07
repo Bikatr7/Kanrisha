@@ -122,7 +122,7 @@ class Kanrisha(discord.Client):
 
         self.refresh_remote_storage.start()
 
-        timestamp = self.toolkit.get_timestamp("INFO", "Kanrisha")
+        timestamp = await self.toolkit.get_timestamp("INFO", "Kanrisha")
 
         print(timestamp + " Kanrisha is ready.")
 

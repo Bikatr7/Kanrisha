@@ -125,6 +125,6 @@ class memberHandler:
 
                 spin_scores_list = list(member.spin_scores)
                 spin_scores_list[spin_index] += spin_value_increase
-                member.spin_scores = tuple(spin_scores_list)
+                member.spin_scores = tuple(spin_scores_list) # type: ignore
                 
                 break
