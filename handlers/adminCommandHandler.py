@@ -61,7 +61,7 @@ class adminCommandHandler:
                 await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
                 return
 
-            await kanrisha_client.remote_handler.reset_remote_storage()
+            await kanrisha_client.remote_handler.reset_remote_storage(is_forced=True, forced_by=interaction.user.name)
 
             await interaction.response.send_message("Remote storage has been reset.", delete_after=3.0, ephemeral=True)
     

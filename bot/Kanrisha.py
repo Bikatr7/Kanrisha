@@ -120,11 +120,10 @@ class Kanrisha(discord.Client):
             await self.tree.sync()
             self.synced = True
 
-        self.refresh_remote_storage.start()
+        if(not self.refresh_remote_storage.is_running()):
+            self.refresh_remote_storage.start()
 
-        timestamp = await self.toolkit.get_timestamp("INFO", "Kanrisha")
-
-        print(timestamp + " Kanrisha is ready.")
+        timestamp = await self.toolkit.get_timestamp("INFO", "Kanrisha", "Kanrisha is ready.")
 
 ##-------------------start-of-refresh_remote_storage()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -144,4 +143,4 @@ class Kanrisha(discord.Client):
 
         """
 
-        await self.remote_handler.reset_remote_storage()
+        await self.remote_handler.reset_remote_storage(is_forced = False)

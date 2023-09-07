@@ -94,7 +94,7 @@ class toolkit():
 
 ##-------------------start-of-get_timestamp()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def get_timestamp(self, type, module) -> str:
+    async def get_timestamp(self, type:str, module:str, message:str) -> str:
 
         """
         
@@ -110,7 +110,7 @@ class toolkit():
         
         """
 
-        timestamp = "[" + datetime.now().strftime("%Y-%m-%d %H:%M:%S") + f"] [{type} - {module}]"
+        timestamp = "[" + datetime.now().strftime("%Y-%m-%d %H:%M:%S") + f"] [{type} - {module}] {message}"
 
         return timestamp
 
