@@ -38,6 +38,31 @@ class adminCommandHandler:
 
         kanrisha_client = inc_kanrisha_client
 
+        ##-------------------start-of-force-log-push()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        @kanrisha_client.tree.command(name="force-log-push", description="Forces a log push.")
+        async def force_log_push(interaction:discord.Interaction):
+
+            """
+            
+            Forces a log push.\n
+
+            Parameters:\n
+            self (object - slashCommandHandler) : the slashCommandHandler object.\n
+            interaction (object - discord.Interaction) : the interaction object.\n
+
+            Returns:\n
+            None.\n
+
+            """
+
+            ## admin check
+            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
+                await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
+                return
+
+            await kanrisha_client.interaction_handler.send_log_file(kanrisha_client.get_channel(kanrisha_client.log_channel_id), is_forced=True,  forced_by=interaction.user.name)  # type: ignore
+
         ##-------------------start-of-force-remote-reset()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.tree.command(name="force-remote-reset", description="Resets the remote storage.")

@@ -60,6 +60,8 @@ class Kanrisha(discord.Client):
 
         self.pg = 1143635379262607441
 
+        self.log_channel_id = 1149433554170810459
+
         #------------------------------------------------------
 
         self.file_ensurer = fileEnsurer()
@@ -68,7 +70,7 @@ class Kanrisha(discord.Client):
 
         #------------------------------------------------------
 
-        self.interaction_handler = interactionHandler()
+        self.interaction_handler = interactionHandler(self.file_ensurer, self.toolkit)
         self.gacha_handler = gachaHandler()
 
         self.remote_handler = remoteHandler(self.file_ensurer, self.toolkit)
@@ -123,11 +125,15 @@ class Kanrisha(discord.Client):
         if(not self.refresh_remote_storage.is_running()):
             self.refresh_remote_storage.start()
 
+        if(not self.send_log_file_to_log_channel.is_running()):
+            self.send_log_file_to_log_channel.start()
+
         timestamp = await self.toolkit.get_timestamp("INFO", "Kanrisha", "Kanrisha is ready.")
+        print(timestamp)
 
 ##-------------------start-of-refresh_remote_storage()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    @tasks.loop(seconds=300)
+    @tasks.loop(minutes=5)
     async def refresh_remote_storage(self):
 
         """
@@ -144,3 +150,23 @@ class Kanrisha(discord.Client):
         """
 
         await self.remote_handler.reset_remote_storage(is_forced = False)
+
+##-------------------start-of-send_log_file_to_log_channel()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    @tasks.loop(minutes=15)
+    async def send_log_file_to_log_channel(self):
+
+        """
+
+        Sends the log file to the log channel.\n
+        Runs every 15 minutes.\n
+
+        Parameters:\n
+        self (object - Kanrisha): The Kanrisha client.\n
+
+        Returns:\n
+        None.\n
+
+        """
+
+        await self.interaction_handler.send_log_file(channel=self.get_channel(self.log_channel_id), is_forced = False)  # type: ignore

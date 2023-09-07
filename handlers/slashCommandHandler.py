@@ -9,12 +9,12 @@ import discord
 
 ## custom libraries
 from handlers.eventHandler import eventHandler
-if(typing.TYPE_CHECKING): ## used for cheating the circular import issue that occurs when i need to type check some things
-    from bot.Kanrisha import Kanrisha
-
 from handlers.adminCommandHandler import adminCommandHandler
 
 from entities.syndicateMember import syndicateMember
+
+if(typing.TYPE_CHECKING): ## used for cheating the circular import issue that occurs when i need to type check some things
+    from bot.Kanrisha import Kanrisha
 
 class slashCommandHandler:
 

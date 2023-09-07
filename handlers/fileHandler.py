@@ -52,7 +52,7 @@ class fileHandler():
 
         if(os.path.isdir(directory_path) == False):
             os.mkdir(directory_path)
-            self.logger.log_action(directory_path + " created due to lack of the folder")
+            await self.logger.log_action(directory_path + " created due to lack of the folder")
 
 ##--------------------start-of-standard_create_file()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -72,7 +72,7 @@ class fileHandler():
         """
 
         if(os.path.exists(file_path) == False):
-            self.logger.log_action(file_path + " was created due to lack of the file")
+            await self.logger.log_action(file_path + " was created due to lack of the file")
             with open(file_path, "w+", encoding="utf-8") as file:
                 file.truncate()
 
@@ -95,7 +95,7 @@ class fileHandler():
         """
 
         if(os.path.exists(file_path) == False or os.path.getsize(file_path) == 0):
-            self.logger.log_action(file_path + " was created due to lack of the file or because it is blank")
+            await self.logger.log_action(file_path + " was created due to lack of the file or because it is blank")
             with open(file_path, "w+", encoding="utf-8") as file:
                 file.write(content_to_write)
 
@@ -338,7 +338,7 @@ class fileHandler():
     
 ##-------------------start-of-handle_critical_exception()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def handle_critical_exception(self, critical_exception:Exception) -> None:
+    async def handle_critical_exception(self, critical_exception:Exception) -> None:
 
         """
 
@@ -354,13 +354,13 @@ class fileHandler():
         """
 
         ## if crash, catch and log, then throw
-        self.logger.log_action("--------------------------------------------------------------")
-        self.logger.log_action("Kanrisha has crashed")
+        await self.logger.log_action("--------------------------------------------------------------")
+        await self.logger.log_action("Kanrisha has crashed")
 
         traceback_str = traceback.format_exc()
         
-        self.logger.log_action(traceback_str)
+        await self.logger.log_action(traceback_str)
 
-        self.logger.push_batch()
+        await self.logger.push_batch()
 
         raise critical_exception

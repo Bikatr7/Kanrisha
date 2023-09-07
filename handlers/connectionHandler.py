@@ -106,7 +106,7 @@ class connectionHandler():
             connection = await self.create_database_connection(host_name, user_name, database_name, password)
             cursor = connection.cursor()
 
-            self.file_ensurer.logger.log_action("Used saved credentials in " + self.file_ensurer.credentials_path)
+            await self.file_ensurer.logger.log_action("Used saved credentials in " + self.file_ensurer.credentials_path)
 
         ## else try to get credentials manually
         except: 
@@ -172,7 +172,7 @@ class connectionHandler():
             database= db_name,
             passwd=user_password)
 
-        self.file_ensurer.logger.log_action("Successfully connected to the " + db_name + " database")
+        await self.file_ensurer.logger.log_action("Successfully connected to the " + db_name + " database")
 
         return connection
     
@@ -212,7 +212,7 @@ class connectionHandler():
 
         """
 
-        self.file_ensurer.logger.log_action("--------------------------------------------------------------")
+        await self.file_ensurer.logger.log_action("--------------------------------------------------------------")
     
         ## execute_query won't ever be called if the connection isn't valid, thus these type ignores are merely to make vscode stfu.
 
@@ -220,10 +220,10 @@ class connectionHandler():
         
         self.connection.commit() ## type: ignore
 
-        self.file_ensurer.logger.log_action("The following query was sent and accepted by the database : ")
-        self.file_ensurer.logger.log_action(query.strip())
+        await self.file_ensurer.logger.log_action("The following query was sent and accepted by the database : ")
+        await self.file_ensurer.logger.log_action(query.strip())
 
-        self.file_ensurer.logger.log_action("--------------------------------------------------------------")
+        await self.file_ensurer.logger.log_action("--------------------------------------------------------------")
 
 ##--------------------start-of-read_single_column_query()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

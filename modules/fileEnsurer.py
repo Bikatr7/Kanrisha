@@ -72,9 +72,6 @@ class fileEnsurer:
       ## logger for all actions taken by Seisen.\n
       self.logger = logger(self.log_path)
 
-      self.logger.log_action("Initialization")
-      self.logger.log_action("--------------------------------------------------------------")
-
       self.file_handler = fileHandler(self.logger)
 
 ##--------------------start-of-ensure_files()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

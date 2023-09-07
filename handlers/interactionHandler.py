@@ -4,6 +4,9 @@ import typing
 ## third-party libraries
 import discord
 
+## custom modules
+from modules.fileEnsurer import fileEnsurer
+from modules.toolkit import toolkit
 
 class interactionHandler:
 
@@ -15,20 +18,24 @@ class interactionHandler:
 
 ##-------------------start-of-__init__()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def __init__(self) -> None:
+    def __init__(self, inc_file_ensurer:fileEnsurer, inc_toolkit:toolkit) -> None:
 
         """
 
         Initializes the interaction handler.\n
 
         Parameters:\n
-        None.\n
+        inc_file_ensurer (object - fileEnsurer) : the fileEnsurer object.\n
+        inc_toolkit (object - toolkit) : the toolkit object.\n
 
         Returns:\n
         None.\n
 
         """
         
+        self.file_ensurer = inc_file_ensurer
+        self.toolkit = inc_toolkit
+
         self.whitelisted_channel_names = ["#general-bot", "#bot-testing", "#syndicate-bot"]
         self.whitelisted_channel_ids = [1144136660691460126, 1146174110548901979, 1146922710698557560]  
 
@@ -124,7 +131,7 @@ class interactionHandler:
             
 ##-------------------start-of-send_response_no_filter_channel()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def send_message_to_channel(self, channel:typing.Union[discord.channel.GroupChannel , discord.Thread], response: typing.Union[str , None] = None, embed: typing.Union[discord.Embed , None] = None, view: typing.Union[discord.ui.View , None] = None, delete_after: typing.Union[float , None] = None) -> None:
+    async def send_message_to_channel(self, channel:typing.Union[discord.channel.GroupChannel , discord.Thread], response: typing.Union[str , None] = None, embed: typing.Union[discord.Embed , None] = None, view: typing.Union[discord.ui.View , None] = None, file:typing.Union[discord.File, None] = None, delete_after: typing.Union[float , None] = None) -> None:
 
         """
 
@@ -150,12 +157,46 @@ class interactionHandler:
         if(view):
             send_args['view'] = view
 
+        if(file):
+            send_args['file'] = file
+
         if(delete_after):
             send_args['delete_after'] = delete_after
 
         ## Send the message based on the provided arguments
-        if(embed or view or response):
+        if(embed or view or response or file):
             await channel.send(response or "", **send_args)
 
         else:
             raise Exception("No response, embed, or view was provided.")
+
+##-------------------start-of-send-log-file()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    async def send_log_file(self, channel:typing.Union[discord.channel.GroupChannel , discord.Thread], is_forced:bool, forced_by:str | None = None) -> None:
+
+        """
+        
+        Sends the log file.\n
+
+        Parameters:\n
+        self (object - slashCommandHandler) : the slashCommandHandler object.\n
+
+        Returns:\n
+        None.\n
+
+        """
+
+        await self.file_ensurer.logger.push_batch()
+
+        await self.send_message_to_channel(channel, file=discord.File(self.file_ensurer.log_path)) ## type: ignore (we know it's not None)
+
+
+        await self.file_ensurer.logger.clear_log_file()
+
+        if(is_forced):
+            timestamp = await self.toolkit.get_timestamp("INFO", "slashCommandHandler", f"Log file has been forcibly pushed by {forced_by}.")
+
+        else:
+            timestamp = await self.toolkit.get_timestamp("INFO", "slashCommandHandler", "Log file has been pushed.")
+
+        print(timestamp)
