@@ -2,6 +2,10 @@
 import asyncio
 import os
 
+## third-party modules
+import discord
+import socket
+
 ## custom modules
 from bot.Kanrisha import Kanrisha
 
@@ -25,7 +29,13 @@ def main():
 
     client.toolkit.clear_console()
 
-    client.run(token=token)
+    try:
+        client.run(token=token)
+
+    except socket.gaierror:
+        
+        timestamp = client.toolkit.get_timestamp("ERROR", "Kanrisha")
+        print(timestamp + " Network Error, retrying.")
 
 ##---------------------------------/
 

@@ -371,3 +371,36 @@ class slashCommandHandler:
                 embed.set_footer(text=f"Your rank is #{no_spin_rank} (haven't spun yet).")
 
             await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "", embed=embed)
+
+##-------------------start-of-help()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        @kanrisha_client.tree.command(name="help", description="Sends the help message.")
+        async def help(interaction: discord.Interaction):
+
+            """
+
+            Sends the help message.\n
+
+            Parameters:\n
+            self (object - slashCommandHandler) : the slashCommandHandler object.\n
+            interaction (object - discord.Interaction) : the interaction object.\n
+
+            Returns:\n
+            None.\n
+
+            """
+
+            help_message = (
+                "**/spin** - Spins a wheel.\n"
+                "**/multispin** - Spins a wheel 10 times.\n"
+                "**/register** - Registers a user to the bot.\n"
+                "**/snipe** - Snipes the last deleted message in a channel.\n"
+                "**/profile** - Sends the user's profile.\n"
+                "**/leaderboard** - Sends the leaderboard\n"
+                "**/help** - Sends the help message.\n"
+            )
+
+            embed = discord.Embed(title="Help", description=help_message, color=0xC0C0C0)
+            embed.set_thumbnail(url=kanrisha_client.file_ensurer.bot_thumbnail_url)
+
+            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "", embed=embed)
