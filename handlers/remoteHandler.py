@@ -32,13 +32,13 @@ class remoteHandler():
 
         ##----------------------------------------------------------------objects----------------------------------------------------------------
 
-        self.fileEnsurer = file_ensurer
+        self.file_ensurer = file_ensurer
 
         self.toolkit = toolkit
 
-        self.connection_handler = connectionHandler(self.fileEnsurer, self.toolkit)
+        self.connection_handler = connectionHandler(self.file_ensurer, self.toolkit)
 
-        self.member_handler = memberHandler(self.fileEnsurer, self.toolkit, self.connection_handler)
+        self.member_handler = memberHandler(self.file_ensurer, self.toolkit, self.connection_handler)
 
         ##----------------------------------------------------------------dir----------------------------------------------------------------
 
@@ -69,17 +69,17 @@ class remoteHandler():
 
         """
 
-        await self.fileEnsurer.logger.log_action("Resetting Remote Storage...")
-
         await self.delete_remote_storage()
         await self.create_remote_storage()
         await self.fill_remote_storage()
 
         if(is_forced):
             timestamp = await self.toolkit.get_timestamp("INFO", "remoteHandler", f"Remote storage has been forcibly reset by {forced_by}.")
+            await self.file_ensurer.logger.log_action("INFO", "remoteHandler", f"Remote storage has been forcibly reset by {forced_by}.")
 
         else:
             timestamp = await self.toolkit.get_timestamp("INFO", "remoteHandler", "Remote storage has been reset.")
+            await self.file_ensurer.logger.log_action("INFO", "remoteHandler", "Remote storage has been reset.")
 
         print(timestamp)
 

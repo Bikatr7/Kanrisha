@@ -100,8 +100,12 @@ class eventHandler:
                     try:
                         await message.delete()
 
+                        await kanrisha_client.file_ensurer.logger.log_action("ALERT", "eventHandler", f"Deleted banned message from {member.name} in {channel.name}.") ## type: ignore (we know it's not None)
+
                         await member.send(f"Your banned message has been deleted in {channel.name}. You will be muted when admins come online.") ## type: ignore (we know it's not None)
                         await seinu.send(f"You need to timeout {member.name} for sending a banned message in {channel.name}.") ## type: ignore (we know it's not None)  
+
+                        await kanrisha_client.file_ensurer.logger.log_action("ALERT", "eventHandler", f"You need to timeout {member.name} for sending a banned message in {channel.name}.") ## type: ignore (we know it's not None)
 
                     except:
                         pass
@@ -189,6 +193,8 @@ class eventHandler:
 
                     await interaction.followup.send("You have been registered.", ephemeral=True)
 
+                    await kanrisha_client.file_ensurer.logger.log_action("INFO", "eventHandler", f"{interaction.user.name} has been registered.") ## type: ignore (we know it's not None)
+
                     await interaction.user.add_roles(syndicate_role) ## type: ignore (we know it's not None)
 
                 ## if register button was pressed by the wrong user
@@ -215,3 +221,5 @@ class eventHandler:
 
         with open(self.file_ensurer.banned_links_path, "r") as file:
             self.banned_messages = file.read().splitlines()
+
+        await self.file_ensurer.logger.log_action("INFO", "eventHandler", "Banned messages have been loaded.") ## type: ignore (we know it's not None)

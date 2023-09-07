@@ -35,6 +35,8 @@ def main():
     except socket.gaierror:
         
         timestamp = loop.run_until_complete(client.toolkit.get_timestamp("ERROR", "Kanrisha", "Network Error, retrying."))
+        loop.run_until_complete(client.file_ensurer.logger.log_action("ERROR", "Kanrisha", "Network Error, retrying."))
+
         print(timestamp)
 
 ##---------------------------------/

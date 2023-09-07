@@ -2,7 +2,6 @@
 from __future__ import annotations ## used for cheating the circular import issue that occurs when i need to type check some things
 
 import typing
-import asyncio
 
 ## third-party libraries
 import discord
@@ -250,6 +249,8 @@ class slashCommandHandler:
                 embed = discord.Embed(title=deleted_message.embeds[0].title, description=deleted_message.embeds[0].description, color=0xC0C0C0)
                 embed.set_thumbnail(url=deleted_message.embeds[0].thumbnail.url)
                 embed.set_footer(text=deleted_message.embeds[0].footer.text)
+
+                await kanrisha_client.file_ensurer.logger.log_action("INFO", "Kanrisha", f"{interaction.user.name} sniped a message in {interaction.channel.name}. The message was: {deleted_message.embeds[0].description}") ## type: ignore
 
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)
                 

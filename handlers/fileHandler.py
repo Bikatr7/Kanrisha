@@ -52,7 +52,7 @@ class fileHandler():
 
         if(os.path.isdir(directory_path) == False):
             os.mkdir(directory_path)
-            await self.logger.log_action(directory_path + " created due to lack of the folder")
+            await self.logger.log_action("INFO", "fileHandler", directory_path + " was created due to lack of the directory")
 
 ##--------------------start-of-standard_create_file()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -72,9 +72,9 @@ class fileHandler():
         """
 
         if(os.path.exists(file_path) == False):
-            await self.logger.log_action(file_path + " was created due to lack of the file")
             with open(file_path, "w+", encoding="utf-8") as file:
                 file.truncate()
+            await self.logger.log_action("INFO", "fileHandler", file_path + " was created due to lack of the file")
 
 ##--------------------start-of-modified_create_file()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -95,10 +95,9 @@ class fileHandler():
         """
 
         if(os.path.exists(file_path) == False or os.path.getsize(file_path) == 0):
-            await self.logger.log_action(file_path + " was created due to lack of the file or because it is blank")
             with open(file_path, "w+", encoding="utf-8") as file:
                 file.write(content_to_write)
-
+            await self.logger.log_action("INFO", "fileHandler", file_path + " was created due to lack of the file or the file was empty")
 ##--------------------start-of-write_sei_line()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     async def write_sei_line(self, sei_file_path:str, items_to_write:typing.List[str]) -> None:
@@ -335,32 +334,3 @@ class fileHandler():
                 return new_id
             
         return new_id
-    
-##-------------------start-of-handle_critical_exception()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    async def handle_critical_exception(self, critical_exception:Exception) -> None:
-
-        """
-
-        Handles a critical exception.\n
-
-        Parameters:\n
-        self (object - fileHandler) : the fileHandler object.\n
-        critical_exception (Exception) : the exception that is critical.\n
-
-        Returns:\n
-        None.\n
-
-        """
-
-        ## if crash, catch and log, then throw
-        await self.logger.log_action("--------------------------------------------------------------")
-        await self.logger.log_action("Kanrisha has crashed")
-
-        traceback_str = traceback.format_exc()
-        
-        await self.logger.log_action(traceback_str)
-
-        await self.logger.push_batch()
-
-        raise critical_exception

@@ -61,7 +61,9 @@ class adminCommandHandler:
                 await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
                 return
 
-            await kanrisha_client.interaction_handler.send_log_file(kanrisha_client.get_channel(kanrisha_client.log_channel_id), is_forced=True,  forced_by=interaction.user.name)  # type: ignore
+            await kanrisha_client.interaction_handler.send_log_file(kanrisha_client.get_channel(kanrisha_client.log_channel_id), is_forced=True,  forced_by=interaction.user.name) ## type: ignore
+
+            await interaction.response.send_message("Log files has been pushed.", delete_after=3.0, ephemeral=True) 
 
         ##-------------------start-of-force-remote-reset()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -142,6 +144,7 @@ class adminCommandHandler:
             ## no one to ban 
             if(len(marked_for_death) == 0):
                 execution_message = "No users have been marked for death."
+                await kanrisha_client.file_ensurer.logger.log_action("WARNING", "adminCommandHandler", execution_message)
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, execution_message, delete_after=5.0, is_ephemeral=True)
                 return
             

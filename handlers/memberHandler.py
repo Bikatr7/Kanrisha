@@ -70,6 +70,8 @@ class memberHandler:
 
             new_member = syndicateMember(int(id_list[i]), name_list[i], spin_scores, int(credits_list[i]))
             self.members.append(new_member)
+
+        await self.file_ensurer.logger.log_action("INFO", "memberHandler", "Loaded members.")
         
 ##-------------------start-of-add_new_member()---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -95,6 +97,9 @@ class memberHandler:
 
         ## adds new member to current instance of bot
         new_member = syndicateMember(inc_member_id, inc_member_name, inc_spin_scores, inc_credits)
+
+        ## logs action
+        await self.file_ensurer.logger.log_action("INFO", "memberHandler", f"Added new member: {inc_member_name}.")
 
         self.members.append(new_member)
 

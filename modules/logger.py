@@ -1,5 +1,5 @@
 ## built-in imports
-import datetime
+from datetime import datetime
 
 class logger:
 
@@ -30,33 +30,27 @@ class logger:
 
         self.batch = ""
 
-##--------------------start-of-get_time_stamp()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+##--------------------start-of-log_barrier()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def get_time_stamp(self):
+    async def log_barrier(self):
 
         """
         
-        Gets the time stamp for a logging action taken.\n
+        Logs a barrier.\n
 
         Parameters:\n
-        self (object - logger) : The logger object.\n
+        None.\n
 
         Returns:\n
-        time_stamp (str) : The time stamp for the logging action.\n
+        None.\n
 
         """
 
-        current_date = datetime.date.today().strftime("%Y-%m-%d")
+        self.batch += "--------------------------------------------------------------\n"
 
-        current_time = datetime.datetime.now().time().strftime("%H:%M:%S")
-
-        time_stamp = "(" + current_date + " " + current_time + ") : "
-
-        return time_stamp
-    
 ##--------------------start-of-log_action()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def log_action(self, action:str):
+    async def log_action(self, type, module, action:str):
 
         """
         
@@ -71,9 +65,9 @@ class logger:
  
         """
 
-        time_stamp = await self.get_time_stamp()
+        entry = "[" + datetime.now().strftime("%Y-%m-%d %H:%M:%S") + f"] [{type} - {module}] {action}"
 
-        self.batch += time_stamp + action + "\n"
+        self.batch += entry + "\n"
 
 ##--------------------start-of-push_batch()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

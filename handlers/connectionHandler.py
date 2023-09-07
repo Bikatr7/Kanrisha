@@ -106,8 +106,6 @@ class connectionHandler():
             connection = await self.create_database_connection(host_name, user_name, database_name, password)
             cursor = connection.cursor()
 
-            await self.file_ensurer.logger.log_action("Used saved credentials in " + self.file_ensurer.credentials_path)
-
         ## else try to get credentials manually
         except: 
 
@@ -172,7 +170,7 @@ class connectionHandler():
             database= db_name,
             passwd=user_password)
 
-        await self.file_ensurer.logger.log_action("Successfully connected to the " + db_name + " database")
+        await self.file_ensurer.logger.log_action("INFO", "connectionHandler", "Successfully connected to the " + db_name + " database")
 
         return connection
     
@@ -212,7 +210,7 @@ class connectionHandler():
 
         """
 
-        await self.file_ensurer.logger.log_action("--------------------------------------------------------------")
+        await self.file_ensurer.logger.log_barrier()
     
         ## execute_query won't ever be called if the connection isn't valid, thus these type ignores are merely to make vscode stfu.
 
@@ -220,10 +218,9 @@ class connectionHandler():
         
         self.connection.commit() ## type: ignore
 
-        await self.file_ensurer.logger.log_action("The following query was sent and accepted by the database : ")
-        await self.file_ensurer.logger.log_action(query.strip())
+        await self.file_ensurer.logger.log_action("INFO", "connectionHandler", "The following query was sent and accepted by the database : " + query.strip())
 
-        await self.file_ensurer.logger.log_action("--------------------------------------------------------------")
+        await self.file_ensurer.logger.log_barrier()
 
 ##--------------------start-of-read_single_column_query()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
