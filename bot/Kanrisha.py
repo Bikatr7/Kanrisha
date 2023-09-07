@@ -128,8 +128,7 @@ class Kanrisha(discord.Client):
         if(not self.send_log_file_to_log_channel.is_running()):
             self.send_log_file_to_log_channel.start()
 
-        timestamp = await self.toolkit.get_timestamp("INFO", "Kanrisha", "Kanrisha is ready.")
-        print(timestamp)
+        await self.file_ensurer.logger.log_action("INFO", "Kanrisha", "Kanrisha is ready.")
 
 ##-------------------start-of-refresh_remote_storage()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

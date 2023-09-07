@@ -74,14 +74,10 @@ class remoteHandler():
         await self.fill_remote_storage()
 
         if(is_forced):
-            timestamp = await self.toolkit.get_timestamp("INFO", "remoteHandler", f"Remote storage has been forcibly reset by {forced_by}.")
             await self.file_ensurer.logger.log_action("INFO", "remoteHandler", f"Remote storage has been forcibly reset by {forced_by}.")
 
         else:
-            timestamp = await self.toolkit.get_timestamp("INFO", "remoteHandler", "Remote storage has been reset.")
             await self.file_ensurer.logger.log_action("INFO", "remoteHandler", "Remote storage has been reset.")
-
-        print(timestamp)
 
 ##--------------------start-of-delete_remote_storage()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -194,9 +194,8 @@ class interactionHandler:
         await self.file_ensurer.logger.clear_log_file()
 
         if(is_forced):
-            timestamp = await self.toolkit.get_timestamp("INFO", "slashCommandHandler", f"Log file has been forcibly pushed by {forced_by}.")
+            await self.file_ensurer.logger.log_action("INFO", "slashCommandHandler", f"Log file has been forcibly pushed by {forced_by}.")
 
         else:
-            timestamp = await self.toolkit.get_timestamp("INFO", "slashCommandHandler", "Log file has been pushed.")
+            await self.file_ensurer.logger.log_action("INFO", "slashCommandHandler", "Log file has been pushed.")
 
-        print(timestamp)

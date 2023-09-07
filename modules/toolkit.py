@@ -91,26 +91,3 @@ class toolkit():
             finally:
 
                 termios.tcsetattr(0, termios.TCSANOW, old_settings)
-
-##-------------------start-of-get_timestamp()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    async def get_timestamp(self, type:str, module:str, message:str) -> str:
-
-        """
-        
-        Gets a formatted timestamp.\n
-
-        Parameters:\n
-        self (object - toolkit) : the toolkit object.\n
-        type (str) : the type of timestamp to get.\n
-        module (str) : the module that is requesting the timestamp.\n
-
-        Returns:\n
-        timestamp (str) : the formatted timestamp.\n
-        
-        """
-
-        timestamp = "[" + datetime.now().strftime("%Y-%m-%d %H:%M:%S") + f"] [{type} - {module}] {message}"
-
-        return timestamp
-
