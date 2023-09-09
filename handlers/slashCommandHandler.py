@@ -336,15 +336,14 @@ class slashCommandHandler:
             ## Calculate scores for each member who has spun at least once and store them in a list with the member's name
             scores_with_members = []
             for member in kanrisha_client.remote_handler.member_handler.members:
-
                 total_spins = sum(member.spin_scores)
-
                 if(total_spins > 0):
                     score = round((member.spin_scores[0] * 20 + member.spin_scores[1] * 8.33 + member.spin_scores[2] * 1.20) / total_spins, 3)
                     scores_with_members.append((score, member.member_name))
 
-            ## Sort the list based on the scores in descending order
+            ## Sort the list based on the scores in descending order and then take only the top 10
             scores_with_members.sort(key=lambda x: x[0], reverse=True)
+            top_10_scores_with_members = scores_with_members[:10]
 
             ## Find the rank of the user calling the command
             user_rank = None
@@ -358,9 +357,7 @@ class slashCommandHandler:
 
             ## Construct the leaderboard message
             leaderboard_message = ""
-            for rank, (score, member_name) in enumerate(scores_with_members, 1):
-                if(member_name == interaction.user.name):
-                    user_rank = rank
+            for score, member_name in top_10_scores_with_members:
                 leaderboard_message += f"**{member_name}** - {score}\n"
 
             embed = discord.Embed(title="Luck Leaderboard", description=leaderboard_message, color=0xC0C0C0)
@@ -373,10 +370,10 @@ class slashCommandHandler:
 
             await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "", embed=embed)
 
-##-------------------start-of-help()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+##-------------------start-of-help_commands()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         
-        @kanrisha_client.tree.command(name="help", description="Sends the help message.")
-        async def help(interaction: discord.Interaction):
+        @kanrisha_client.tree.command(name="help-commands", description="Sends the help message.")
+        async def help_commands(interaction: discord.Interaction):
 
             """
 
@@ -397,11 +394,11 @@ class slashCommandHandler:
                 "**/register** - Registers a user to the bot.\n"
                 "**/snipe** - Snipes the last deleted message in a channel.\n"
                 "**/profile** - Sends the user's profile.\n"
-                "**/leaderboard** - Sends the leaderboard\n"
-                "**/help** - Sends the help message.\n"
+                "**/leaderboard** - Sends the luck leaderboard\n"
+                "**/help** - Sends this message.\n"
             )
 
             embed = discord.Embed(title="Help", description=help_message, color=0xC0C0C0)
             embed.set_thumbnail(url=kanrisha_client.file_ensurer.bot_thumbnail_url)
 
-            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "", embed=embed)
+            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)

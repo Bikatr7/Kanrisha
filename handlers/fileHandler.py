@@ -1,6 +1,5 @@
 ## built-in libaries
 import os
-import traceback
 import typing
 
 ## custom modules

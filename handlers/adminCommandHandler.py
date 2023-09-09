@@ -38,10 +38,51 @@ class adminCommandHandler:
 
         kanrisha_client = inc_kanrisha_client
 
+        ##-------------------start-of-trigger_early-shutdown()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        async def trigger_early_shutdown_logic(interaction:discord.Interaction):
+
+            """
+            
+            Triggers an early shutdown.\n
+
+            Parameters:\n
+            self (object - slashCommandHandler) : the slashCommandHandler object.\n
+            interaction (object - discord.Interaction) : the interaction object.\n
+
+            Returns:\n
+            None.\n
+
+            """
+
+            ## admin check
+            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
+                await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
+                return
+
+            await interaction.response.send_message("Shutting down...", delete_after=3.0, ephemeral=True)
+
+            await force_remote_reset_logic(interaction, is_shutdown_protocol=True) 
+
+            await force_log_push_logic(interaction, is_shutdown_protocol=True)
+
+            await kanrisha_client.file_ensurer.logger.log_action("WARNING", "adminCommandHandler", f"Early shutdown triggered by {interaction.user.name}.")
+
+            try:
+                ## cancel all tasks
+                kanrisha_client.send_log_file_to_log_channel.cancel()
+                kanrisha_client.refresh_remote_storage.cancel()
+
+                ## try to close gracefully
+                await kanrisha_client.close()
+
+            ## if we can't close gracefully, just exit
+            except:
+                exit()
+
         ##-------------------start-of-force-log-push()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        @kanrisha_client.tree.command(name="force-log-push", description="Forces a log push.")
-        async def force_log_push(interaction:discord.Interaction):
+        async def force_log_push_logic(interaction:discord.Interaction, is_shutdown_protocol:bool | None = False):
 
             """
             
@@ -50,6 +91,7 @@ class adminCommandHandler:
             Parameters:\n
             self (object - slashCommandHandler) : the slashCommandHandler object.\n
             interaction (object - discord.Interaction) : the interaction object.\n
+            is_shutdown_protocol (bool | None) : whether or not this is part of a shutdown protocol.\n
 
             Returns:\n
             None.\n
@@ -57,18 +99,18 @@ class adminCommandHandler:
             """
 
             ## admin check
-            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
+            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids and not is_shutdown_protocol):
                 await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
                 return
 
             await kanrisha_client.interaction_handler.send_log_file(kanrisha_client.get_channel(kanrisha_client.log_channel_id), is_forced=True,  forced_by=interaction.user.name) ## type: ignore
 
-            await interaction.response.send_message("Log files has been pushed.", delete_after=3.0, ephemeral=True) 
+            if(not is_shutdown_protocol):
+                await interaction.response.send_message("Log files has been pushed.", delete_after=3.0, ephemeral=True) 
 
         ##-------------------start-of-force-remote-reset()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        @kanrisha_client.tree.command(name="force-remote-reset", description="Resets the remote storage.")
-        async def force_remote_reset(interaction:discord.Interaction):
+        async def force_remote_reset_logic(interaction:discord.Interaction, is_shutdown_protocol:bool | None = False):
 
             """
             
@@ -77,6 +119,7 @@ class adminCommandHandler:
             Parameters:\n
             self (object - slashCommandHandler) : the slashCommandHandler object.\n
             interaction (object - discord.Interaction) : the interaction object.\n
+            is_shutdown_protocol (bool | None) : whether or not this is part of a shutdown protocol.\n
 
             Returns:\n
             None.\n
@@ -84,14 +127,15 @@ class adminCommandHandler:
             """
 
             ## admin check
-            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
+            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids and not is_shutdown_protocol):
                 await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
                 return
 
             await kanrisha_client.remote_handler.reset_remote_storage(is_forced=True, forced_by=interaction.user.name)
 
-            await interaction.response.send_message("Remote storage has been reset.", delete_after=3.0, ephemeral=True)
-    
+            if(not is_shutdown_protocol):
+                await interaction.response.send_message("Remote storage has been reset.", delete_after=3.0, ephemeral=True)
+            
         ##-------------------start-of-execute_order_66()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.tree.command(name="execute-order-66", description="It is time.")
@@ -202,3 +246,44 @@ class adminCommandHandler:
             embed.set_footer(text="Thank you for your cooperation...")
 
             await interaction.followup.send(embed=embed)
+
+##-------------------start-of-help_admin()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        @kanrisha_client.tree.command(name="help-admin", description="Sends the admin help message.")
+        async def help_admin(interaction: discord.Interaction):
+
+            """
+
+            Sends the admin help message.\n
+
+            Parameters:\n
+            self (object - slashCommandHandler) : the slashCommandHandler object.\n
+            interaction (object - discord.Interaction) : the interaction object.\n
+
+            Returns:\n
+            None.\n
+
+            """
+
+            ## admin check
+            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
+                await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
+                return
+
+            help_message = (
+                "**/force-log-push** - Forces a Kanrisha log push.\n"
+                "**/force-remote-reset** - Overrides Nusevei with the current instance's data.\n"
+                "**/execute-order-66** - Executes order 66.\n"
+                "**/help-admin** - Sends this message.\n"
+            )
+
+            embed = discord.Embed(title="Help", description=help_message, color=0xC0C0C0)
+            embed.set_thumbnail(url=kanrisha_client.file_ensurer.bot_thumbnail_url)
+
+            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)
+
+        ##-------------------start-of-banners--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        trigger_early_shutdown = kanrisha_client.tree.command(name="trigger-early-shutdown", description="Admin Command.")(trigger_early_shutdown_logic)
+        force_log_push = kanrisha_client.tree.command(name="force-log-push", description="Admin Command.")(force_log_push_logic)
+        force_remote_reset = kanrisha_client.tree.command(name="force-remote-reset", description="Admin Command.")(force_remote_reset_logic)
