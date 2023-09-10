@@ -3,6 +3,7 @@ from __future__ import annotations ## used for cheating the circular import issu
 
 import typing
 import asyncio
+import json
 
 ## third-party libraries
 import discord
@@ -246,6 +247,42 @@ class adminCommandHandler:
             embed.set_footer(text="Thank you for your cooperation...")
 
             await interaction.followup.send(embed=embed)
+
+##-------------------start-of-sync-roles()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        @kanrisha_client.tree.command(name="sync-roles", description="Syncs the roles of all users in the server with the role persistence database.")
+        async def sync_roles(interaction:discord.Interaction):
+
+            """
+            
+            Syncs the roles of all users in the server with the role persistence database.\n
+
+            Parameters:\n
+            self (object - slashCommandHandler) : the slashCommandHandler object.\n
+            interaction (object - discord.Interaction) : the interaction object.\n
+
+            Returns:\n
+            None.\n
+
+            """
+
+            ## admin check
+            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
+                await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
+                return
+
+            for member in interaction.guild.members: ## type: ignore (we know it's not None)
+
+                roles = [role.id for role in member.roles if role != member.guild.default_role]
+
+                with open(kanrisha_client.file_ensurer.role_persistence_path, 'r') as file:
+                    data = json.load(file)
+
+                    data[str(member.id)] = roles
+                with open(kanrisha_client.file_ensurer.role_persistence_path, 'w') as file:
+                    json.dump(data, file)
+
+            await interaction.response.send_message("Roles synced.", delete_after=3.0, ephemeral=True)
 
 ##-------------------start-of-help_admin()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         
