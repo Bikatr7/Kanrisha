@@ -91,8 +91,11 @@ class eventHandler:
             """
 
             with open(self.file_ensurer.role_persistence_path, 'r') as file:
-
-                data = json.load(file)
+                try:
+                    data = json.load(file)
+                except json.JSONDecodeError:
+                    data = {}
+                    
                 roles = data.get(str(member.id))
 
                 if(roles):

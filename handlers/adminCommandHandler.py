@@ -265,22 +265,26 @@ class adminCommandHandler:
             None.\n
 
             """
-
+            
             ## admin check
             if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
                 await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
                 return
 
-            for member in interaction.guild.members: ## type: ignore (we know it's not None)
-
-                roles = [role.id for role in member.roles if role != member.guild.default_role]
-
-                with open(kanrisha_client.file_ensurer.role_persistence_path, 'r') as file:
+            # Load the existing data once
+            with open(kanrisha_client.file_ensurer.role_persistence_path, 'r') as file:
+                try:
                     data = json.load(file)
+                except json.JSONDecodeError:
+                    data = {}
 
-                    data[str(member.id)] = roles
-                with open(kanrisha_client.file_ensurer.role_persistence_path, 'w') as file:
-                    json.dump(data, file)
+            for member in interaction.guild.members:  # type: ignore (we know it's not None)
+                roles = [role.id for role in member.roles if role != member.guild.default_role]
+                data[str(member.id)] = roles
+
+            # Write the updated data once
+            with open(kanrisha_client.file_ensurer.role_persistence_path, 'w') as file:
+                json.dump(data, file)
 
             await interaction.response.send_message("Roles synced.", delete_after=3.0, ephemeral=True)
 
