@@ -12,6 +12,8 @@ from handlers.adminCommandHandler import adminCommandHandler
 
 from entities.syndicateMember import syndicateMember
 
+from exam.gooseExam import gooseExam
+
 if(typing.TYPE_CHECKING): ## used for cheating the circular import issue that occurs when i need to type check some things
     from bot.Kanrisha import Kanrisha
 
@@ -45,6 +47,8 @@ class slashCommandHandler:
         archive_channel_id = 1146979933416067163
 
         self.event_handler = eventHandler(kanrisha_client)
+
+        self.goose_exam = gooseExam(kanrisha_client)
 
         self.admin_command_handler = adminCommandHandler(kanrisha_client)
     

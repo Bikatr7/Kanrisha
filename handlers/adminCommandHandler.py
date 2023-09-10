@@ -271,10 +271,10 @@ class adminCommandHandler:
                 return
 
             help_message = (
-                "**/force-log-push** - Forces a Kanrisha log push.\n"
-                "**/force-remote-reset** - Overrides Nusevei with the current instance's data.\n"
-                "**/execute-order-66** - Executes order 66.\n"
-                "**/help-admin** - Sends this message.\n"
+                "**/force-log-push** - Forces a Kanrisha log push. (ADMIN)\n"
+                "**/force-remote-reset** - Overrides Nusevei with the current instance's data. (ADMIN)\n"
+                "**/execute-order-66** - Executes order 66. (ADMIN)\n"
+                "**/help-admin** - Sends this message. (ADMIN)\n"
             )
 
             embed = discord.Embed(title="Help", description=help_message, color=0xC0C0C0)

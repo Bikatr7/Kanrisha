@@ -56,8 +56,6 @@ class Kanrisha(discord.Client):
         ## sets the activity currently "Watching you all."
         self.activity = discord.Activity(name='you all.', type=discord.ActivityType.watching)
 
-        self.synced = False
-
         self.pg = 1143635379262607441
 
         self.log_channel_id = 1149433554170810459
@@ -118,9 +116,7 @@ class Kanrisha(discord.Client):
 
         await self.wait_until_ready()
 
-        if(not self.synced):
-            await self.tree.sync()
-            self.synced = True
+        await self.tree.sync()
 
         if(not self.refresh_remote_storage.is_running()):
             self.refresh_remote_storage.start()
