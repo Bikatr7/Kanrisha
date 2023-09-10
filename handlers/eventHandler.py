@@ -76,7 +76,7 @@ class eventHandler:
         ##-------------------start-of-on_member_join()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.event
-        async def on_member_join(member):
+        async def on_member_join(member:discord.Member):
 
             """
 
@@ -93,15 +93,18 @@ class eventHandler:
             with open(self.file_ensurer.role_persistence_path, 'r') as file:
                 try:
                     data = json.load(file)
+
                 except json.JSONDecodeError:
                     data = {}
                     
                 roles = data.get(str(member.id))
 
                 if(roles):
-                    role_objs = [discord.utils.get(member.guild.roles, id=role_id) for role_id in roles]
+                    role_ids = [role_id for role_id in roles if discord.utils.get(member.guild.roles, id=role_id) is not None]
 
-                    await member.add_roles(*role_objs)
+                    if(role_ids):
+                        await member.add_roles(*role_ids)
+
 
                     del data[str(member.id)]
                     
