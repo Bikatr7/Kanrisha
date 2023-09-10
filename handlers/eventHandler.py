@@ -5,6 +5,7 @@ import typing
 
 ## third-party libraries
 import discord
+import json
 
 ## custom libraries
 if(typing.TYPE_CHECKING): ## used for cheating the circular import issue that occurs when i need to type check some things
@@ -43,6 +44,66 @@ class eventHandler:
         self.syndicate_role = 1146901009248026734 
 
         self.banned_messages = []
+
+        ##-------------------start-of-on_member_remove()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        @kanrisha_client.event
+        async def on_member_remove(member:discord.Member):
+
+            """
+
+            Handles members leaving.\n
+
+            Parameters:\n
+            member (object - discord.Member | discord.User) : the member object.\n
+
+            Returns:\n
+            None.\n
+
+            """
+
+
+            roles = [role.id for role in member.roles if role != member.guild.default_role] 
+
+            with open(self.file_ensurer.role_persistence_path, 'r') as file:
+
+                data = json.load(file)
+                data[str(member.id)] = roles
+
+            with open('role_persistence.json', 'w') as file:
+                json.dump(data, file)
+
+        ##-------------------start-of-on_member_join()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        @kanrisha_client.event
+        async def on_member_join(member):
+
+            """
+
+            Handles members joining.\n
+
+            Parameters:\n
+            member (object - discord.Member | discord.User) : the member object.\n
+
+            Returns:\n
+            None.\n
+
+            """
+
+            with open(self.file_ensurer.role_persistence_path, 'r') as file:
+
+                data = json.load(file)
+                roles = data.get(str(member.id))
+
+                if(roles):
+                    role_objs = [discord.utils.get(member.guild.roles, id=role_id) for role_id in roles]
+
+                    await member.add_roles(*role_objs)
+
+                    del data[str(member.id)]
+                    
+            with open('role_persistence.json', 'w') as file:
+                json.dump(data, file)
     
         ##-------------------start-of-on_message()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
