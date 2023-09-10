@@ -77,6 +77,8 @@ class gooseExam:
 
         board_display = ''
 
+        game_started = False
+
         BOARD_WIDTH = 8
         BOARD_HEIGHT = 6
 
@@ -155,6 +157,7 @@ class gooseExam:
                 return
 
             players = []
+            game_started = True
 
             await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "A new game has started!")
 
@@ -175,7 +178,7 @@ class gooseExam:
 
             """
 
-            if(not any(p.user == interaction.user for p in players) and len(players) < 4):
+            if(not any(p.user == interaction.user for p in players) and len(players) < 4 and game_started == True):
 
                 new_player = player(interaction.user, "")
                 players.append(new_player)
@@ -295,11 +298,11 @@ class gooseExam:
                     distance_x = abs(current_position[0] - position[0])
                     distance_y = abs(current_position[1] - position[1])
 
-                    # Check if the move is diagonal
+                    ## Check if the move is diagonal
                     if distance_x == 1 and distance_y == 1:
                         current_player.position = position
 
-                    # Check if the move is linear and within 3 positions
+                    ## Check if the move is linear and within 3 positions
                     elif (distance_x == 0 and distance_y <= 3) or (distance_y == 0 and distance_x <= 3):
                         current_player.position = position
 
@@ -336,4 +339,5 @@ class gooseExam:
 
             position = current_player.position
             room_name = room_names.get(position, 'Unknown room')
+
             await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, f"{author.mention}, you are currently in {room_name}.")
