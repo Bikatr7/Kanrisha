@@ -105,7 +105,7 @@ class eventHandler:
 
                     del data[str(member.id)]
                     
-            with open('role_persistence.json', 'w') as file:
+            with open(self.file_ensurer.role_persistence_path, 'w') as file:
                 json.dump(data, file)
     
         ##-------------------start-of-on_message()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------

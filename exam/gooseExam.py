@@ -37,25 +37,36 @@ class player:
 
         """
 
+        ## the user object
         self.user = inc_user
+
+        ## duck or goose
         self.role = inc_role
 
+        ## whether the player has a sprint token
         self.has_sprint_token = False
 
+        ## the opponent of the player (goose if duck, duck if goose)
         self.opponent = None
 
+        ## the players teammate
         self.partner = None
 
+        ## whether the player has chosen a starting position
         self.starting_position_chosen = False
 
-        self.position: tuple[int, int] = (0, 5)  ## Assuming default starting position
+        self.position: tuple[int, int] = (0, 0)
 
+        ## whether the player has moved this round
         self.has_moved = False
 
+        ## whether the player has a linear movement bonus
         self.has_linear_movement_bonus = False
 
+        ## whether the player has a diagonal movement bonus
         self.has_diagonal_movement_bonus = False
 
+        ## whether the player is at the library
         self.at_library = False
 
         if(self.role.lower() == "duck"):
@@ -481,6 +492,7 @@ class gooseExam:
             """
 
             author = interaction.user
+            max_move_distance = 0
 
             ## Ensure the player is in the game.
             current_player = next((p for p in self.players if p.user == author), None)
@@ -503,11 +515,19 @@ class gooseExam:
 
                 if(current_player.has_sprint_token):
                     max_move_distance = 3
+
                 else:
                     max_move_distance = 1
 
             elif(current_player.role.lower() == "goose"):
                 max_move_distance = 3
+
+
+            if(current_player.has_linear_movement_bonus):
+                max_move_distance += 1
+
+            if(current_player.has_diagonal_movement_bonus):
+                max_move_distance += 1
 
             else:
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "Invalid role! Please contact admin", is_ephemeral=True)
