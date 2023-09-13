@@ -228,7 +228,7 @@ class fileEnsurer:
       
 ##-------------------start-of-get_host_name()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-   def get_db_credentials(self) -> typing.Tuple[str,str]:
+   async def get_db_credentials(self) -> typing.Tuple[str,str]:
        
       """
 

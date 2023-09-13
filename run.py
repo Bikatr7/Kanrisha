@@ -24,7 +24,7 @@ def main():
 
     token = client.file_ensurer.get_token()
 
-    host, user = client.file_ensurer.get_db_credentials()
+    host, user = loop.run_until_complete(client.file_ensurer.get_db_credentials())
 
     try:
 
