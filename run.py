@@ -3,7 +3,6 @@ import asyncio
 import os
 
 ## third-party modules
-import discord
 import socket
 
 ## custom modules
@@ -15,6 +14,8 @@ def main():
 
     client = Kanrisha()
 
+    client.toolkit.clear_console()
+
     os.system("title " + "Kanrisha")
 
     loop = asyncio.get_event_loop()
@@ -25,7 +26,19 @@ def main():
 
     host, user = client.file_ensurer.get_db_credentials()
 
-    loop.run_until_complete(client.remote_handler.connection_handler.ready_connection(host,user))
+    try:
+
+        loop.run_until_complete(client.remote_handler.connection_handler.ready_connection(host,user))
+
+    except:
+
+        client.toolkit.clear_console()
+
+        print("No Connection")
+
+        client.toolkit.pause_console()
+
+        exit()
 
     client.toolkit.clear_console()
 

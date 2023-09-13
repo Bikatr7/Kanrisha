@@ -314,7 +314,9 @@ class adminCommandHandler:
             help_message = (
                 "**/force-log-push** - Forces a Kanrisha log push. (ADMIN)\n"
                 "**/force-remote-reset** - Overrides Nusevei with the current instance's data. (ADMIN)\n"
+                "**/trigger-early-shutdown** - Triggers an early shutdown. (ADMIN)\n"
                 "**/execute-order-66** - Executes order 66. (ADMIN)\n"
+                "**/sync-roles** - Syncs the roles of all users in the server with the role persistence database. (ADMIN)\n"
                 "**/help-admin** - Sends this message. (ADMIN)\n"
             )
 

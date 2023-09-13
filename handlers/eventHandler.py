@@ -195,8 +195,8 @@ class eventHandler:
 
             """
 
-            ## check if the message was cached and if it was not sent by a bot
-            if(payload.cached_message and not payload.cached_message.author.bot):
+            ## check if the message was cached and if it was not sent by a bot or the owner
+            if(payload.cached_message and not payload.cached_message.author.bot and payload.cached_message.author.id != kanrisha_client.interaction_handler.owner_id):
                 store_channel = kanrisha_client.get_channel(archive_channel_id)
 
                 message_cache = payload.cached_message
@@ -215,10 +215,11 @@ class eventHandler:
                 if(message_cache.author.avatar):
                     embed.set_thumbnail(url=message_cache.author.avatar.url)
 
-                embed.set_footer(text=f'Deleted in #{message_cache.channel.name} at {int(message_cache.created_at.now().timestamp())}') ## type: ignore (we know it's not None)
+                timestamp = int(message_cache.created_at.now().timestamp())
+
+                embed.set_footer(text=f'Deleted in #{message_cache.channel.name} at <t:{timestamp}:F>') ## type: ignore (we know it's not None)
                 embed.add_field(name="Channel ID", value=message_cache.channel.id)
                 embed.add_field(name="User ID", value=message_cache.author.id)
-
 
                 await kanrisha_client.interaction_handler.send_message_to_channel(store_channel, embed=embed) ## type: ignore (we know it's not None)
 
