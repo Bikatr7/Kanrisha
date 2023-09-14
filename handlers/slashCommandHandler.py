@@ -80,12 +80,12 @@ class slashCommandHandler:
             
             Parameters:\n
             interaction (object - discord.Interaction) : the interaction object.\n
-            member (object - discord.Member) : the member object.\n
+            member (object - discord.Member | discord.User | None) : the member object.\n
 
             Returns:\n
-            target_member_id (int) : the member id of the member.\n
-            target_member_id (int) : the member id of the member.\n
-            image_url (str) : the url of the member's avatar.\n
+            target_member (object - syndicateMember | None) : the syndicateMember object.\n
+            target_member_id (int) : the member id.\n
+            image_url (str) : the image url.\n
             is_self_request (bool) : whether or not the request is for the user's own profile.\n
 
             """
