@@ -426,11 +426,14 @@ class slashCommandHandler:
 
             embed = discord.Embed(title="Luck Leaderboard", description=leaderboard_message, color=0xC0C0C0)
             embed.set_thumbnail(url=kanrisha_client.file_ensurer.bot_thumbnail_url)
+
+
+            annotation = "At the end of each month, top 5 users will receive a credit bonus based on their rank.\n"
             
             if(user_rank is not None):
-                embed.set_footer(text=f"Your rank is #{user_rank}.")
+                embed.set_footer(text=f"Your rank is #{user_rank}. {annotation}")
             else:
-                embed.set_footer(text=f"Your rank is #{no_spin_rank} (haven't spun yet).")
+                embed.set_footer(text=f"Your rank is #{no_spin_rank} (haven't spun yet). {annotation}")
 
             await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "", embed=embed)
 
