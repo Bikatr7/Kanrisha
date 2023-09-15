@@ -217,7 +217,8 @@ class eventHandler:
 
                 timestamp = int(message_cache.created_at.now().timestamp())
 
-                embed.set_footer(text=f'Deleted in #{message_cache.channel.name} at <t:{timestamp}:F>') ## type: ignore (we know it's not None)
+                embed.set_footer(text=f'Deleted in #{message_cache.channel.name}') ## type: ignore (we know it's not None)
+                embed.add_field(name="Deleted at", value=f"<t:{timestamp}:F>") ## type: ignore (we know it's not None)
                 embed.add_field(name="Channel ID", value=message_cache.channel.id)
                 embed.add_field(name="User ID", value=message_cache.author.id)
 
