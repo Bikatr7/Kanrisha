@@ -184,7 +184,7 @@ class fileEnsurer:
 
       self.banned_links_path = os.path.join(self.moderation_dir, "banned links.txt")
 
-      self.role_persistence_path = os.path.join(self.lib_dir, "role persistence.json")
+      self.role_persistence_path = os.path.join(self.moderation_dir, "role persistence.json")
 
       await self.file_handler.standard_create_directory(self.moderation_dir)
 
