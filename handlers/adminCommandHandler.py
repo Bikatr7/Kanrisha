@@ -4,6 +4,8 @@ from __future__ import annotations ## used for cheating the circular import issu
 import typing
 import asyncio
 import json
+import os
+import shutil
 
 ## third-party libraries
 import discord
@@ -288,10 +290,70 @@ class adminCommandHandler:
 
             await interaction.response.send_message("Roles synced.", delete_after=3.0, ephemeral=True)
 
+##-------------------start-of-get-running-config-directory()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        @kanrisha_client.tree.command(name="get-running-config-directory", description="Gets the running config directory.")
+        async def get_running_config_directory(interaction:discord.Interaction):
+
+            """
+            
+            Gets the running config directory.\n
+
+            Parameters:\n
+            self (object - slashCommandHandler) : the slashCommandHandler object.\n
+            interaction (object - discord.Interaction) : the interaction object.\n
+
+            Returns:\n
+            None.\n
+
+            """
+
+            ## admin check
+            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
+                await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
+                return
+                    
+            member_requesting = interaction.user
+                    
+            src = kanrisha_client.file_ensurer.config_dir
+
+            if(os.name == 'nt'):  ## Windows
+                dest = os.path.join(os.environ['USERPROFILE'],"KanrishaConfig-Copy")
+            else:  ## Linux
+                dest = os.path.join(os.path.expanduser("~"), "KanrishaConfig-Copy")
+
+            excluded_file = kanrisha_client.file_ensurer.credentials_path
+
+            async def copy_directory():
+                if(not os.path.exists(dest)):
+                    os.makedirs(dest)
+                        
+                for dirpath, dirnames, filenames in os.walk(src):
+                    ## Create all directories in the destination that don't exist yet
+                    for dirname in dirnames:
+                        dest_dir_path = os.path.join(dest, os.path.relpath(dirpath, src), dirname)
+                        if(not os.path.exists(dest_dir_path)):
+                            os.makedirs(dest_dir_path)
+                        
+                    ## Copy all files that aren't the excluded file
+                    for filename in filenames:
+                        if(filename != excluded_file):
+                            shutil.copy2(os.path.join(dirpath, filename), os.path.join(dest, os.path.relpath(dirpath, src), filename))
+
+            await asyncio.to_thread(copy_directory)
+            await asyncio.to_thread(shutil.make_archive, dest, 'zip', dest)
+
+            ## send the zip file
+            await member_requesting.send(file=discord.File(f"{dest}.zip"))
+
+            ## delete temp files
+            await asyncio.to_thread(os.remove, f"{dest}.zip")
+            await asyncio.to_thread(os.remove, dest)
+
 ##-------------------start-of-help_admin()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         
         @kanrisha_client.tree.command(name="help-admin", description="Sends the admin help message.")
-        async def help_admin(interaction: discord.Interaction):
+        async def help_admin(interaction: discord.Interaction) -> None:
 
             """
 
@@ -317,6 +379,7 @@ class adminCommandHandler:
                 "**/trigger-early-shutdown** - Triggers an early shutdown. (ADMIN)\n"
                 "**/execute-order-66** - Executes order 66. (ADMIN)\n"
                 "**/sync-roles** - Syncs the roles of all users in the server with the role persistence database. (ADMIN)\n"
+                "**/get-running-config-directory** - Gets the running config directory. (ADMIN)\n"
                 "**/help-admin** - Sends this message. (ADMIN)\n"
             )
 
