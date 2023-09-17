@@ -92,7 +92,7 @@ class Kanrisha(discord.Client):
 
         """
 
-        await self.remote_handler.member_handler.load_members()
+        await self.remote_handler.member_handler.load_members_from_remote()
 
         await self.slash_command_handler.event_handler.setup_moderation()
     

@@ -161,10 +161,16 @@ class remoteHandler():
 
             for member in self.member_handler.members:
 
+                ## member_id, member_name, spin_scores, credits
                 new_id = member.member_id
                 new_name = member.member_name
                 new_spin_scores = str(member.spin_scores)
                 new_credits = member.credits
+
+
+                score_string = f'"{new_spin_scores[0]}.{new_spin_scores[1]}.{new_spin_scores[2]}"'
+
+                member_details = [str(new_id), new_name, score_string, str(new_credits)]
 
                 table_name = "members"
                 insert_dict = {
@@ -175,6 +181,7 @@ class remoteHandler():
                 }
 
                 await self.connection_handler.insert_into_table(table_name, insert_dict)
+                await self.file_ensurer.file_handler.write_sei_line(self.file_ensurer.member_path, member_details)
 
         ##----------------------------------------------------------------calls----------------------------------------------------------------
 

@@ -42,9 +42,9 @@ class memberHandler:
 
         self.members: typing.List[syndicateMember] = [] 
 
-##-------------------start-of-load_members()---------------------------------------------------------------------------------------------------------------------------------------------------------------
+##-------------------start-of-load_members_from_remote()---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def load_members(self) -> None:
+    async def load_members_from_remote(self) -> None:
 
         """
 
@@ -71,7 +71,35 @@ class memberHandler:
             new_member = syndicateMember(int(id_list[i]), name_list[i], spin_scores, int(credits_list[i]))
             self.members.append(new_member)
 
-        await self.file_ensurer.logger.log_action("INFO", "memberHandler", "Loaded members.")
+        await self.file_ensurer.logger.log_action("INFO", "memberHandler", "Loaded members from remote.")
+
+##-------------------start-of-load_members_from_local()---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    async def load_members_from_local(self) -> None:
+
+        """
+
+        Loads the members from the members folder.\n
+
+        Parameters:\n
+        None.\n
+
+        Returns:\n
+        None.\n
+
+        """
+
+        with open(self.file_ensurer.member_path, "r", encoding="utf-8") as file:
+
+            for line in file:
+
+                values = line.strip().split(',')
+
+                spin_scores = tuple([int(score) for score in values[2].strip('"').split('.')[:3]]) 
+
+                self.members.append(syndicateMember(int(values[0]), values[1], spin_scores, int(values[3]))) ## type: ignore (we know that the length of the tuple is 3)
+
+        await self.file_ensurer.logger.log_action("INFO", "memberHandler", "Loaded members from local.")
         
 ##-------------------start-of-add_new_member()---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -125,8 +153,6 @@ class memberHandler:
         for member in self.members:
 
             if(member.member_id == target_member_id):
-
-                tuple_string = f'"{member.spin_scores[0]}.{member.spin_scores[1]}.{member.spin_scores[2]}"'
 
                 spin_scores_list = list(member.spin_scores)
                 spin_scores_list[spin_index] += spin_value_increase
