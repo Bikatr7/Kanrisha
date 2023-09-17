@@ -141,7 +141,7 @@ class adminCommandHandler:
             
         ##-------------------start-of-execute_order_66()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        @kanrisha_client.tree.command(name="execute-order-66", description="It is time.")
+        @kanrisha_client.tree.command(name="execute-order-66", description="It is time. (ADMIN)")
         async def execute_order_66(interaction:discord.Interaction, ban_reason:str, ban_message:str):
 
             """
@@ -252,7 +252,7 @@ class adminCommandHandler:
 
 ##-------------------start-of-sync-roles()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        @kanrisha_client.tree.command(name="sync-roles", description="Syncs the roles of all users in the server with the role persistence database.")
+        @kanrisha_client.tree.command(name="sync-roles", description="Syncs the roles of all users in the server with the role persistence database. (ADMIN)")
         async def sync_roles(interaction:discord.Interaction):
 
             """
@@ -292,7 +292,7 @@ class adminCommandHandler:
 
 ##-------------------start-of-get-running-config-directory()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        @kanrisha_client.tree.command(name="get-running-config-directory", description="Gets the running config directory.")
+        @kanrisha_client.tree.command(name="get-running-config-directory", description="Gets the running config directory. (ADMIN)")
         async def get_running_config_directory(interaction:discord.Interaction):
 
             """
@@ -350,9 +350,36 @@ class adminCommandHandler:
             await asyncio.to_thread(os.remove, f"{dest}.zip")
             await asyncio.to_thread(os.remove, dest)
 
+            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "Running config directory sent.", delete_after=3.0, is_ephemeral=True)
+
+##-------------------start-of-load-members-from-local()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        @kanrisha_client.tree.command(name="load-members-from-local", description="(DO NOT USE THIS WITH LOADED INSTANCE) Loads members from the local file. (ADMIN))")
+        async def load_members_from_local(interaction:discord.Interaction):
+
+            """
+            
+            Loads members from the local file.\n
+
+            Parameters:\n
+            interaction (object - discord.Interaction) : the interaction object.\n
+
+            Returns:\n
+            None.\n
+
+            """
+
+            ## admin check
+            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
+                await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
+                return
+
+            await kanrisha_client.remote_handler.member_handler.load_members_from_local()
+
+            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "Members loaded from local file.", delete_after=3.0, is_ephemeral=True)
 ##-------------------start-of-help_admin()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         
-        @kanrisha_client.tree.command(name="help-admin", description="Sends the admin help message.")
+        @kanrisha_client.tree.command(name="help-admin", description="Sends the admin help message. (ADMIN)")
         async def help_admin(interaction: discord.Interaction) -> None:
 
             """
@@ -360,7 +387,6 @@ class adminCommandHandler:
             Sends the admin help message.\n
 
             Parameters:\n
-            self (object - slashCommandHandler) : the slashCommandHandler object.\n
             interaction (object - discord.Interaction) : the interaction object.\n
 
             Returns:\n
@@ -380,6 +406,7 @@ class adminCommandHandler:
                 "**/execute-order-66** - Executes order 66. (ADMIN)\n"
                 "**/sync-roles** - Syncs the roles of all users in the server with the role persistence database. (ADMIN)\n"
                 "**/get-running-config-directory** - Gets the running config directory. (ADMIN)\n"
+                "**/load-members-from-local** - Loads members from the local file. (ADMIN)\n"
                 "**/help-admin** - Sends this message. (ADMIN)\n"
             )
 
@@ -390,6 +417,6 @@ class adminCommandHandler:
 
         ##-------------------start-of-banners--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        trigger_early_shutdown = kanrisha_client.tree.command(name="trigger-early-shutdown", description="Admin Command.")(trigger_early_shutdown_logic)
-        force_log_push = kanrisha_client.tree.command(name="force-log-push", description="Admin Command.")(force_log_push_logic)
-        force_remote_reset = kanrisha_client.tree.command(name="force-remote-reset", description="Admin Command.")(force_remote_reset_logic)
+        trigger_early_shutdown = kanrisha_client.tree.command(name="trigger-early-shutdown", description="Shuts down the bot. (ADMIN)")(trigger_early_shutdown_logic)
+        force_log_push = kanrisha_client.tree.command(name="force-log-push", description="Forces a Kanrisha log push. (ADMIN)")(force_log_push_logic)
+        force_remote_reset = kanrisha_client.tree.command(name="force-remote-reset", description="Overrides Nusevei with the current instance's data. (ADMIN)")(force_remote_reset_logic)
