@@ -128,6 +128,7 @@ class remoteHandler():
             member_id bigint primary key,
             member_name varchar(32) not null,
             spin_scores varchar(32) not null,
+            owned_card_ids varchar(32) not null,
             credits int not null
         )
         """
@@ -155,34 +156,51 @@ class remoteHandler():
 
         ##----------------------------------------------------------------members----------------------------------------------------------------
 
+        async def clear_members():
+    
+            with open(self.file_ensurer.member_path, "w+") as member_file:
+                member_file.truncate(0)
+
         async def fill_members():
 
             table_name = "members"
 
             for member in self.member_handler.members:
 
-                ## member_id, member_name, spin_scores, credits
+                ## member_id, member_name, spin_scores, owned care_ids, credits
                 new_id = member.member_id
                 new_name = member.member_name
-                new_spin_scores = str(member.spin_scores)
+                new_spin_scores = member.spin_scores
+                owned_card_ids = member.owned_card_ids
                 new_credits = member.credits
 
+                score_string = ""
+                card_string = ""
 
                 score_string = f'"{new_spin_scores[0]}.{new_spin_scores[1]}.{new_spin_scores[2]}"'
 
-                member_details = [str(new_id), new_name, score_string, str(new_credits)]
+                for card_id in owned_card_ids:
+                    card_string += f'"{card_id}."'
+
+                card_string = card_string[:-1]
+
+                member_details = [str(new_id), new_name, score_string, card_string, str(new_credits)]
 
                 table_name = "members"
                 insert_dict = {
                     "member_id" : new_id,
                     "member_name" : new_name,
                     "spin_scores" : new_spin_scores,
+                    "owned_card_ids" : owned_card_ids,
                     "credits" : new_credits
                 }
 
                 await self.connection_handler.insert_into_table(table_name, insert_dict)
+
                 await self.file_ensurer.file_handler.write_sei_line(self.file_ensurer.member_path, member_details)
 
         ##----------------------------------------------------------------calls----------------------------------------------------------------
+
+        await clear_members()
 
         await fill_members()

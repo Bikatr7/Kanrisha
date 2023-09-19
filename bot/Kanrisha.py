@@ -56,8 +56,10 @@ class Kanrisha(discord.Client):
         ## sets the activity currently "Watching you all."
         self.activity = discord.Activity(name='you all.', type=discord.ActivityType.watching)
 
+        ## PIG GUILD ID
         self.pg = 1143635379262607441
 
+        ## KANRISHA LOG CHANNEL ID
         self.log_channel_id = 1149433554170810459
 
         #------------------------------------------------------
@@ -82,7 +84,7 @@ class Kanrisha(discord.Client):
 
         """
         
-        Runs the post initialization tasks.\n
+        Runs the post initialization tasks. Tasks that need to be done after the object and it's handlers are created, but before the object can be used.\n
 
         Parameters:\n
         self (object - Kanrisha): The Kanrisha client.\n
@@ -92,8 +94,10 @@ class Kanrisha(discord.Client):
 
         """
 
+        ## loads the members from the remote storage
         await self.remote_handler.member_handler.load_members_from_remote()
 
+        ## setups moderation tasks
         await self.slash_command_handler.event_handler.setup_moderation()
     
 ##-------------------start-of-on_ready()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -102,7 +106,7 @@ class Kanrisha(discord.Client):
 
         """
 
-        Prints a message to the console when the bot is ready.\n
+        Gets the bot ready.\n
 
         Parameters:\n
         self (object - Kanrisha): The Kanrisha client.\n
@@ -114,17 +118,24 @@ class Kanrisha(discord.Client):
 
         await self.run_post_init_tasks()
 
-        await self.wait_until_ready()
-
+        ## syncs the command tree
         await self.tree.sync()
 
+        ## starts the remote storage refresh task
         if(not self.refresh_remote_storage.is_running()):
             self.refresh_remote_storage.start()
 
+        ## starts the log file sending task
         if(not self.send_log_file_to_log_channel.is_running()):
             self.send_log_file_to_log_channel.start()
 
+        ## starts the role persistence database sync task
+        if(not self.sync_role_persistence_database.is_running()):
+            self.sync_role_persistence_database.start()
+
         await self.file_ensurer.logger.log_action("INFO", "Kanrisha", "Kanrisha is ready.")
+
+        await self.wait_until_ready()
 
 ##-------------------start-of-refresh_remote_storage()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -146,6 +157,28 @@ class Kanrisha(discord.Client):
 
         await self.remote_handler.reset_remote_storage(is_forced = False)
 
+##-------------------start-of-sync_role_persistence_database()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    @tasks.loop(minutes=5)
+    async def sync_role_persistence_database(self):
+
+        """
+
+        Syncs the role persistence database.\n
+        Runs every 5 minutes.\n
+
+        Parameters:\n
+        self (object - Kanrisha): The Kanrisha client.\n
+
+        Returns:\n
+        None.\n
+
+        """
+
+        members = [member for member in self.get_all_members()]
+
+        await self.interaction_handler.sync_roles_logic(members, is_forced = False)
+
 ##-------------------start-of-send_log_file_to_log_channel()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     @tasks.loop(minutes=15)
@@ -164,4 +197,4 @@ class Kanrisha(discord.Client):
 
         """
 
-        await self.interaction_handler.send_log_file(channel=self.get_channel(self.log_channel_id), is_forced = False)  # type: ignore
+        await self.interaction_handler.send_log_file(channel=self.get_channel(self.log_channel_id), is_forced = False) ## type: ignore

@@ -316,8 +316,8 @@ class slashCommandHandler:
 
         ##-------------------start-of-transfer()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-       #@kanrisha_client.tree.command(name="transfer", description="Transfers credits from one user to another.")
-        async def transfer_credits(self, interaction: discord.Interaction, member:discord.Member, amount:int):
+        @kanrisha_client.tree.command(name="transfer", description="Transfers credits from one user to another.")
+        async def transfer_credits(interaction: discord.Interaction, member:discord.Member, amount:int):
 
             """
 
@@ -342,7 +342,7 @@ class slashCommandHandler:
                 return
             
             ## Check if the user is an admin
-            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
+            if(interaction.user.id in kanrisha_client.interaction_handler.admin_user_ids):
                 is_admin = True
 
             ## get the syndicateMember objects for the sender and the transfer target     
@@ -354,7 +354,7 @@ class slashCommandHandler:
                 return
             
             ## Check if target and sender are the same
-            if(sender_member.member_id == transfer_target_member.member_id): ## type: ignore (we know it's not None)
+            if(sender_member.member_id == transfer_target_member.member_id and not is_admin): ## type: ignore (we know it's not None)
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You can't transfer credits to yourself.", delete_after=5.0, is_ephemeral=True)
                 return
 
@@ -366,7 +366,9 @@ class slashCommandHandler:
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You don't have enough credits.", delete_after=5.0, is_ephemeral=True)
                 return
             
-            sender_member.credits -= amount ## type: ignore (we know it's not None)
+            if(not is_admin):
+                sender_member.credits -= amount ## type: ignore (we know it's not None)
+                
             transfer_target_member.credits += amount
 
             embed = discord.Embed(title="Credit Transfer", description= f"{interaction.user.mention} successfully transferred {amount} credits to {member.mention}.", color=0xC0C0C0)
@@ -380,12 +382,11 @@ class slashCommandHandler:
         async def leaderboard(interaction: discord.Interaction):
 
             """
-
-            Sends the leaderboard.\n
+            
+            Sends the leaderboards.\n
 
             Parameters:\n
             self (object - slashCommandHandler) : the slashCommandHandler object.\n
-            interaction (object - discord.Interaction) : the interaction object.\n
 
             Returns:\n
             None.\n
@@ -396,6 +397,31 @@ class slashCommandHandler:
             if(not await check_if_registered(self, interaction)):
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not registered.", delete_after=5.0, is_ephemeral=True)
                 return
+
+            luck_leaderboard = await get_luck_leaderboard(interaction)
+
+            balance_leaderboard = await get_balance_leaderboard(interaction)
+
+            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=luck_leaderboard)
+
+            await interaction.followup.send(embed=balance_leaderboard)
+
+##-------------------start-of-get_luck_leaderboard()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        async def get_luck_leaderboard(interaction: discord.Interaction) -> discord.Embed:
+
+            """
+
+            Gets the luck leaderboard.\n
+
+            Parameters:\n
+            self (object - slashCommandHandler) : the slashCommandHandler object.\n
+            interaction (object - discord.Interaction) : the interaction object.\n
+
+            Returns:\n
+            luck_leaderboard (object - discord.Embed) : the embed object.\n
+
+            """
 
             ## Calculate scores for each member who has spun at least once and store them in a list with the member's name
             scores_with_members = []
@@ -424,19 +450,58 @@ class slashCommandHandler:
             for score, member_name in top_10_scores_with_members:
                 leaderboard_message += f"**{member_name}** - {score}\n"
 
-            embed = discord.Embed(title="Luck Leaderboard", description=leaderboard_message, color=0xC0C0C0)
-            embed.set_thumbnail(url=kanrisha_client.file_ensurer.bot_thumbnail_url)
-
+            luck_leaderboard = discord.Embed(title="Luck Leaderboard", description=leaderboard_message, color=0xC0C0C0)
+            luck_leaderboard.set_thumbnail(url=kanrisha_client.file_ensurer.bot_thumbnail_url)
 
             annotation = "At the end of each month, top 5 users will receive a credit bonus based on their rank.\n"
             
             if(user_rank is not None):
-                embed.set_footer(text=f"Your rank is #{user_rank}. {annotation}")
+                luck_leaderboard.set_footer(text=f"Your rank is #{user_rank}. {annotation}")
             else:
-                embed.set_footer(text=f"Your rank is #{no_spin_rank} (haven't spun yet). {annotation}")
+                luck_leaderboard.set_footer(text=f"Your rank is #{no_spin_rank} (haven't spun yet). {annotation}")
 
-            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "", embed=embed)
+            return luck_leaderboard
+        
+##-------------------start-of-get_balance_leaderboard()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+        async def get_balance_leaderboard(interaction: discord.Interaction) -> discord.Embed:
+
+            """
+            
+            Gets the balance leaderboard.\n
+
+            Parameters:\n
+            self (object - slashCommandHandler) : the slashCommandHandler object.\n
+
+            Returns:\n
+            balance_leaderboard (object - discord.Embed) : the embed object.\n
+
+            """
+
+            ## Sort the list based on the scores in descending order and then take only the top 10
+            kanrisha_client.remote_handler.member_handler.members.sort(key=lambda x: x.credits, reverse=True)
+            top_10_members = kanrisha_client.remote_handler.member_handler.members[:10]
+
+            ## Find the rank of the user calling the command
+            user_rank = None
+            for rank, member in enumerate(kanrisha_client.remote_handler.member_handler.members, 1):
+                if(member.member_id == interaction.user.id):
+                    user_rank = rank
+                    break
+
+            ## Construct the leaderboard message
+            leaderboard_message = ""
+            for member in top_10_members:
+                leaderboard_message += f"**{member.member_name}** - {member.credits}\n"
+
+            balance_leaderboard = discord.Embed(title="Balance Leaderboard", description=leaderboard_message, color=0xC0C0C0)
+            balance_leaderboard.set_thumbnail(url=kanrisha_client.file_ensurer.bot_thumbnail_url)
+
+            
+            balance_leaderboard.set_footer(text=f"Your rank is #{user_rank}.")
+
+            return balance_leaderboard
+        
 ##-------------------start-of-help_commands()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         
         @kanrisha_client.tree.command(name="help-commands", description="Sends the help message.")
@@ -461,7 +526,7 @@ class slashCommandHandler:
                 "**/register** - Registers a user to the bot.\n"
                 "**/snipe** - Snipes the last deleted message in a channel.\n"
                 "**/profile** - Sends the user's profile.\n"
-                "**/leaderboard** - Sends the luck leaderboard\n"
+                "**/leaderboard** - Sends the leaderboards.\n"
                 "**/transfer** - Transfers credits from one user to another.\n"
                 "**/help-commands** - Sends this message.\n"
             )

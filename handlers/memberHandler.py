@@ -68,7 +68,7 @@ class memberHandler:
 
             spin_scores = (int(spin_scores[0]), int(spin_scores[1]), int(spin_scores[2]))
 
-            new_member = syndicateMember(int(id_list[i]), name_list[i], spin_scores, int(credits_list[i]))
+            new_member = syndicateMember(int(id_list[i]), name_list[i], spin_scores, [], int(credits_list[i]))
             self.members.append(new_member)
 
         await self.file_ensurer.logger.log_action("INFO", "memberHandler", "Loaded members from remote.")
@@ -89,6 +89,8 @@ class memberHandler:
 
         """
 
+        self.members.clear()
+
         with open(self.file_ensurer.member_path, "r", encoding="utf-8") as file:
 
             for line in file:
@@ -97,13 +99,17 @@ class memberHandler:
 
                 spin_scores = tuple([int(score) for score in values[2].strip('"').split('.')[:3]]) 
 
-                self.members.append(syndicateMember(int(values[0]), values[1], spin_scores, int(values[3]))) ## type: ignore (we know that the length of the tuple is 3)
+                card_ids = []
 
-        await self.file_ensurer.logger.log_action("INFO", "memberHandler", "Loaded members from local.")
-        
+                ## explicit type hinting to avoid pylance warning below
+                spin_scores = (spin_scores[0], spin_scores[1], spin_scores[2])
+
+                self.members.append(syndicateMember(int(values[0]), values[1], spin_scores, card_ids, int(values[4]))) 
+
+        await self.file_ensurer.logger.log_action("INFO", "memberHandler", "Loaded members from local.")        
 ##-------------------start-of-add_new_member()---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def add_new_member(self, inc_member_id:int, inc_member_name:str, inc_spin_scores:typing.Tuple[int,int,int], inc_credits:int) -> None:
+    async def add_new_member(self, inc_member_id:int, inc_member_name:str, inc_spin_scores:typing.Tuple[int,int,int],  inc_credits:int) -> None:
 
         """
         
@@ -121,10 +127,14 @@ class memberHandler:
 
         score_string = f'"{inc_spin_scores[0]}.{inc_spin_scores[1]}.{inc_spin_scores[2]}"'
 
-        member_details = [str(inc_member_id), inc_member_name, score_string, str(inc_credits)]
+        card_id_string = ""
+
+        member_details = [str(inc_member_id), inc_member_name, score_string, card_id_string, str(inc_credits)]
+
+        await self.file_ensurer.file_handler.write_sei_line(self.file_ensurer.member_path, member_details)
 
         ## adds new member to current instance of bot
-        new_member = syndicateMember(inc_member_id, inc_member_name, inc_spin_scores, inc_credits)
+        new_member = syndicateMember(inc_member_id, inc_member_name, inc_spin_scores, [], inc_credits)
 
         ## logs action
         await self.file_ensurer.logger.log_action("INFO", "memberHandler", f"Added new member: {inc_member_name}.")

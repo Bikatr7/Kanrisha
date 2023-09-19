@@ -3,9 +3,9 @@ from __future__ import annotations ## used for cheating the circular import issu
 
 import typing
 import asyncio
-import json
 import os
 import shutil
+import tempfile
 
 ## third-party libraries
 import discord
@@ -18,7 +18,7 @@ class adminCommandHandler:
 
     """
     
-    Handles slash commands.\n
+    Handles admin slash commands.\n
 
     """
 
@@ -29,7 +29,7 @@ class adminCommandHandler:
 
         """
         
-        Initializes the slash command handler.\n
+        Initializes the admin command handler.\n
 
         Parameters:\n
         inc_kanrisha_client (Kanrisha): The client object.\n
@@ -43,14 +43,13 @@ class adminCommandHandler:
 
         ##-------------------start-of-trigger_early-shutdown()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        async def trigger_early_shutdown_logic(interaction:discord.Interaction):
+        async def trigger_early_shutdown_logic(interaction:discord.Interaction) -> None:
 
             """
             
             Triggers an early shutdown.\n
 
             Parameters:\n
-            self (object - slashCommandHandler) : the slashCommandHandler object.\n
             interaction (object - discord.Interaction) : the interaction object.\n
 
             Returns:\n
@@ -60,7 +59,7 @@ class adminCommandHandler:
 
             ## admin check
             if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
-                await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
                 return
 
             await interaction.response.send_message("Shutting down...", delete_after=3.0, ephemeral=True)
@@ -75,9 +74,12 @@ class adminCommandHandler:
                 ## cancel all tasks
                 kanrisha_client.send_log_file_to_log_channel.cancel()
                 kanrisha_client.refresh_remote_storage.cancel()
+                kanrisha_client.sync_role_persistence_database.cancel()
 
                 ## try to close gracefully
                 await kanrisha_client.close()
+
+                exit()
 
             ## if we can't close gracefully, just exit
             except:
@@ -85,14 +87,13 @@ class adminCommandHandler:
 
         ##-------------------start-of-force-log-push()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        async def force_log_push_logic(interaction:discord.Interaction, is_shutdown_protocol:bool | None = False):
+        async def force_log_push_logic(interaction:discord.Interaction, is_shutdown_protocol:bool | None = False) -> None:
 
             """
             
             Forces a log push.\n
 
             Parameters:\n
-            self (object - slashCommandHandler) : the slashCommandHandler object.\n
             interaction (object - discord.Interaction) : the interaction object.\n
             is_shutdown_protocol (bool | None) : whether or not this is part of a shutdown protocol.\n
 
@@ -103,7 +104,7 @@ class adminCommandHandler:
 
             ## admin check
             if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids and not is_shutdown_protocol):
-                await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
                 return
 
             await kanrisha_client.interaction_handler.send_log_file(kanrisha_client.get_channel(kanrisha_client.log_channel_id), is_forced=True,  forced_by=interaction.user.name) ## type: ignore
@@ -113,14 +114,13 @@ class adminCommandHandler:
 
         ##-------------------start-of-force-remote-reset()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        async def force_remote_reset_logic(interaction:discord.Interaction, is_shutdown_protocol:bool | None = False):
+        async def force_remote_reset_logic(interaction:discord.Interaction, is_shutdown_protocol:bool | None = False) -> None:
 
             """
             
-            Resets the remote storage.\n
+            Resets the remote storage with the current instance's data.\n
 
             Parameters:\n
-            self (object - slashCommandHandler) : the slashCommandHandler object.\n
             interaction (object - discord.Interaction) : the interaction object.\n
             is_shutdown_protocol (bool | None) : whether or not this is part of a shutdown protocol.\n
 
@@ -131,7 +131,7 @@ class adminCommandHandler:
 
             ## admin check
             if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids and not is_shutdown_protocol):
-                await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
                 return
 
             await kanrisha_client.remote_handler.reset_remote_storage(is_forced=True, forced_by=interaction.user.name)
@@ -142,14 +142,13 @@ class adminCommandHandler:
         ##-------------------start-of-execute_order_66()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.tree.command(name="execute-order-66", description="It is time. (ADMIN)")
-        async def execute_order_66(interaction:discord.Interaction, ban_reason:str, ban_message:str):
+        async def execute_order_66(interaction:discord.Interaction, ban_reason:str, ban_message:str) -> None:
 
             """
             
             Executes order 66.\n
 
             Parameters:\n
-            self (object - slashCommandHandler) : the slashCommandHandler object.\n
             interaction (object - discord.Interaction) : the interaction object.\n
             ban_reason (str) : the reason for the ban.\n
             ban_message (str) : the message to send to the banned users.\n
@@ -161,7 +160,7 @@ class adminCommandHandler:
 
             ## admin check
             if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
-                await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
                 return
 
             ## marked ids
@@ -178,6 +177,7 @@ class adminCommandHandler:
 
             execution_message = "The following users have been marked for death and will be banned:\n"
 
+            ## get all members with the marked for death role
             for guild in kanrisha_client.guilds:
                 
                 for member in guild.members:
@@ -188,7 +188,7 @@ class adminCommandHandler:
                         marked_for_death.append(member)
                         execution_message += f"{member.mention}\n"
 
-            ## no one to ban 
+            ## if no one to ban 
             if(len(marked_for_death) == 0):
                 execution_message = "No users have been marked for death."
                 await kanrisha_client.file_ensurer.logger.log_action("WARNING", "adminCommandHandler", execution_message)
@@ -221,6 +221,7 @@ class adminCommandHandler:
                         await member.add_roles(mark_of_silence_role)  # type: ignore (we know it's not None)
                         await kanrisha_client.interaction_handler.send_message_to_channel(target_channel, silence_message) ## type: ignore (we know it's not None)
                 
+                ## countdown for ban (last 10 seconds)
                 if(20 <= i < 30):
                     await interaction.followup.send(f"Banning in {30 - i} seconds...")
 
@@ -253,14 +254,13 @@ class adminCommandHandler:
 ##-------------------start-of-sync-roles()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.tree.command(name="sync-roles", description="Syncs the roles of all users in the server with the role persistence database. (ADMIN)")
-        async def sync_roles(interaction:discord.Interaction):
+        async def sync_roles(interaction:discord.Interaction) -> None:
 
             """
             
             Syncs the roles of all users in the server with the role persistence database.\n
 
             Parameters:\n
-            self (object - slashCommandHandler) : the slashCommandHandler object.\n
             interaction (object - discord.Interaction) : the interaction object.\n
 
             Returns:\n
@@ -270,37 +270,26 @@ class adminCommandHandler:
             
             ## admin check
             if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
-                await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
                 return
+            
+            members = [member for member in interaction.guild.members] ## type: ignore (we know it's not None)
 
-            # Load the existing data once
-            with open(kanrisha_client.file_ensurer.role_persistence_path, 'r') as file:
-                try:
-                    data = json.load(file)
-                except json.JSONDecodeError:
-                    data = {}
-
-            for member in interaction.guild.members:  # type: ignore (we know it's not None)
-                roles = [role.id for role in member.roles if role != member.guild.default_role]
-                data[str(member.id)] = roles
-
-            # Write the updated data once
-            with open(kanrisha_client.file_ensurer.role_persistence_path, 'w') as file:
-                json.dump(data, file)
+            await kanrisha_client.interaction_handler.sync_roles_logic(members, is_forced=True, forced_by=interaction.user.name)
 
             await interaction.response.send_message("Roles synced.", delete_after=3.0, ephemeral=True)
 
 ##-------------------start-of-get-running-config-directory()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.tree.command(name="get-running-config-directory", description="Gets the running config directory. (ADMIN)")
-        async def get_running_config_directory(interaction:discord.Interaction):
+        async def get_running_config_directory(interaction:discord.Interaction) -> None:
 
             """
             
             Gets the running config directory.\n
 
             Parameters:\n
-            self (object - slashCommandHandler) : the slashCommandHandler object.\n
+            self (object - adminCommandHandler) : the adminCommandHandler object.\n
             interaction (object - discord.Interaction) : the interaction object.\n
 
             Returns:\n
@@ -314,8 +303,11 @@ class adminCommandHandler:
                 return
                     
             member_requesting = interaction.user
-                    
+            
             src = kanrisha_client.file_ensurer.config_dir
+
+            ## config dir name
+            outer_dir_name = os.path.basename(src)
 
             if(os.name == 'nt'):  ## Windows
                 dest = os.path.join(os.environ['USERPROFILE'],"KanrishaConfig-Copy")
@@ -324,38 +316,52 @@ class adminCommandHandler:
 
             excluded_file = kanrisha_client.file_ensurer.credentials_path
 
-            async def copy_directory():
-                if(not os.path.exists(dest)):
-                    os.makedirs(dest)
-                        
+            with tempfile.TemporaryDirectory() as tmpdirname:
+                ## Prepare the temp directory path with the outer directory name
+                tmp_dest = os.path.join(tmpdirname, outer_dir_name)
+
+                ## Copy the config to the temporary directory
                 for dirpath, dirnames, filenames in os.walk(src):
-                    ## Create all directories in the destination that don't exist yet
                     for dirname in dirnames:
-                        dest_dir_path = os.path.join(dest, os.path.relpath(dirpath, src), dirname)
+                        dest_dir_path = os.path.join(tmp_dest, os.path.relpath(dirpath, src), dirname)
                         if(not os.path.exists(dest_dir_path)):
                             os.makedirs(dest_dir_path)
-                        
-                    ## Copy all files that aren't the excluded file
-                    for filename in filenames:
-                        if(filename != excluded_file):
-                            shutil.copy2(os.path.join(dirpath, filename), os.path.join(dest, os.path.relpath(dirpath, src), filename))
 
-            await asyncio.to_thread(copy_directory)
-            await asyncio.to_thread(shutil.make_archive, dest, 'zip', dest)
+                    for filename in filenames:
+                        if(os.path.join(dirpath, filename) != excluded_file):
+                            shutil.copy2(os.path.join(dirpath, filename), os.path.join(tmp_dest, os.path.relpath(dirpath, src), filename))
+
+                # Create the ZIP from the temporary directory
+                await asyncio.to_thread(shutil.make_archive, dest, 'zip', tmpdirname)
 
             ## send the zip file
             await member_requesting.send(file=discord.File(f"{dest}.zip"))
 
-            ## delete temp files
-            await asyncio.to_thread(os.remove, f"{dest}.zip")
-            await asyncio.to_thread(os.remove, dest)
+            await member_requesting.send("Please place this under your /user folder and rename it to KanrishaConfig.")
+
+            ## delete the ZIP, temporary directory, and the copied config directory. Or at least try to.
+            try:
+                await asyncio.to_thread(os.remove, f"{dest}.zip")
+            except:
+                pass
+
+            try:
+                await asyncio.to_thread(shutil.rmtree, tmpdirname)
+            except:
+                pass
+
+            try:
+                await asyncio.to_thread(shutil.rmtree, dest)
+
+            except:
+                pass
 
             await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "Running config directory sent.", delete_after=3.0, is_ephemeral=True)
 
 ##-------------------start-of-load-members-from-local()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        @kanrisha_client.tree.command(name="load-members-from-local", description="(DO NOT USE THIS WITH LOADED INSTANCE) Loads members from the local file. (ADMIN))")
-        async def load_members_from_local(interaction:discord.Interaction):
+        @kanrisha_client.tree.command(name="load-members-from-local", description="(DO NOT USE THIS WITH A LOADED INSTANCE) Loads members from the local file. (ADMIN))")
+        async def load_members_from_local(interaction:discord.Interaction) -> None:
 
             """
             
@@ -377,6 +383,33 @@ class adminCommandHandler:
             await kanrisha_client.remote_handler.member_handler.load_members_from_local()
 
             await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "Members loaded from local file.", delete_after=3.0, is_ephemeral=True)
+
+##-------------------start-of-send-query()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        @kanrisha_client.tree.command(name="send-query", description="Sends an sql query to the Nusevei database. (ADMIN)")
+        async def send_query(interaction:discord.Interaction, query:str) -> None:
+
+            """
+            
+            Sends an sql query to the Nusevei database.\n
+
+            Parameters:\n
+            interaction (object - discord.Interaction) : the interaction object.\n
+
+            Returns:\n
+            None.\n
+
+            """
+
+            ## admin check
+            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
+                await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
+                return
+
+            await kanrisha_client.remote_handler.connection_handler.execute_query(query)
+
+            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "Query sent.", delete_after=3.0, is_ephemeral=True)
+
 ##-------------------start-of-help_admin()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         
         @kanrisha_client.tree.command(name="help-admin", description="Sends the admin help message. (ADMIN)")
@@ -402,12 +435,12 @@ class adminCommandHandler:
             help_message = (
                 "**/force-log-push** - Forces a Kanrisha log push. (ADMIN)\n"
                 "**/force-remote-reset** - Overrides Nusevei with the current instance's data. (ADMIN)\n"
-                "**/trigger-early-shutdown** - Triggers an early shutdown. (ADMIN)\n"
-                "**/execute-order-66** - Executes order 66. (ADMIN)\n"
+                "**/execute-order-66** - It is time. (ADMIN)\n"
                 "**/sync-roles** - Syncs the roles of all users in the server with the role persistence database. (ADMIN)\n"
                 "**/get-running-config-directory** - Gets the running config directory. (ADMIN)\n"
-                "**/load-members-from-local** - Loads members from the local file. (ADMIN)\n"
-                "**/help-admin** - Sends this message. (ADMIN)\n"
+                "**/load-members-from-local** - (DO NOT USE THIS WITH A LOADED INSTANCE) Loads members from the local file. (ADMIN))\n"
+                "**/send-query** - Sends an sql query to the Nusevei database. (ADMIN)\n"
+                "**/help-admin** - Sends the admin help message. (ADMIN)\n"
             )
 
             embed = discord.Embed(title="Help", description=help_message, color=0xC0C0C0)

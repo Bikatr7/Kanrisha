@@ -51,7 +51,7 @@ class connectionHandler():
 
         ##----------------------------------------------------------------other----------------------------------------------------------------
 
-        ## the database connection, can either be itself or none
+        ## the database connection and cursor, can either be itself or none
         self.connection, self.cursor = None, None
 
 ##--------------------start-of-check_connection()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -228,7 +228,7 @@ class connectionHandler():
 
         """
 
-        reads a single column query from the database.\n
+        Reads a single column query from the database.\n
 
         Parameters:\n
         self (object - connectionHandler) : The connection handler object.\n
@@ -252,11 +252,11 @@ class connectionHandler():
     
 ##--------------------start-of-insert_into_table()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def insert_into_table(self, table_name, data) -> None:
+    async def insert_into_table(self, table_name:str, data:dict) -> None:
 
         """
         
-        inserts data into a table.\n
+        Inserts data into a table.\n
 
         Parameters:\n
         self (object - connectionHandler) : The connection handler object.\n
@@ -281,7 +281,7 @@ class connectionHandler():
 
         """
 
-        reads a multi column query from the database.\n
+        Reads a multi column query from the database.\n
 
         Parameters:\n
         self (object - connectionHandler) : The connection handler object.\n

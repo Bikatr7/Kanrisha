@@ -41,14 +41,14 @@ class eventHandler:
 
         archive_channel_id = 1146979933416067163
 
-        self.syndicate_role = 1146901009248026734 
+        self.syndicate_role_id = 1146901009248026734 
 
         self.banned_messages = []
 
         ##-------------------start-of-on_member_remove()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.event
-        async def on_member_remove(member:discord.Member):
+        async def on_member_remove(member:discord.Member) -> None:
 
             """
 
@@ -62,21 +62,21 @@ class eventHandler:
 
             """
 
+            roles = [role.id for role in member.roles] 
 
-            roles = [role.id for role in member.roles if role != member.guild.default_role] 
-
+            ## loads the data from the file, adds the roles to the json object.
             with open(self.file_ensurer.role_persistence_path, 'r') as file:
-
                 data = json.load(file)
                 data[str(member.id)] = roles
 
+            ## saves the data back to the file
             with open(self.file_ensurer.role_persistence_path, 'w') as file:
                 json.dump(data, file)
 
         ##-------------------start-of-on_member_join()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.event
-        async def on_member_join(member:discord.Member):
+        async def on_member_join(member:discord.Member) -> None:
 
             """
 
@@ -90,6 +90,7 @@ class eventHandler:
 
             """
 
+            ## loads the data from the file.
             with open(self.file_ensurer.role_persistence_path, 'r') as file:
                 try:
                     data = json.load(file)
@@ -97,6 +98,7 @@ class eventHandler:
                 except json.JSONDecodeError:
                     data = {}
                     
+                ## checks if the member is in the json object, if they are, adds the roles to the member.
                 roles = data.get(str(member.id))
 
                 if(roles):
@@ -104,7 +106,6 @@ class eventHandler:
 
                     if(role_ids):
                         await member.add_roles(*role_ids)
-
 
                     del data[str(member.id)]
                     
@@ -114,7 +115,7 @@ class eventHandler:
         ##-------------------start-of-on_message()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.event
-        async def on_message(message: discord.Message):
+        async def on_message(message: discord.Message) -> None:
 
             """
 
@@ -133,7 +134,7 @@ class eventHandler:
 
         ##-------------------start-of-check_banned_messages()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        async def check_banned_messages(message:discord.Message):
+        async def check_banned_messages(message:discord.Message) -> None:
 
             """
 
@@ -180,7 +181,7 @@ class eventHandler:
         ##-------------------start-of-on_raw_message_delete()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.event
-        async def on_raw_message_delete(payload: discord.RawMessageDeleteEvent):
+        async def on_raw_message_delete(payload: discord.RawMessageDeleteEvent) -> None:
 
             """
 
@@ -195,7 +196,7 @@ class eventHandler:
 
             """
 
-            ## check if the message was cached and if it was not sent by a bot or the owner
+            ## check if the message was cached and if it was not sent by a bot or the owner cause we don't want to store those
             if(payload.cached_message and not payload.cached_message.author.bot and payload.cached_message.author.id != kanrisha_client.interaction_handler.owner_id):
                 store_channel = kanrisha_client.get_channel(archive_channel_id)
 
@@ -251,12 +252,12 @@ class eventHandler:
                 ## if register button was pressed by the correct user
                 if(custom_id == f"register_{interaction.user.id}"):
 
-                    syndicate_role = kanrisha_client.get_guild(interaction.guild_id).get_role(self.syndicate_role) ## type: ignore (we know it's not None)
+                    syndicate_role = kanrisha_client.get_guild(interaction.guild_id).get_role(self.syndicate_role_id) ## type: ignore (we know it's not None)
 
                     ## acknowledge the interaction immediately
                     await interaction.response.defer()
 
-                    await kanrisha_client.remote_handler.member_handler.add_new_member(interaction.user.id, interaction.user.name, tuple([0,0,0]),0) # type: ignore
+                    await kanrisha_client.remote_handler.member_handler.add_new_member(interaction.user.id, interaction.user.name, tuple([0,0,0]), 50000) # type: ignore
 
                     await interaction.delete_original_response()
 
@@ -267,12 +268,11 @@ class eventHandler:
                     await interaction.user.add_roles(syndicate_role) ## type: ignore (we know it's not None)
 
                 ## if register button was pressed by the wrong user
-                elif custom_id and custom_id.startswith("register_"):
+                elif(custom_id and custom_id.startswith("register_")):
 
                     await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not authorized to use this button.", delete_after=5.0, is_ephemeral=True)
 
-
-    ##-------------------start-of-setup_moderation()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+##-------------------start-of-setup_moderation()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     async def setup_moderation(self) -> None:
 

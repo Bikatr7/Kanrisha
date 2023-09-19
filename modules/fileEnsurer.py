@@ -53,7 +53,6 @@ class fileEnsurer:
       self.log_path = os.path.join(self.bot_details_dir, "debug log.txt")
 
       self.token_path = os.path.join(self.bot_details_dir, "token.txt")
-      self.host_name_path = os.path.join(self.bot_details_dir, "host name.txt")
       self.user_name_path = os.path.join(self.bot_details_dir, "user name.txt")
 
       self.bot_thumbnail_url = "https://cdn.discordapp.com/app-icons/1144166968979628072/7f4e6d14a104149d59624d5cc2897b94.png?size=256"
@@ -138,7 +137,6 @@ class fileEnsurer:
       self.credentials_path = os.path.join(self.bot_details_dir, "credentials.txt")
 
       await self.file_handler.modified_create_file(self.token_path, "token")
-      await self.file_handler.modified_create_file(self.host_name_path, "host_name")
       await self.file_handler.modified_create_file(self.user_name_path, "user_name")
 
       await self.file_handler.standard_create_file(self.credentials_path)
