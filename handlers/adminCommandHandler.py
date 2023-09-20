@@ -360,8 +360,8 @@ class adminCommandHandler:
 
 ##-------------------start-of-load-members-from-local()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        @kanrisha_client.tree.command(name="load-members-from-local", description="(DO NOT USE THIS WITH A LOADED INSTANCE) Loads members from the local file. (ADMIN))")
-        async def load_members_from_local(interaction:discord.Interaction) -> None:
+        @kanrisha_client.tree.command(name="load-local-storage", description="(DO NOT USE THIS WITH A LOADED INSTANCE) Loads from the local file. (ADMIN))")
+        async def load_local_storage(interaction:discord.Interaction) -> None:
 
             """
             
@@ -380,9 +380,9 @@ class adminCommandHandler:
                 await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
                 return
 
-            await kanrisha_client.remote_handler.member_handler.load_members_from_local()
+            await kanrisha_client.remote_handler.load_local_storage()
 
-            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "Members loaded from local file.", delete_after=3.0, is_ephemeral=True)
+            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "Loaded from local.", delete_after=3.0, is_ephemeral=True)
 
 ##-------------------start-of-send-query()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -413,7 +413,7 @@ class adminCommandHandler:
             await kanrisha_client.remote_handler.connection_handler.execute_query(query)
 
             ## pull remote back into instance
-            await kanrisha_client.remote_handler.member_handler.load_members_from_remote()
+            await kanrisha_client.remote_handler.load_remote_storage()
 
             embed = discord.Embed(title="Query Sent.", description=f"Query : {query}", color=0xC0C0C0)
 

@@ -56,6 +56,44 @@ class remoteHandler():
 
         ##----------------------------------------------------------------functions---------------------------------------------------------------- 
 
+##--------------------start-of-load_remote_storage()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    async def load_remote_storage(self) -> None:
+
+        """
+        
+        Loads the need data from remote storage.\n
+
+        Parameters:\n
+        self (object - remoteHandler) : The handler object.\n
+
+        Returns:\n
+        None.\n
+
+        """
+
+        await self.member_handler.load_members_from_remote()
+        await self.gacha_handler.load_cards_from_remote()
+
+##--------------------start-of-load_local_storage()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    async def load_local_storage(self) -> None:
+
+        """
+        
+        Loads the needed data from local storage.\n
+
+        Parameters:\n
+        self (object - remoteHandler) : The handler object.\n
+
+        Returns:\n
+        None.\n
+
+        """
+        
+        await self.member_handler.load_members_from_local()
+        await self.gacha_handler.load_cards_from_local()
+
 ##--------------------start-of-reset_remote_storage()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     async def reset_remote_storage(self, is_forced:bool, forced_by:str | None = None) -> None:

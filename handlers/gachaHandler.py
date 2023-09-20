@@ -62,6 +62,69 @@ class gachaHandler:
             957451091748986972
         ]
 
+##-------------------start-of-load_cards_from_remote()---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    async def load_cards_from_remote(self) -> None:
+
+        """
+
+        Loads the cards from the local db.\n
+
+        Parameters:\n
+        None.\n
+
+        Returns:\n
+        None.\n
+
+        """
+
+        self.cards.clear()
+
+        id_list, name_list, rarity_list, picture_path_list = await self.connection_handler.read_multi_column_query("select card_id, card_name, card_rarity, card_picture_path from cards")
+
+        for i in range(len(id_list)):
+
+            new_card = card(int(id_list[i]), name_list[i], int(rarity_list[i]), picture_path_list[i])
+
+            self.cards.append(new_card)
+
+        await self.file_ensurer.logger.log_action("INFO", "gachaHandler", "Loaded cards from remote.")
+
+##-------------------start-of-load_cards_from_local()---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    async def load_cards_from_local(self) -> None:
+
+        """
+
+        Loads the cards from the cards folder.\n
+
+        Parameters:\n
+        None.\n
+
+        Returns:\n
+        None.\n
+
+        """
+
+        self.cards.clear()
+
+        with open(self.file_ensurer.card_path, "r", encoding="utf-8") as file:
+
+            for line in file:
+
+                values = line.strip().split(',')
+
+                card_id = int(values[0])
+                card_name = values[1]
+                card_rarity = int(values[2])
+                card_picture_path = values[3]
+
+                new_card = card(card_id, card_name, card_rarity, card_picture_path)
+
+                self.cards.append(new_card)
+
+        await self.file_ensurer.logger.log_action("INFO", "gachaHandler", "Loaded cards from local.")
+
 ##-------------------start-of-spin_wheel()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     async def spin_wheel(self, user_id:int) -> typing.Tuple[str,int]:

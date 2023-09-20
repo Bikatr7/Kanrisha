@@ -94,7 +94,7 @@ class Kanrisha(discord.Client):
         """
 
         ## loads the members from the remote storage
-        await self.remote_handler.member_handler.load_members_from_remote()
+        await self.remote_handler.load_remote_storage()
 
         ## setups moderation tasks
         await self.slash_command_handler.event_handler.setup_moderation()
