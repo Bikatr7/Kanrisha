@@ -415,7 +415,9 @@ class adminCommandHandler:
             ## pull remote back into instance
             await kanrisha_client.remote_handler.member_handler.load_members_from_remote()
 
-            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "Query sent.", delete_after=3.0, is_ephemeral=True)
+            embed = discord.Embed(title="Query Sent.", description=f"Query : {query}", color=0xC0C0C0)
+
+            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed, delete_after=3.0)
 
 ##-------------------start-of-help_admin()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         

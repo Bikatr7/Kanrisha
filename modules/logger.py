@@ -5,7 +5,7 @@ class logger:
 
     '''
 
-    The logger class is used to log actions taken by Kudasai.\n
+    The logger class is used to log actions taken by Kanrisha.\n
         
     '''
 

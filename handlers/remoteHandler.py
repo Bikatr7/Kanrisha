@@ -4,6 +4,8 @@
 from modules.toolkit import toolkit
 from modules.fileEnsurer import fileEnsurer
 from handlers.connectionHandler import connectionHandler
+
+from handlers.gachaHandler import gachaHandler
 from handlers.memberHandler import memberHandler
 
 class remoteHandler():
@@ -39,6 +41,9 @@ class remoteHandler():
         self.connection_handler = connectionHandler(self.file_ensurer, self.toolkit)
 
         self.member_handler = memberHandler(self.file_ensurer, self.toolkit, self.connection_handler)
+
+        self.gacha_handler = gachaHandler(self.file_ensurer, self.toolkit, self.connection_handler)
+
 
         ##----------------------------------------------------------------dir----------------------------------------------------------------
 
@@ -101,9 +106,14 @@ class remoteHandler():
         drop table if exists members
         """
 
+        delete_cards_query = """
+        drop table if exists cards
+        """
+
         ##----------------------------------------------------------------calls----------------------------------------------------------------
 
         await self.connection_handler.execute_query(delete_members_query)
+        await self.connection_handler.execute_query(delete_cards_query)
 
 ##--------------------start-of-create_remote_storage()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -133,10 +143,19 @@ class remoteHandler():
         )
         """
 
+        create_cards_query = """
+        create table if not exists cards (
+            card_id bigint primary key,
+            card_name varchar(32) not null,
+            card_rarity int not null,
+            card_picture_path varchar(32) not null
+        )
+        """
+
         ##----------------------------------------------------------------calls----------------------------------------------------------------
 
         await self.connection_handler.execute_query(create_members_query)
-
+        await self.connection_handler.execute_query(create_cards_query)
 
 ##--------------------start-of-fill_remote_storage()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -154,12 +173,19 @@ class remoteHandler():
 
         """
 
-        ##----------------------------------------------------------------members----------------------------------------------------------------
-
+        ##----------------------------------------------------------------clears----------------------------------------------------------------
+        
         async def clear_members():
     
             with open(self.file_ensurer.member_path, "w+") as member_file:
                 member_file.truncate(0)
+
+        async def clear_cards():
+
+            with open(self.file_ensurer.card_path, "w+") as card_file:
+                card_file.truncate(0)
+
+        ##----------------------------------------------------------------members----------------------------------------------------------------
 
         async def fill_members():
 
@@ -199,8 +225,37 @@ class remoteHandler():
 
                 await self.file_ensurer.file_handler.write_sei_line(self.file_ensurer.member_path, member_details)
 
+        ##----------------------------------------------------------------cards----------------------------------------------------------------
+
+        async def fill_cards():
+
+            table_name = "cards"
+
+            for card in self.gacha_handler.cards:
+
+                ## card_id, card_name, card_rarity, card_picture_path
+                new_id = card.id
+                new_name = card.name
+                new_rarity = card.rarity
+                new_picture_path = card.picture_path
+
+                card_details = [str(new_id), new_name, str(new_rarity), new_picture_path]
+
+                insert_dict = {
+                    "card_id" : new_id,
+                    "card_name" : new_name,
+                    "card_rarity" : new_rarity,
+                    "card_picture_path" : new_picture_path
+                }
+
+                await self.connection_handler.insert_into_table(table_name, insert_dict)
+
+                await self.file_ensurer.file_handler.write_sei_line(self.file_ensurer.card_path, card_details)
+
         ##----------------------------------------------------------------calls----------------------------------------------------------------
 
         await clear_members()
+        await clear_cards()
 
         await fill_members()
+        await fill_cards()

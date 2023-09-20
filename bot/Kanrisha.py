@@ -71,7 +71,6 @@ class Kanrisha(discord.Client):
         #------------------------------------------------------
 
         self.interaction_handler = interactionHandler(self.file_ensurer, self.toolkit)
-        self.gacha_handler = gachaHandler()
 
         self.remote_handler = remoteHandler(self.file_ensurer, self.toolkit)
 

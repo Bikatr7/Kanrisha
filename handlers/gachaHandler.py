@@ -2,6 +2,14 @@
 import random
 import typing
 
+## custom modules
+from entities.card import card
+
+from modules.fileEnsurer import fileEnsurer
+from modules.toolkit import toolkit
+
+from handlers.connectionHandler import connectionHandler
+
 class gachaHandler:
 
 
@@ -14,7 +22,7 @@ class gachaHandler:
 
 ##-------------------start-of-__init__()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def __init__(self):
+    def __init__(self, file_ensurer:fileEnsurer, toolkit:toolkit, connection_handler:connectionHandler) -> None:
 
         """
 
@@ -28,7 +36,17 @@ class gachaHandler:
 
         """
 
-        pass
+        ##----------------------------------------------------------------objects----------------------------------------------------------------
+
+        self.file_ensurer = file_ensurer
+
+        self.toolkit = toolkit
+
+        self.connection_handler = connection_handler
+
+        self.cards:typing.List[card] = []
+
+        ##----------------------------------------------------------------ids----------------------------------------------------------------
 
         self.lucky_number_ids = [
             202873006773633024,
