@@ -373,6 +373,8 @@ class slashCommandHandler:
 
             embed = discord.Embed(title="Credit Transfer", description= f"{interaction.user.mention} successfully transferred {amount} credits to {member.mention}.", color=0xC0C0C0)
             embed.set_thumbnail(url=kanrisha_client.file_ensurer.bot_thumbnail_url)
+
+            await kanrisha_client.file_ensurer.logger.log_action("INFO", "Kanrisha", f"{interaction.user.name} transferred {amount} credits to {member.name}.") ## type: ignore (we know it's not None)
         
             await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)
 
@@ -426,6 +428,10 @@ class slashCommandHandler:
             ## Calculate scores for each member who has spun at least once and store them in a list with the member's name
             scores_with_members = []
             for member in kanrisha_client.remote_handler.member_handler.members:
+                ## Skip admins
+                if(member.member_id in kanrisha_client.interaction_handler.admin_user_ids):
+                    continue
+
                 total_spins = sum(member.spin_scores)
                 if(total_spins > 0):
                     score = round((member.spin_scores[0] * 20 + member.spin_scores[1] * 8.33 + member.spin_scores[2] * 1.20) / total_spins, 3)
@@ -435,12 +441,13 @@ class slashCommandHandler:
             scores_with_members.sort(key=lambda x: x[0], reverse=True)
             top_10_scores_with_members = scores_with_members[:10]
 
-            ## Find the rank of the user calling the command
+            ## Find the rank of the user calling the command if the user is not an admin
             user_rank = None
-            for rank, (score, member_name) in enumerate(scores_with_members, 1):
-                if(member_name == interaction.user.name):
-                    user_rank = rank
-                    break
+            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
+                for rank, (score, member_name) in enumerate(scores_with_members, 1):
+                    if(member_name == interaction.user.name):
+                        user_rank = rank
+                        break
 
             ## Calculate rank for users who haven't spun yet
             no_spin_rank = len(scores_with_members) + 1
@@ -457,7 +464,7 @@ class slashCommandHandler:
             
             if(user_rank is not None):
                 luck_leaderboard.set_footer(text=f"Your rank is #{user_rank}. {annotation}")
-            else:
+            elif(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):  # Check if the user is not an admin
                 luck_leaderboard.set_footer(text=f"Your rank is #{no_spin_rank} (haven't spun yet). {annotation}")
 
             return luck_leaderboard
@@ -478,16 +485,18 @@ class slashCommandHandler:
 
             """
 
-            ## Sort the list based on the scores in descending order and then take only the top 10
-            kanrisha_client.remote_handler.member_handler.members.sort(key=lambda x: x.credits, reverse=True)
-            top_10_members = kanrisha_client.remote_handler.member_handler.members[:10]
+            ## Sort the list based on the scores in descending order and then take only the top 10, but skip admins
+            non_admin_members = [member for member in kanrisha_client.remote_handler.member_handler.members if member.member_id not in kanrisha_client.interaction_handler.admin_user_ids]
 
-            ## Find the rank of the user calling the command
+            top_10_members = sorted(non_admin_members, key=lambda x: x.credits, reverse=True)[:10]
+
+            ## Find the rank of the user calling the command if they are not an admin
             user_rank = None
-            for rank, member in enumerate(kanrisha_client.remote_handler.member_handler.members, 1):
-                if(member.member_id == interaction.user.id):
-                    user_rank = rank
-                    break
+            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids): 
+                for rank, member in enumerate(non_admin_members, 1):
+                    if(member.member_id == interaction.user.id):
+                        user_rank = rank
+                        break
 
             ## Construct the leaderboard message
             leaderboard_message = ""
@@ -497,8 +506,8 @@ class slashCommandHandler:
             balance_leaderboard = discord.Embed(title="Balance Leaderboard", description=leaderboard_message, color=0xC0C0C0)
             balance_leaderboard.set_thumbnail(url=kanrisha_client.file_ensurer.bot_thumbnail_url)
 
-            
-            balance_leaderboard.set_footer(text=f"Your rank is #{user_rank}.")
+            if(user_rank is not None):  # Only set the footer with rank if the user is not an admin
+                balance_leaderboard.set_footer(text=f"Your rank is #{user_rank}.")
 
             return balance_leaderboard
         

@@ -405,8 +405,15 @@ class adminCommandHandler:
             if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
                 await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
                 return
+            
+            ## get remote up to date
+            await kanrisha_client.refresh_remote_storage()
 
+            ## change remote via query
             await kanrisha_client.remote_handler.connection_handler.execute_query(query)
+
+            ## pull remote back into instance
+            await kanrisha_client.remote_handler.member_handler.load_members_from_remote()
 
             await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "Query sent.", delete_after=3.0, is_ephemeral=True)
 
