@@ -213,8 +213,21 @@ class slashCommandHandler:
 
             card = await kanrisha_client.remote_handler.gacha_handler.spin_gacha(interaction.user.id)
 
-            embed = discord.Embed(title=f"{card.name}", description=f"Rarity: {card.rarity.name}", color=0xC0C0C0)
+            embed = discord.Embed(title=f"{card.name}", description=f"{card.rarity.name}", color=0xC0C0C0)
             embed.set_image(url=card.picture_url)
+
+            ## get the syndicateMember object for the target member, and add the card id to the member's owned_card_ids list if not already owned
+            target_member, _, _, _ = await get_member_id(interaction)
+
+            if(card.id not in target_member.owned_card_ids): ## type: ignore (we know it's not None)
+                target_member.owned_card_ids.append(card.id) ## type: ignore (we know it's not None)
+
+            ## add credits to the member's balance based on the card's rarity if the card is already owned
+            else:
+                credits_to_add = kanrisha_client.remote_handler.gacha_handler.rarity_to_credits.get(card.rarity.name, 0) 
+                target_member.credits += credits_to_add ## type: ignore (we know it's not None)
+                embed.set_footer(text=f"You already own this card. You have been awarded {credits_to_add} credits.")
+    
 
             await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, embed=embed)
 

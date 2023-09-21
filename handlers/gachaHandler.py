@@ -47,7 +47,23 @@ class gachaHandler:
 
         self.cards:typing.List[card] = []
 
+        ##----------------------------------------------------------------likelihoods----------------------------------------------------------------
+
+        self.STANDARD_LIKELIHOOD = .55
+        self.NOTABLE_LIKELIHOOD = .30
+        self.DISTINCT_LIKELIHOOD = .12
+        self.PRIME_LIKELIHOOD = .03
+        self.EXCLUSIVE_LIKELIHOOD = .00
+
         ##----------------------------------------------------------------ids----------------------------------------------------------------
+
+        self.rarity_to_credits = {
+            'Standard': 300,
+            'Notable': 600,
+            'Distinct': 1200,
+            'Prime': 2500,
+            'Exclusive': 5000
+        }
 
         self.lucky_number_ids = [
             202873006773633024,
@@ -212,11 +228,11 @@ class gachaHandler:
         async def get_rarity():
 
             chances = {
-                "Standard": 0.55,
-                "Notable": 0.30,
-                "Distinct": 0.12,
-                "Prime": 0.03,
-                "Exclusive": 0.00
+                "Standard": self.STANDARD_LIKELIHOOD,
+                "Notable": self.NOTABLE_LIKELIHOOD,
+                "Distinct": self.DISTINCT_LIKELIHOOD,
+                "Prime": self.PRIME_LIKELIHOOD,
+                "Exclusive": self.EXCLUSIVE_LIKELIHOOD
             }
             random_number = random.random()
 
@@ -251,7 +267,6 @@ class gachaHandler:
         ##----------------------------------------------------------------/
 
         possible_options = []
-        spin_index = 0
 
         rarity = await get_rarity()
 
