@@ -261,7 +261,7 @@ class slashCommandHandler:
 
                 for message in messages:
 
-                    if(message.embeds and message.embeds[0].fields[0].value == str(interaction.channel_id)):
+                    if(message.embeds and message.embeds[0].fields[1].value == str(interaction.channel_id)):
                         deleted_message = message
                         break
 
@@ -269,11 +269,11 @@ class slashCommandHandler:
                     error_message = "No recent deleted messages in this channel."
                     raise Exception(error_message)
                 
-                embed = discord.Embed(title=deleted_message.embeds[0].title, description=deleted_message.embeds[0].description, color=0xC0C0C0)
+                embed = discord.Embed(title=deleted_message.embeds[0].title, description=f"Deleted Message : {deleted_message.embeds[0].description}\nDeleted At : {deleted_message.embeds[0].fields[0].value}.", color=0xC0C0C0)
                 embed.set_thumbnail(url=deleted_message.embeds[0].thumbnail.url)
                 embed.set_footer(text=deleted_message.embeds[0].footer.text)
 
-                await kanrisha_client.file_ensurer.logger.log_action("INFO", "Kanrisha", f"{interaction.user.name} sniped a message in {interaction.channel.name}. The message was: {deleted_message.embeds[0].description}") ## type: ignore
+                await kanrisha_client.file_ensurer.logger.log_action("INFO", "Kanrisha", f"{interaction.user.name} sniped a message in {interaction.channel.name}. The message was: {deleted_message.embeds[0].description}") ## type: ignore (we know it's not None)
 
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)
                 
