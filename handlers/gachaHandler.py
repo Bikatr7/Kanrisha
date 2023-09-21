@@ -81,11 +81,11 @@ class gachaHandler:
 
         self.cards.clear()
 
-        id_list, name_list, rarity_list, picture_path_list = await self.connection_handler.read_multi_column_query("select card_id, card_name, card_rarity, card_picture_path from cards")
+        id_list, name_list, rarity_list, picture_path_list, picture_url_list = await self.connection_handler.read_multi_column_query("select card_id, card_name, card_rarity, card_picture_path, card_picture_url from cards")
 
         for i in range(len(id_list)):
 
-            new_card = card(int(id_list[i]), name_list[i], int(rarity_list[i]), picture_path_list[i])
+            new_card = card(int(id_list[i]), name_list[i], int(rarity_list[i]), picture_path_list[i], picture_url_list[i])
 
             self.cards.append(new_card)
 
@@ -119,8 +119,9 @@ class gachaHandler:
                 card_name = values[1]
                 card_rarity = int(values[2])
                 card_picture_path = os.path.join(self.file_ensurer.gacha_images_dir, values[3])
+                card_picture_url = values[4]
 
-                new_card = card(card_id, card_name, card_rarity, card_picture_path)
+                new_card = card(card_id, card_name, card_rarity, card_picture_path, card_picture_url)
 
                 self.cards.append(new_card)
 
@@ -139,7 +140,8 @@ class gachaHandler:
         user_id (int) : the id of the user.\n
 
         Returns:\n
-        result (str) : the result of the spin.\n
+        value_to_return (str) : the result of the spin.\n
+        spin_index (int) : the type of spin.\n
 
         """
 
@@ -177,12 +179,87 @@ class gachaHandler:
                 value_to_return = value
                 break
 
-        if value_to_return == "<:shining:1144089713934864444>":
+        if(value_to_return == "<:shining:1144089713934864444>"):
             spin_index = 0
-        elif value_to_return == "<:glowing:1144089680934080512>":
+        elif(value_to_return == "<:glowing:1144089680934080512>"):
             spin_index = 1
         else:
             spin_index = 2
 
         return value_to_return, spin_index
 
+
+##-------------------start-of-spin_gacha()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    async def spin_gacha(self, user_id:int) -> card:
+
+        """
+        
+        Spins the gacha and returns the result.\n
+
+        Parameters:\n
+        self (object - gachaHandler) : the gachaHandler object.\n
+        user_id (int) : the id of the user.\n
+
+        Returns:\n
+        random_card (object - card) : the result of the spin.\n
+        spin_index (int) : the type of spin.\n
+
+        """
+
+        ##----------------------------------------------------------------/
+
+        async def get_rarity():
+
+            chances = {
+                "Standard": 0.55,
+                "Notable": 0.30,
+                "Distinct": 0.12,
+                "Prime": 0.03,
+                "Exclusive": 0.00
+            }
+            random_number = random.random()
+
+            selection = ""
+
+            cumulative_probability = 0
+
+            for value, probability in chances.items():
+                cumulative_probability += probability
+
+                if(random_number <= cumulative_probability):
+                    selection = value
+                    break
+
+            if(selection == "Standard"):
+                rarity = 1
+
+            elif(selection == "Notable"):
+                rarity = 2
+
+            elif(selection == "Distinct"):
+                rarity = 3
+            
+            elif(selection == "Prime"):
+                rarity = 4
+
+            else:
+                rarity = 5
+
+            return rarity
+        
+        ##----------------------------------------------------------------/
+
+        possible_options = []
+        spin_index = 0
+
+        rarity = await get_rarity()
+
+        for card in self.cards:
+
+            if(card.rarity.identifier == rarity):
+                possible_options.append(card)
+
+        random_card = random.choice(possible_options)
+
+        return random_card

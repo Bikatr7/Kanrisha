@@ -41,6 +41,31 @@ class adminCommandHandler:
 
         kanrisha_client = inc_kanrisha_client
 
+        ##-------------------start-of-check_if_admin()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        async def check_if_admin(interaction:discord.Interaction) -> bool:
+
+            """
+            
+            Checks if the user is an admin.\n
+
+            Parameters:\n
+            interaction (object - discord.Interaction) : the interaction object.\n
+
+            Returns:\n
+            is_admin (bool) : whether or not the user is an admin.\n
+
+            """
+
+            is_admin = True
+
+            ## admin check
+            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
+                is_admin = False
+            
+            return is_admin
+
         ##-------------------start-of-trigger_early-shutdown()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         async def trigger_early_shutdown_logic(interaction:discord.Interaction) -> None:
@@ -58,8 +83,7 @@ class adminCommandHandler:
             """
 
             ## admin check
-            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
+            if(check_if_admin(interaction) == False):
                 return
 
             await interaction.response.send_message("Shutting down...", delete_after=3.0, ephemeral=True)
@@ -103,8 +127,7 @@ class adminCommandHandler:
             """
 
             ## admin check
-            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids and not is_shutdown_protocol):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
+            if(check_if_admin(interaction) == False):
                 return
 
             await kanrisha_client.interaction_handler.send_log_file(kanrisha_client.get_channel(kanrisha_client.log_channel_id), is_forced=True,  forced_by=interaction.user.name) ## type: ignore
@@ -130,8 +153,7 @@ class adminCommandHandler:
             """
 
             ## admin check
-            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids and not is_shutdown_protocol):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
+            if(check_if_admin(interaction) == False):
                 return
 
             await kanrisha_client.remote_handler.reset_remote_storage(is_forced=True, forced_by=interaction.user.name)
@@ -159,8 +181,7 @@ class adminCommandHandler:
             """
 
             ## admin check
-            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
+            if(check_if_admin(interaction) == False):
                 return
 
             ## marked ids
@@ -269,8 +290,7 @@ class adminCommandHandler:
             """
             
             ## admin check
-            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
+            if(check_if_admin(interaction) == False):
                 return
             
             members = [member for member in interaction.guild.members] ## type: ignore (we know it's not None)
@@ -298,8 +318,7 @@ class adminCommandHandler:
             """
 
             ## admin check
-            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
-                await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
+            if(check_if_admin(interaction) == False):
                 return
                     
             member_requesting = interaction.user
@@ -376,8 +395,7 @@ class adminCommandHandler:
             """
 
             ## admin check
-            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
-                await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
+            if(check_if_admin(interaction) == False):
                 return
 
             await kanrisha_client.remote_handler.load_local_storage()
@@ -402,8 +420,7 @@ class adminCommandHandler:
             """
 
             ## admin check
-            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
-                await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
+            if(check_if_admin(interaction) == False):
                 return
             
             ## get remote up to date
@@ -437,8 +454,7 @@ class adminCommandHandler:
             """
 
             ## admin check
-            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
-                await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
+            if(check_if_admin(interaction) == False):
                 return
 
             help_message = (

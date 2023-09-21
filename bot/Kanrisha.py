@@ -93,8 +93,24 @@ class Kanrisha(discord.Client):
 
         """
 
-        ## loads the members from the remote storage
-        await self.remote_handler.load_remote_storage()
+        try:
+
+            ## loads the remote storage
+            await self.remote_handler.load_remote_storage()
+
+        ## if it breaks, reset remote but do not fill it, load backup from local, and refresh remote
+        except:
+
+            await self.file_ensurer.logger.log_action("ERROR", "Kanrisha", "Failed to load remote storage. Resetting remote storage.")
+
+            await self.remote_handler.delete_remote_storage()
+            await self.remote_handler.create_remote_storage()
+
+            await self.remote_handler.load_local_storage()
+
+            await self.refresh_remote_storage()
+
+            await self.file_ensurer.logger.log_action("WARNING", "Kanrisha", "Remote storage reset with local storage.")
 
         ## setups moderation tasks
         await self.slash_command_handler.event_handler.setup_moderation()

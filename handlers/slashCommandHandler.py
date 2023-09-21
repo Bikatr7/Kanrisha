@@ -54,7 +54,20 @@ class slashCommandHandler:
     
         ##-------------------start-of-check_if_registered()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        async def check_if_registered(self, interaction:discord.Interaction, register_check:bool = False):
+        async def check_if_registered(interaction:discord.Interaction, register_check:bool = False):
+
+            """
+
+            Checks if the user is registered.\n
+
+            Parameters:\n
+            interaction (object - discord.Interaction) : the interaction object.\n
+            register_check (bool) : whether or not the check is for the register command.\n
+
+            Returns:\n
+            None.\n
+
+            """
 
             registered_member_ids = [member.member_id for member in kanrisha_client.remote_handler.member_handler.members]
 
@@ -69,7 +82,7 @@ class slashCommandHandler:
             
             else:
                 return True
-            
+    
         ##-------------------start-of-get_member_id()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         async def get_member_id(interaction:discord.Interaction, member:discord.Member | discord.User | None = None) -> typing.Tuple[syndicateMember | None, int, str, bool]:
@@ -129,7 +142,7 @@ class slashCommandHandler:
 
             """
 
-            if(await check_if_registered(self, interaction) == False):
+            if(await check_if_registered(interaction) == False):
                 return
 
             spin_result, spin_index = await kanrisha_client.remote_handler.gacha_handler.spin_wheel(interaction.user.id)
@@ -150,7 +163,6 @@ class slashCommandHandler:
             Spins a wheel 10 times.\n
 
             Parameters:\n
-            self (object - slashCommandHandler) : the slashCommandHandler object.\n
             interaction (object - discord.Interaction) : the interaction object.\n
 
             Returns:\n
@@ -158,7 +170,7 @@ class slashCommandHandler:
 
             """
 
-            if(await check_if_registered(self, interaction) == False):
+            if(await check_if_registered(interaction) == False):
                 return
 
             target_member, _, _, _ = await get_member_id(interaction) 
@@ -173,6 +185,38 @@ class slashCommandHandler:
                 await kanrisha_client.remote_handler.member_handler.update_spin_value(target_member.member_id, 1, spin_index) ## type: ignore (we know it's not None)
 
             await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, multi_spin)
+
+        ##-------------------start-of-gacha_spin()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        @kanrisha_client.tree.command(name="gacha-spin", description="Spins the gacha wheel.")
+        async def gacha_spin(interaction: discord.Interaction):
+
+            """
+
+            Spins the gacha wheel.\n
+
+            Parameters:\n
+            interaction (object - discord.Interaction) : the interaction object.\n
+
+            Returns:\n
+            None.\n
+
+            """
+
+            if(await check_if_registered(interaction) == False):
+                return
+
+            ## admin check
+            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
+                is_admin = False
+
+            card = await kanrisha_client.remote_handler.gacha_handler.spin_gacha(interaction.user.id)
+
+            embed = discord.Embed(title=f"{card.name}", description=f"Rarity: {card.rarity.name}", color=0xC0C0C0)
+            embed.set_image(url=card.picture_url)
+
+            await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, embed=embed)
 
         ##-------------------start-of-register()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -199,7 +243,7 @@ class slashCommandHandler:
             - You may have to register multiple times during the testing phase.\n
             """
 
-            if(await check_if_registered(self, interaction, register_check=True) == True):
+            if(await check_if_registered(interaction, register_check=True) == True):
                 error_message = "You are already registered."
 
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, response=error_message, delete_after=5.0, is_ephemeral=True)
@@ -280,7 +324,7 @@ class slashCommandHandler:
 
             """
 
-            if(await check_if_registered(self, interaction) == False):
+            if(await check_if_registered(interaction) == False):
                 return
             
             is_ephemeral = True
@@ -337,7 +381,7 @@ class slashCommandHandler:
             is_admin = False
 
             ## Check if the user is registered
-            if(await check_if_registered(self, interaction) == False):
+            if(await check_if_registered(interaction) == False):
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not registered.", delete_after=5.0, is_ephemeral=True)
                 return
             
@@ -396,7 +440,7 @@ class slashCommandHandler:
             """
 
             ## Check if the user is registered
-            if(not await check_if_registered(self, interaction)):
+            if(not await check_if_registered(interaction)):
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not registered.", delete_after=5.0, is_ephemeral=True)
                 return
 

@@ -187,7 +187,8 @@ class remoteHandler():
             card_id bigint primary key,
             card_name varchar(32) not null,
             card_rarity int not null,
-            card_picture_path varchar(32) not null
+            card_picture_path varchar(32) not null,
+            card_picture_url varchar(32) not null
         )
         """
 
@@ -272,19 +273,21 @@ class remoteHandler():
 
             for card in self.gacha_handler.cards:
 
-                ## card_id, card_name, card_rarity, card_picture_path
+                ## card_id, card_name, card_rarity, card_picture_path, card_picture_url
                 new_id = card.id
                 new_name = card.name
-                new_rarity = card.rarity
+                new_rarity = card.rarity.identifier
                 new_picture_path = os.path.basename(card.picture_path)
+                new_picture_url = card.picture_url
 
-                card_details = [str(new_id), new_name, str(new_rarity), new_picture_path]
+                card_details = [str(new_id), new_name, str(new_rarity), new_picture_path, new_picture_url]
 
                 insert_dict = {
                     "card_id" : new_id,
                     "card_name" : new_name,
                     "card_rarity" : new_rarity,
-                    "card_picture_path" : new_picture_path
+                    "card_picture_path" : new_picture_path,
+                    "card_picture_url" : new_picture_url
                 }
 
                 await self.connection_handler.insert_into_table(table_name, insert_dict)
