@@ -46,6 +46,8 @@ class slashCommandHandler:
 
         archive_channel_id = 1146979933416067163
 
+        syndicate_role_id = 1146901009248026734 
+
         self.event_handler = eventHandler(kanrisha_client)
 
         self.goose_exam = gooseExam(kanrisha_client)
@@ -82,47 +84,7 @@ class slashCommandHandler:
             
             else:
                 return True
-    
-        ##-------------------start-of-get_member_id()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        async def get_member_id(interaction:discord.Interaction, member:discord.Member | discord.User | None = None) -> typing.Tuple[syndicateMember | None, int, str, bool]:
-
-            """
-            
-            Gets the member id of the member.\n
-            
-            Parameters:\n
-            interaction (object - discord.Interaction) : the interaction object.\n
-            member (object - discord.Member | discord.User | None) : the member object.\n
-
-            Returns:\n
-            target_member (object - syndicateMember | None) : the syndicateMember object.\n
-            target_member_id (int) : the member id.\n
-            image_url (str) : the image url.\n
-            is_self_request (bool) : whether or not the request is for the user's own profile.\n
-
-            """
-
-            target_member = None
-
-            is_self_request = False
-
-            if(member):
-
-                target_member_id = member.id
-                image_url = member.display_avatar.url
-                
-            else:
-                is_self_request = True
-                target_member_id = interaction.user.id
-                image_url = interaction.user.display_avatar.url
-
-            for syndicate_member in kanrisha_client.remote_handler.member_handler.members:
-                    
-                    if(target_member_id == syndicate_member.member_id):
-                        target_member = syndicate_member
-
-            return target_member, target_member_id, image_url, is_self_request
 
         ##-------------------start-of-spin()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -147,7 +109,7 @@ class slashCommandHandler:
 
             spin_result, spin_index = await kanrisha_client.remote_handler.gacha_handler.spin_wheel(interaction.user.id)
 
-            target_member, _, _, _ = await get_member_id(interaction) 
+            target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction)
 
             await kanrisha_client.remote_handler.member_handler.update_spin_value(target_member.member_id, 1, spin_index) ## type: ignore (we know it's not None)
 
@@ -173,7 +135,7 @@ class slashCommandHandler:
             if(await check_if_registered(interaction) == False):
                 return
 
-            target_member, _, _, _ = await get_member_id(interaction) 
+            target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction)
 
             multi_spin = ""
             
@@ -217,7 +179,7 @@ class slashCommandHandler:
             embed.set_image(url=card.picture_url)
 
             ## get the syndicateMember object for the target member, and add the card id to the member's owned_card_ids list if not already owned
-            target_member, _, _, _ = await get_member_id(interaction)
+            target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction)
 
             if(card.id not in target_member.owned_card_ids): ## type: ignore (we know it's not None)
                 target_member.owned_card_ids.append(card.id) ## type: ignore (we know it's not None)
@@ -342,7 +304,7 @@ class slashCommandHandler:
             
             is_ephemeral = True
 
-            target_member, _, image_url, self_request = await get_member_id(interaction, member)
+            target_member, _, image_url, self_request = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, member)
 
             if(target_member == None):
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That user is not registered.", delete_after=5.0, is_ephemeral=True)
@@ -403,8 +365,8 @@ class slashCommandHandler:
                 is_admin = True
 
             ## get the syndicateMember objects for the sender and the transfer target     
-            sender_member, _, _, _ = await get_member_id(interaction, interaction.user)
-            transfer_target_member, _, _, _ = await get_member_id(interaction, member)
+            sender_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, interaction.user)
+            transfer_target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, member)
 
             if(transfer_target_member == None):
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That user is not registered.", delete_after=5.0, is_ephemeral=True)
@@ -435,7 +397,57 @@ class slashCommandHandler:
         
             await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)
 
-        ##-------------------start-of-leaderboard()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+##-------------------start-of-get_deck()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        @kanrisha_client.tree.command(name="deck", description="Displays the user's deck.")
+        async def get_deck(interaction: discord.Interaction, member:discord.Member | None) -> None:
+
+            """
+
+            Displays the user's deck.\n
+
+            Parameters:\n
+            interaction (object - discord.Interaction) : the interaction object.\n
+            member (object - discord.Member | None) : the member object.\n
+            
+            Returns:\n
+            None.\n
+
+            """
+
+            ## Check if the user is registered
+            if(not await check_if_registered(interaction)):
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not registered.", delete_after=5.0, is_ephemeral=True)
+                return
+            
+            ## get the syndicateMember object for the target member
+            target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, member)
+
+            if(target_member.owned_card_ids == []): ## type: ignore (we know it's not None)
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You don't have any cards.", delete_after=5.0, is_ephemeral=True)
+                return
+            
+            ## get the card objects for the target member's owned cards
+            owned_cards = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
+
+            ## sort the cards by rarity
+            owned_cards.sort(key=lambda x: x.rarity.identifier, reverse=True)
+
+            embed = discord.Embed(title="Deck", description=f"{owned_cards[0].rarity.name} {owned_cards[0].name}", color=0xC0C0C0)
+            embed.set_image(url=owned_cards[0].picture_url)
+            embed.set_footer(text=f"1/{len(owned_cards)}")
+
+            left_button = discord.ui.Button(style=discord.ButtonStyle.gray, custom_id=f"deck_left_{interaction.user.id}", label=":arrow_backward:")
+            right_button = discord.ui.Button(style=discord.ButtonStyle.gray, custom_id=f"deck_right_{interaction.user.id}", label=":arrow_forward:")
+
+            view = discord.ui.View(timeout=300)
+
+            view.add_item(left_button)
+            view.add_item(right_button)
+
+            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed, view=view)
+            
+##-------------------start-of-leaderboard()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.tree.command(name="leaderboard", description="Sends the leaderboard.")
         async def leaderboard(interaction: discord.Interaction):
@@ -445,7 +457,7 @@ class slashCommandHandler:
             Sends the leaderboards.\n
 
             Parameters:\n
-            self (object - slashCommandHandler) : the slashCommandHandler object.\n
+            interaction (object - discord.Interaction) : the interaction object.\n
 
             Returns:\n
             None.\n
@@ -474,7 +486,6 @@ class slashCommandHandler:
             Gets the luck leaderboard.\n
 
             Parameters:\n
-            self (object - slashCommandHandler) : the slashCommandHandler object.\n
             interaction (object - discord.Interaction) : the interaction object.\n
 
             Returns:\n
@@ -535,37 +546,49 @@ class slashCommandHandler:
             Gets the balance leaderboard.\n
 
             Parameters:\n
-            self (object - slashCommandHandler) : the slashCommandHandler object.\n
+            interaction (object - discord.Interaction) : the interaction object.\n
 
             Returns:\n
             balance_leaderboard (object - discord.Embed) : the embed object.\n
 
             """
 
-            ## Sort the list based on the scores in descending order and then take only the top 10, but skip admins
-            non_admin_members = [member for member in kanrisha_client.remote_handler.member_handler.members if member.member_id not in kanrisha_client.interaction_handler.admin_user_ids]
-
-            top_10_members = sorted(non_admin_members, key=lambda x: x.credits, reverse=True)[:10]
-
+            ## Sort the list based on the scores in descending order and then take only the non-admin members
+            non_admin_members = [
+                member for member in kanrisha_client.remote_handler.member_handler.members 
+                if member.member_id not in kanrisha_client.interaction_handler.admin_user_ids
+            ]
+            
+            ## Sort the non-admin members based on credits in descending order
+            sorted_non_admin_members = sorted(non_admin_members, key=lambda x: x.credits, reverse=True)
+            
+            ## Take the top 10 members for the leaderboard
+            top_10_members = sorted_non_admin_members[:10]
+            
             ## Find the rank of the user calling the command if they are not an admin
             user_rank = None
-            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids): 
-                for rank, member in enumerate(non_admin_members, 1):
-                    if(member.member_id == interaction.user.id):
+            if interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids:
+                for rank, member in enumerate(sorted_non_admin_members, 1):
+                    if member.member_id == interaction.user.id:
                         user_rank = rank
                         break
-
+            
             ## Construct the leaderboard message
             leaderboard_message = ""
             for member in top_10_members:
                 leaderboard_message += f"**{member.member_name}** - {member.credits}\n"
-
-            balance_leaderboard = discord.Embed(title="Balance Leaderboard", description=leaderboard_message, color=0xC0C0C0)
+            
+            balance_leaderboard = discord.Embed(
+                title="Balance Leaderboard",
+                description=leaderboard_message,
+                color=0xC0C0C0
+            )
             balance_leaderboard.set_thumbnail(url=kanrisha_client.file_ensurer.bot_thumbnail_url)
-
-            if(user_rank is not None):  # Only set the footer with rank if the user is not an admin
+            
+            ## Only set the footer with rank if the user is not an admin
+            if user_rank is not None:
                 balance_leaderboard.set_footer(text=f"Your rank is #{user_rank}.")
-
+            
             return balance_leaderboard
         
 ##-------------------start-of-help_commands()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------

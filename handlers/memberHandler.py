@@ -1,6 +1,9 @@
 ## build-in libraries
 import typing
 
+## third-party libraries
+import discord
+
 ## custom modules
 from handlers.connectionHandler import connectionHandler
 
@@ -171,3 +174,44 @@ class memberHandler:
                 member.spin_scores = tuple(spin_scores_list) # type: ignore
                 
                 break
+
+##-------------------start-of-get_syndicate_member()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    async def get_syndicate_member(self, interaction:discord.Interaction, member:discord.Member | discord.User | None = None) -> typing.Tuple[syndicateMember | None, int, str, bool]:
+
+        """
+        
+        Gets the member id of the member.\n
+        
+        Parameters:\n
+        interaction (object - discord.Interaction) : the interaction object.\n
+        member (object - discord.Member | discord.User | None) : the member object.\n
+
+        Returns:\n
+        target_member (object - syndicateMember | None) : the syndicateMember object.\n
+        target_member_id (int) : the member id.\n
+        image_url (str) : the image url.\n
+        is_self_request (bool) : whether or not the request is for the user's own profile.\n
+
+        """
+
+        target_member = None
+
+        is_self_request = False
+
+        if(member):
+
+            target_member_id = member.id
+            image_url = member.display_avatar.url
+            
+        else:
+            is_self_request = True
+            target_member_id = interaction.user.id
+            image_url = interaction.user.display_avatar.url
+
+        for syndicate_member in self.members:
+                
+                if(target_member_id == syndicate_member.member_id):
+                    target_member = syndicate_member
+
+        return target_member, target_member_id, image_url, is_self_request

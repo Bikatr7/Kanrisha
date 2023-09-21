@@ -11,6 +11,8 @@ import json
 if(typing.TYPE_CHECKING): ## used for cheating the circular import issue that occurs when i need to type check some things
     from bot.Kanrisha import Kanrisha
 
+from entities.card import card
+
 class eventHandler:
 
     """
@@ -40,8 +42,6 @@ class eventHandler:
         self.file_ensurer = kanrisha_client.file_ensurer
 
         archive_channel_id = 1146979933416067163
-
-        self.syndicate_role_id = 1146901009248026734 
 
         self.banned_messages = []
 
@@ -243,16 +243,14 @@ class eventHandler:
 
             """
 
-            ## check if it's a button press
-            if(interaction.type == discord.InteractionType.component):
+            ##----------------------------------------------/
 
-                ## get the custom id of the button
-                custom_id = interaction.data.get("custom_id") if interaction.data else None
+            async def check_register_button(interaction: discord.Interaction, custom_id) -> None:
 
                 ## if register button was pressed by the correct user
                 if(custom_id == f"register_{interaction.user.id}"):
 
-                    syndicate_role = kanrisha_client.get_guild(interaction.guild_id).get_role(self.syndicate_role_id) ## type: ignore (we know it's not None)
+                    syndicate_role = kanrisha_client.get_guild(interaction.guild_id).get_role(syndicate_role_id) ## type: ignore (we know it's not None)
 
                     ## acknowledge the interaction immediately
                     await interaction.response.defer()
@@ -263,7 +261,7 @@ class eventHandler:
 
                     await interaction.followup.send("You have been registered.", ephemeral=True)
 
-                    await kanrisha_client.file_ensurer.logger.log_action("INFO", "eventHandler", f"{interaction.user.name} has been registered.") ## type: ignore (we know it's not None)
+                    await kanrisha_client.file_ensurer.logger.log_action("INFO", "slashCommandHandler", f"{interaction.user.name} has been registered.") ## type: ignore (we know it's not None)
 
                     await interaction.user.add_roles(syndicate_role) ## type: ignore (we know it's not None)
 
@@ -271,6 +269,81 @@ class eventHandler:
                 elif(custom_id and custom_id.startswith("register_")):
 
                     await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not authorized to use this button.", delete_after=5.0, is_ephemeral=True)
+
+
+            ##----------------------------------------------/
+
+            async def get_owned_cards() -> typing.Tuple[typing.List[card], int]:
+
+                ## get the current card index
+                current_index = int(interaction.message.embeds[0].footer.text.split("/")[0]) - 1 ## type: ignore (we know it's not None)
+
+                ## get the target member's syndicateMember object
+                target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction)
+
+                owned_cards = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
+
+                owned_cards.sort(key=lambda x: x.rarity.identifier, reverse=True)
+
+                return owned_cards, current_index
+
+            ##----------------------------------------------/
+
+            async def check_left_deck_button(interaction: discord.Interaction, custom_id) -> None:
+
+                ## if left deck button was pressed by the correct user
+                if(custom_id == f"deck_left_{interaction.user.id}"):
+
+                    ## get the current cards and index
+                    owned_cards, current_index = await get_owned_cards()
+
+                    ## calculate the new index to display
+                    new_index = current_index - 1 if current_index > 0 else len(owned_cards) - 1
+
+                    card_to_display = owned_cards[new_index]
+
+                    new_embed = discord.Embed(title="Deck", description=f"{card_to_display.rarity.name} {card_to_display.name}", color=0xC0C0C0)
+                    new_embed.set_image(url=card_to_display.picture_url)
+                    new_embed.set_footer(text=f"{new_index + 1}/{len(owned_cards)}")
+
+                    await interaction.response.edit_message(embed=new_embed)
+
+            ##----------------------------------------------/
+
+            async def check_right_deck_button(interaction: discord.Interaction, custom_id) -> None:
+
+                ## if right deck button was pressed by the correct user
+                if(custom_id == f"deck_right_{interaction.user.id}"):
+
+                    ## get the current cards and index
+                    owned_cards, current_index = await get_owned_cards()
+
+                    ## calculate the new index to display
+                    new_index = current_index + 1 if current_index < len(owned_cards) - 1 else 0
+
+                    card_to_display = owned_cards[new_index]
+
+                    new_embed = discord.Embed(title="Deck", description=f"{card_to_display.rarity.name} {card_to_display.name}", color=0xC0C0C0)
+                    new_embed.set_image(url=card_to_display.picture_url)
+                    new_embed.set_footer(text=f"{new_index + 1}/{len(owned_cards)}")
+
+                    await interaction.response.edit_message(embed=new_embed)
+
+            ##----------------------------------------------/
+                
+            ## check if it's a button press
+            if(interaction.type == discord.InteractionType.component):
+
+                ## get the custom id of the button
+                custom_id = interaction.data.get("custom_id") if interaction.data else None
+
+                ## check if the button is the register button
+                await check_register_button(interaction, custom_id)
+
+                await check_left_deck_button(interaction, custom_id)
+
+                await check_right_deck_button(interaction, custom_id)
+
 
 ##-------------------start-of-setup_moderation()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
