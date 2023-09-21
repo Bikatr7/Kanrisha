@@ -83,7 +83,7 @@ class adminCommandHandler:
             """
 
             ## admin check
-            if(check_if_admin(interaction) == False):
+            if(await check_if_admin(interaction) == False):
                 return
 
             await interaction.response.send_message("Shutting down...", delete_after=3.0, ephemeral=True)
@@ -127,7 +127,7 @@ class adminCommandHandler:
             """
 
             ## admin check
-            if(check_if_admin(interaction) == False):
+            if(await check_if_admin(interaction) == False):
                 return
 
             await kanrisha_client.interaction_handler.send_log_file(kanrisha_client.get_channel(kanrisha_client.log_channel_id), is_forced=True,  forced_by=interaction.user.name) ## type: ignore
@@ -153,7 +153,7 @@ class adminCommandHandler:
             """
 
             ## admin check
-            if(check_if_admin(interaction) == False):
+            if(await check_if_admin(interaction) == False):
                 return
 
             await kanrisha_client.remote_handler.reset_remote_storage(is_forced=True, forced_by=interaction.user.name)
@@ -181,7 +181,7 @@ class adminCommandHandler:
             """
 
             ## admin check
-            if(check_if_admin(interaction) == False):
+            if(await check_if_admin(interaction) == False):
                 return
 
             ## marked ids
@@ -290,7 +290,7 @@ class adminCommandHandler:
             """
             
             ## admin check
-            if(check_if_admin(interaction) == False):
+            if(await check_if_admin(interaction) == False):
                 return
             
             members = [member for member in interaction.guild.members] ## type: ignore (we know it's not None)
@@ -318,7 +318,7 @@ class adminCommandHandler:
             """
 
             ## admin check
-            if(check_if_admin(interaction) == False):
+            if(await check_if_admin(interaction) == False):
                 return
                     
             member_requesting = interaction.user
@@ -395,7 +395,7 @@ class adminCommandHandler:
             """
 
             ## admin check
-            if(check_if_admin(interaction) == False):
+            if(await check_if_admin(interaction) == False):
                 return
 
             await kanrisha_client.remote_handler.load_local_storage()
@@ -420,7 +420,7 @@ class adminCommandHandler:
             """
 
             ## admin check
-            if(check_if_admin(interaction) == False):
+            if(await check_if_admin(interaction) == False):
                 return
             
             ## get remote up to date
@@ -454,7 +454,7 @@ class adminCommandHandler:
             """
 
             ## admin check
-            if(check_if_admin(interaction) == False):
+            if(await check_if_admin(interaction) == False):
                 return
 
             help_message = (

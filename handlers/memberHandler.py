@@ -60,15 +60,17 @@ class memberHandler:
 
         self.members.clear()
 
-        id_list, name_list, spin_scores_list, credits_list = await self.connection_handler.read_multi_column_query("select member_id, member_name, spin_scores, credits from members")
+        id_list, name_list, spin_scores_list, owned_card_ids, credits_list = await self.connection_handler.read_multi_column_query("select member_id, member_name, spin_scores, owned_card_ids, credits from members")
 
         for i in range(len(id_list)):
 
             spin_scores = spin_scores_list[i].strip("(").strip(")").split(",")
 
-            spin_scores = (int(spin_scores[0]), int(spin_scores[1]), int(spin_scores[2]))
+            spin_scores = (int(spin_scores[0]), int(spin_scores[1]), int(spin_scores[2]), int(spin_scores[3]), int(spin_scores[4]))
 
-            new_member = syndicateMember(int(id_list[i]), name_list[i], spin_scores, [], int(credits_list[i]))
+            owned_cards = [int(card_id) for card_id in owned_card_ids[i].strip("[").strip("]").split(",")] if owned_card_ids[i].strip("[").strip("]") != "" else []
+
+            new_member = syndicateMember(int(id_list[i]), name_list[i], spin_scores, owned_cards, int(credits_list[i]))
             self.members.append(new_member)
 
         await self.file_ensurer.logger.log_action("INFO", "memberHandler", "Loaded members from remote.")
@@ -97,19 +99,19 @@ class memberHandler:
 
                 values = line.strip().split(',')
 
-                spin_scores = tuple([int(score) for score in values[2].strip('"').split('.')[:3]]) 
+                spin_scores = tuple([int(score) for score in values[2].strip('"').split('.')[:5]]) 
 
-                card_ids = []
+                card_ids = [int(card_id) for card_id in values[3].strip('"').split('.')] if values[3].strip('"') != "" else []
 
                 ## explicit type hinting to avoid pylance warning below
-                spin_scores = (spin_scores[0], spin_scores[1], spin_scores[2])
+                spin_scores = (spin_scores[0], spin_scores[1], spin_scores[2], spin_scores[3], spin_scores[4])
 
                 self.members.append(syndicateMember(int(values[0]), values[1], spin_scores, card_ids, int(values[4]))) 
 
         await self.file_ensurer.logger.log_action("INFO", "memberHandler", "Loaded members from local.")        
 ##-------------------start-of-add_new_member()---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def add_new_member(self, inc_member_id:int, inc_member_name:str, inc_spin_scores:typing.Tuple[int,int,int],  inc_credits:int) -> None:
+    async def add_new_member(self, inc_member_id:int, inc_member_name:str, inc_spin_scores:typing.Tuple[int,int,int,int,int],  inc_credits:int) -> None:
 
         """
         
@@ -125,7 +127,7 @@ class memberHandler:
 
         ## member id, member_name
 
-        score_string = f'"{inc_spin_scores[0]}.{inc_spin_scores[1]}.{inc_spin_scores[2]}"'
+        score_string = f'"{inc_spin_scores[0]}.{inc_spin_scores[1]}.{inc_spin_scores[2]}.{inc_spin_scores[3]}.{inc_spin_scores[4]}"'
 
         card_id_string = ""
 

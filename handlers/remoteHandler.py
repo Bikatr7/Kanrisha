@@ -175,9 +175,9 @@ class remoteHandler():
         create_members_query = """
         create table if not exists members (
             member_id bigint primary key,
-            member_name varchar(32) not null,
-            spin_scores varchar(32) not null,
-            owned_card_ids varchar(32) not null,
+            member_name varchar(256) not null,
+            spin_scores varchar(256) not null,
+            owned_card_ids varchar(256) not null,
             credits int not null
         )
         """
@@ -185,10 +185,10 @@ class remoteHandler():
         create_cards_query = """
         create table if not exists cards (
             card_id bigint primary key,
-            card_name varchar(32) not null,
+            card_name varchar(256) not null,
             card_rarity int not null,
-            card_picture_path varchar(32) not null,
-            card_picture_url varchar(32) not null
+            card_picture_path varchar(256) not null,
+            card_picture_url varchar(256) not null
         )
         """
 
@@ -243,12 +243,14 @@ class remoteHandler():
                 score_string = ""
                 card_string = ""
 
-                score_string = f'"{new_spin_scores[0]}.{new_spin_scores[1]}.{new_spin_scores[2]}"'
+                score_string = f'"{new_spin_scores[0]}.{new_spin_scores[1]}.{new_spin_scores[2]}.{new_spin_scores[3]}.{new_spin_scores[4]}"'
 
                 for card_id in owned_card_ids:
-                    card_string += f'"{card_id}."'
+                    card_string += f"{card_id}."
 
                 card_string = card_string[:-1]
+
+                card_string = '"' + card_string + '"'
 
                 member_details = [str(new_id), new_name, score_string, card_string, str(new_credits)]
 
