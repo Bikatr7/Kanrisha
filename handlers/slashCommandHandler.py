@@ -209,7 +209,7 @@ class slashCommandHandler:
             ## admin check
             if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
-                is_admin = False
+                return
 
             card = await kanrisha_client.remote_handler.gacha_handler.spin_gacha(interaction.user.id)
 
