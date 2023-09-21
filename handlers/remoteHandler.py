@@ -1,4 +1,5 @@
 ## built-in modules
+import os
 
 ## custom modules
 from modules.toolkit import toolkit
@@ -275,7 +276,7 @@ class remoteHandler():
                 new_id = card.id
                 new_name = card.name
                 new_rarity = card.rarity
-                new_picture_path = card.picture_path
+                new_picture_path = os.path.basename(card.picture_path)
 
                 card_details = [str(new_id), new_name, str(new_rarity), new_picture_path]
 

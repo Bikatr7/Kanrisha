@@ -1,6 +1,7 @@
 ## built-in libraries
 import random
 import typing
+import os
 
 ## custom modules
 from entities.card import card
@@ -117,7 +118,7 @@ class gachaHandler:
                 card_id = int(values[0])
                 card_name = values[1]
                 card_rarity = int(values[2])
-                card_picture_path = values[3]
+                card_picture_path = os.path.join(self.file_ensurer.gacha_images_dir, values[3])
 
                 new_card = card(card_id, card_name, card_rarity, card_picture_path)
 

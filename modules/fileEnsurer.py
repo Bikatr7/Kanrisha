@@ -45,7 +45,6 @@ class fileEnsurer:
       self.members_dir = os.path.join(self.config_dir, "members")
       self.images_dir = os.path.join(self.config_dir, "images")
       self.lib_dir = os.path.join(self.config_dir, "lib")
-      self.bot_images_dir = os.path.join(self.images_dir, "bot images")
 
       ##----------------------------------------------------------------paths----------------------------------------------------------------
 
@@ -93,6 +92,7 @@ class fileEnsurer:
       await self.ensure_bot_files()
       await self.ensure_member_files()
       await self.ensure_lib_files()
+      await self.ensure_image_files()
 
 ##--------------------start-of-create_needed_base_directories()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -113,9 +113,9 @@ class fileEnsurer:
       await self.file_handler.standard_create_directory(self.bot_details_dir)
 
       await self.file_handler.standard_create_directory(self.members_dir)
+
       await self.file_handler.standard_create_directory(self.images_dir)
 
-      await self.file_handler.standard_create_directory(self.bot_images_dir)
       await self.file_handler.standard_create_directory(self.lib_dir)
 
 ##--------------------start-of-ensure_bot_files()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -191,7 +191,29 @@ class fileEnsurer:
       await self.file_handler.standard_create_file(self.banned_links_path)
 
       await self.file_handler.standard_create_file(self.role_persistence_path)
-               
+
+##--------------------start-of-ensure_image_files()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   async def ensure_image_files(self) -> None:
+
+      """
+      
+      Ensures that the image files are present and ready to be used.\n
+
+      Parameters:\n
+      self (object - fileEnsurer) : the fileEnsurer object.\n
+
+      Returns:\n
+      None.\n
+      
+      """
+
+      self.bot_images_dir = os.path.join(self.images_dir, "bot images")
+      self.gacha_images_dir = os.path.join(self.images_dir, "gacha images")
+
+      await self.file_handler.standard_create_directory(self.bot_images_dir)
+      await self.file_handler.standard_create_directory(self.gacha_images_dir)
+
 ##-------------------start-of-get_elapsed_time()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
    def get_token(self) -> str:
