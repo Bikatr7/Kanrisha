@@ -353,7 +353,6 @@ class slashCommandHandler:
 
             ## Check if the user is registered
             if(await check_if_registered(interaction) == False):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not registered.", delete_after=5.0, is_ephemeral=True)
                 return
             
             ## Check if the user is an admin
@@ -413,7 +412,6 @@ class slashCommandHandler:
 
             ## Check if the user is registered
             if(await check_if_registered(interaction) == False):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not registered.", delete_after=5.0, is_ephemeral=True)
                 return
             
             ## get the syndicateMember object for the target member
@@ -457,7 +455,6 @@ class slashCommandHandler:
 
             ## Check if the user is registered
             if(not await check_if_registered(interaction)):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not registered.", delete_after=5.0, is_ephemeral=True)
                 return
             
             ## get the syndicateMember object for the target member
