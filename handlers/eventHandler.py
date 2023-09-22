@@ -275,13 +275,13 @@ class eventHandler:
 
             ##----------------------------------------------/
 
-            async def get_owned_cards() -> typing.Tuple[typing.List[card], int]:
+            async def get_owned_cards(deck_owner:discord.User) -> typing.Tuple[typing.List[card], int]:
 
                 ## get the current card index
                 current_index = int(interaction.message.embeds[0].footer.text.split("/")[0]) - 1 ## type: ignore (we know it's not None)
 
                 ## get the target member's syndicateMember object
-                target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction)
+                target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, deck_owner) 
 
                 owned_cards = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
 
@@ -291,13 +291,20 @@ class eventHandler:
 
             ##----------------------------------------------/
 
-            async def check_left_deck_button(interaction: discord.Interaction, custom_id) -> None:
+            async def check_left_deck_button(interaction: discord.Interaction, custom_id:str) -> None:
 
                 ## if left deck button was pressed by the correct user
-                if(custom_id == f"deck_left_{interaction.user.id}"):
+
+                target_id_portion = f"deck_left_{interaction.user.id}."
+
+                if(target_id_portion in custom_id):
+
+                    ## get deck owner member object
+                    member_id = int(custom_id.replace(target_id_portion, ""))
+                    deck_owner = await kanrisha_client.fetch_user(member_id)
 
                     ## get the current cards and index
-                    owned_cards, current_index = await get_owned_cards()
+                    owned_cards, current_index = await get_owned_cards(deck_owner)
 
                     ## calculate the new index to display
                     new_index = current_index - 1 if current_index > 0 else len(owned_cards) - 1
@@ -316,13 +323,20 @@ class eventHandler:
 
             ##----------------------------------------------/
 
-            async def check_right_deck_button(interaction: discord.Interaction, custom_id) -> None:
+            async def check_right_deck_button(interaction: discord.Interaction, custom_id:str) -> None:
 
                 ## if right deck button was pressed by the correct user
-                if(custom_id == f"deck_right_{interaction.user.id}"):
+
+                target_id_portion = f"deck_right_{interaction.user.id}."
+
+                if(target_id_portion in custom_id):
+
+                    ## get deck owner member object
+                    member_id = int(custom_id.replace(target_id_portion, ""))
+                    deck_owner = await kanrisha_client.fetch_user(member_id)
 
                     ## get the current cards and index
-                    owned_cards, current_index = await get_owned_cards()
+                    owned_cards, current_index = await get_owned_cards(deck_owner)
 
                     ## calculate the new index to display
                     new_index = current_index + 1 if current_index < len(owned_cards) - 1 else 0
@@ -345,7 +359,7 @@ class eventHandler:
             if(interaction.type == discord.InteractionType.component):
 
                 ## get the custom id of the button
-                custom_id = interaction.data.get("custom_id") if interaction.data else None
+                custom_id = str(interaction.data.get("custom_id")) if interaction.data else ""
 
                 ## check if the button is the register button
                 await check_register_button(interaction, custom_id)

@@ -477,8 +477,13 @@ class slashCommandHandler:
             embed.set_image(url=owned_cards[0].picture_url)
             embed.set_footer(text=f"1/{len(owned_cards)}")
 
-            left_button = discord.ui.Button(style=discord.ButtonStyle.gray, custom_id=f"deck_left_{interaction.user.id}", emoji="◀️")
-            right_button = discord.ui.Button(style=discord.ButtonStyle.gray, custom_id=f"deck_right_{interaction.user.id}",emoji="▶️")
+            ## custom id structure
+            ##  id of command caller | id of member whose deck is being viewed
+            ## _{interaction.user.id}.{member.id}
+            custom_id = f"_{interaction.user.id}.{target_member.member_id}" ## type: ignore (we know it's not None)
+
+            left_button = discord.ui.Button(style=discord.ButtonStyle.gray, custom_id=f"deck_left{custom_id}", emoji="◀️")
+            right_button = discord.ui.Button(style=discord.ButtonStyle.gray, custom_id=f"deck_right{custom_id}", emoji="▶️")
 
             view = discord.ui.View(timeout=300)
 
