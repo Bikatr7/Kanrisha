@@ -47,17 +47,26 @@ class interactionHandler:
 
 ##-------------------start-of-send_response_filter_channel()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def send_response_filter_channel(self, interaction:discord.Interaction, response: typing.Union[str, None] = None, embed: typing.Union[discord.Embed, None] = None, view: typing.Union[discord.ui.View , None] = None, is_admin_only:bool = False, delete_after: typing.Union[float , None] = None, is_ephemeral:bool = False) -> None:
+    async def send_response_filter_channel(self, 
+                                           interaction:discord.Interaction, 
+                                           response: typing.Union[str, None] = None, 
+                                           embed: typing.Union[discord.Embed, None] = None, 
+                                           view: typing.Union[discord.ui.View , None] = None, 
+                                           file:typing.Union[discord.File , None] = None, 
+                                           delete_after: typing.Union[float , None] = None, 
+                                           is_ephemeral:bool = False) -> None:
 
         """
 
-        Sends a response to a channel.\n
+        Sends a response to a channel with filtering.\n
 
         Parameters:\n
         self (object - interactionHandler) : the interactionHandler object.\n
         interaction (object - discord.Interaction) : the interaction object.\n
         response (str | optional) : the response to send.\n
-        is_admin_only (bool | optional) : whether or not to restrict the command to admins only.\n
+        embed (object - discord.Embed | optional) : the embed to send.\n
+        view (object - discord.ui.View | optional) : the view to send.\n
+        file (object - discord.File | optional) : the file to send.\n
         delete_after (float | optional) : how long to wait before deleting the message.\n
         is_ephemeral (bool | optional) : whether or not to make the message ephemeral.\n
 
@@ -66,33 +75,47 @@ class interactionHandler:
 
         """
 
-        ## admin check
-        if(interaction.user.id not in self.admin_user_ids and is_admin_only):
-            await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
+        ## if not correct channel and not admin, send response
+        if(interaction.channel_id not in self.whitelisted_channel_ids and interaction.user.id not in self.admin_user_ids):
+            await interaction.response.send_message(f"Please use {str(self.whitelisted_channel_names)} for this command.", delete_after=5.0, ephemeral=True)
             return
         
-        ## if correct channel or admin, send response
-        if(interaction.channel_id in self.whitelisted_channel_ids or interaction.user.id in self.admin_user_ids):
+        send_args = {}
 
-            if(embed and view):
-                await interaction.response.send_message(embed=embed, view=view, delete_after=delete_after, ephemeral=is_ephemeral)
+        if(response):
+            send_args['content'] = response
 
-            elif(embed):
-                await interaction.response.send_message(embed=embed, delete_after=delete_after, ephemeral=is_ephemeral)
-            
-            elif(response):
-                await interaction.response.send_message(response, delete_after=delete_after, ephemeral=is_ephemeral)
+        if(embed):
+            send_args['embed'] = embed
 
-            else:
-                raise Exception("No response, embed, or view was provided.")
+        if(view):
+            send_args['view'] = view
+
+        if(file):
+            send_args['file'] = file
+
+        if(delete_after):
+            send_args['delete_after'] = delete_after
+
+        if(is_ephemeral):
+            send_args['ephemeral'] = is_ephemeral
+
+        if(response or embed or view or file):
+            await interaction.response.send_message(**send_args)
 
         else:
-
-            await interaction.response.send_message(f"Please use {str(self.whitelisted_channel_names)} for this command.", delete_after=5.0, ephemeral=True)
+            raise Exception("No response, embed, view, or file was provided.")
 
 ##-------------------start-of-send_response_no_filter_channel()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def send_response_no_filter_channel(self, interaction:discord.Interaction, response: typing.Union[str , None] = None, embed: typing.Union[discord.Embed , None] = None, view: typing.Union[discord.ui.View , None] = None, is_admin_only:bool = False, delete_after: typing.Union[float , None] = None, is_ephemeral:bool = False) -> None:
+    async def send_response_no_filter_channel(self, 
+                                              interaction:discord.Interaction, 
+                                              response:typing.Union[str , None] = None, 
+                                              embed:typing.Union[discord.Embed , None] = None, 
+                                              view:typing.Union[discord.ui.View , None] = None, 
+                                              file:typing.Union[discord.File , None] = None, 
+                                              delete_after:typing.Union[float , None] = None, 
+                                              is_ephemeral:bool = False) -> None:
 
         """
 
@@ -102,7 +125,9 @@ class interactionHandler:
         self (object - interactionHandler) : the interactionHandler object.\n
         interaction (object - discord.Interaction) : the interaction object.\n
         response (str | optional) : the response to send.\n
-        is_admin_only (bool | optional) : whether or not to restrict the command to admins only.\n
+        embed (object - discord.Embed | optional) : the embed to send.\n
+        view (object - discord.ui.View | optional) : the view to send.\n
+        file (object - discord.File | optional) : the file to send.\n
         delete_after (float | optional) : how long to wait before deleting the message.\n
         is_ephemeral (bool | optional) : whether or not to make the message ephemeral.\n
 
@@ -111,28 +136,41 @@ class interactionHandler:
 
         """
 
-        ## admin check
-        if(interaction.user.id not in self.admin_user_ids and is_admin_only):
-            await interaction.response.send_message("You do not have permission to use this command.", delete_after=3.0, ephemeral=True)
-            return
+        send_args = {}
+
+        if(response):
+            send_args['content'] = response
+
+        if(embed):
+            send_args['embed'] = embed
+        
+        if(view):
+            send_args['view'] = view
+
+        if(file):
+            send_args['file'] = file
+        
+        if(delete_after):
+            send_args['delete_after'] = delete_after
+
+        if(is_ephemeral):
+            send_args['ephemeral'] = is_ephemeral
+
+        if(response or embed or view or file):
+            await interaction.response.send_message(**send_args)
 
         else:
-
-            if(embed and view):
-                await interaction.response.send_message(embed=embed, view=view, delete_after=delete_after, ephemeral=is_ephemeral)
-
-            elif(embed):
-                await interaction.response.send_message(embed=embed, delete_after=delete_after, ephemeral=is_ephemeral)
-            
-            elif(response):
-                await interaction.response.send_message(response, delete_after=delete_after, ephemeral=is_ephemeral)
-
-            else:
-                raise Exception("No response, embed, or view was provided.")
+            raise Exception("No response, embed, view, or file was provided.")
             
 ##-------------------start-of-send_response_no_filter_channel()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def send_message_to_channel(self, channel:typing.Union[discord.channel.GroupChannel , discord.Thread], response: typing.Union[str , None] = None, embed: typing.Union[discord.Embed , None] = None, view: typing.Union[discord.ui.View , None] = None, file:typing.Union[discord.File, None] = None, delete_after: typing.Union[float , None] = None) -> None:
+    async def send_message_to_channel(self, 
+                                      channel:typing.Union[discord.channel.GroupChannel , discord.Thread], 
+                                      response:typing.Union[str , None] = None, 
+                                      embed:typing.Union[discord.Embed , None] = None, 
+                                      view:typing.Union[discord.ui.View , None] = None, 
+                                      file:typing.Union[discord.File, None] = None, 
+                                      delete_after:typing.Union[float , None] = None) -> None:
 
         """
 
@@ -142,6 +180,9 @@ class interactionHandler:
         self (object - interactionHandler) : the interactionHandler object.\n
         channel (object - discord.channel.GroupChannel | discord.Thread) : the channel to send the message to.\n
         response (str | optional) : the response to send.\n
+        embed (object - discord.Embed | optional) : the embed to send.\n
+        view (object - discord.ui.View | optional) : the view to send.\n
+        file (object - discord.File | optional) : the file to send.\n
         delete_after (float | optional) : how long to wait before deleting the message.\n
     
         Returns:\n
@@ -151,6 +192,9 @@ class interactionHandler:
 
         ## magic dict bullshit to make this work
         send_args = {}
+
+        if(response):
+            send_args['content'] = response
 
         if(embed):
             send_args['embed'] = embed
@@ -165,11 +209,11 @@ class interactionHandler:
             send_args['delete_after'] = delete_after
 
         ## Send the message based on the provided arguments
-        if(embed or view or response or file):
-            await channel.send(response or "", **send_args)
+        if(response or embed or view or file):
+            await channel.send(**send_args)
 
         else:
-            raise Exception("No response, embed, or view was provided.")
+            raise Exception("No response, embed, view, or file was provided.")
 
 ##-------------------start-of-send-log-file()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -190,7 +234,6 @@ class interactionHandler:
         await self.file_ensurer.logger.push_batch()
 
         await self.send_message_to_channel(channel, file=discord.File(self.file_ensurer.log_path)) ## type: ignore (we know it's not None)
-
 
         await self.file_ensurer.logger.clear_log_file()
 

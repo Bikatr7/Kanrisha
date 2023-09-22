@@ -255,7 +255,7 @@ class eventHandler:
                     syndicate_role = kanrisha_client.get_guild(interaction.guild_id).get_role(syndicate_role_id) ## type: ignore (we know it's not None)
 
                     ## acknowledge the interaction immediately
-                    await interaction.response.defer()
+                    await interaction.response.defer(ephemeral=True, thinking=True)
 
                     await kanrisha_client.remote_handler.member_handler.add_new_member(interaction.user.id, interaction.user.name, tuple([0,0,0,0,0]), 50000) # type: ignore
 
@@ -271,7 +271,6 @@ class eventHandler:
                 elif(custom_id and custom_id.startswith("register_")):
 
                     await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not authorized to use this button.", delete_after=5.0, is_ephemeral=True)
-
 
             ##----------------------------------------------/
 
