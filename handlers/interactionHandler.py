@@ -215,6 +215,91 @@ class interactionHandler:
         else:
             raise Exception("No response, embed, view, or file was provided.")
 
+##-------------------start-of-send_followup_to_interaction()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    async def send_followup_to_interaction(self,
+                                      interaction:discord.Interaction,
+                                      response:typing.Union[str , None] = None, 
+                                      embed:typing.Union[discord.Embed , None] = None, 
+                                      view:typing.Union[discord.ui.View , None] = None, 
+                                      file:typing.Union[discord.File, None] = None, 
+                                      is_ephemeral:bool = False) -> None:
+
+        """
+
+        Sends a followup to an interaction.\n
+
+        Parameters:\n
+        self (object - interactionHandler) : the interactionHandler object.\n
+        interaction (object - discord.Interaction) : the interaction object.\n
+        response (str | optional) : the response to send.\n
+        embed (object - discord.Embed | optional) : the embed to send.\n
+        view (object - discord.ui.View | optional) : the view to send.\n
+        file (object - discord.File | optional) : the file to send.\n
+        delete_after (float | optional) : how long to wait before deleting the message.\n
+
+        Returns:\n
+        None.\n
+
+        """
+
+        ## magic dict bullshit to make this work
+        send_args = {}
+
+        if(response):
+            send_args['content'] = response
+
+        if(embed):
+            send_args['embed'] = embed
+
+        if(view):
+            send_args['view'] = view
+
+        if(file):
+            send_args['file'] = file
+
+        if(is_ephemeral):
+            send_args['ephemeral'] = is_ephemeral
+
+        ## Send the message based on the provided arguments
+        if(response or embed or view or file):
+            await interaction.followup.send(**send_args)
+
+        else:
+            raise Exception("No response, embed, view, or file was provided.")
+
+##-------------------start-of-defer_interaction()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    
+    async def defer_interaction(self, 
+                                interaction:discord.Interaction, 
+                                is_ephemeral:bool = False,
+                                is_thinking:bool = False) -> None:
+        
+        """
+        
+        Defers an interaction.\n
+
+        Parameters:\n
+        self (object - interactionHandler) : the interactionHandler object.\n
+        interaction (object - discord.Interaction) : the interaction object.\n
+        is_ephemeral (bool | optional) : whether or not to make the message ephemeral.\n
+        is_thinking (bool | optional) : whether or not to show the thinking indicator.\n
+
+        Returns:\n
+        None.\n
+
+        """
+
+        send_args = {}
+
+        if(is_ephemeral):
+            send_args['ephemeral'] = is_ephemeral
+
+        if(is_thinking):
+            send_args['thinking'] = is_thinking
+
+        await interaction.response.defer(**send_args)
+
 ##-------------------start-of-send-log-file()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     async def send_log_file(self, channel:typing.Union[discord.channel.GroupChannel , discord.Thread], is_forced:bool, forced_by:str | None = None) -> None:
