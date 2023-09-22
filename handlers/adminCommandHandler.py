@@ -420,17 +420,33 @@ class adminCommandHandler:
             None.\n
 
             """
+            
 
             ## admin check
             if(await check_if_admin(interaction) == False):
                 return
             
+            if("drop" in query.lower()):
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You cannot drop tables.", delete_after=5.0, is_ephemeral=True)
+                return
+            
             ## get remote up to date
             await kanrisha_client.refresh_remote_storage()
 
+            description = f"Query : {query}"
+
             try:
-                ## change remote via query
-                await kanrisha_client.remote_handler.connection_handler.execute_query(query)
+
+                if(query.lower().startswith("select")):
+
+                    result = await kanrisha_client.remote_handler.connection_handler.read_multi_column_query(query)
+                
+                    description += f"\n\nResult : \n{result}"
+
+                else:
+                
+                    ## change remote via query
+                    await kanrisha_client.remote_handler.connection_handler.execute_query(query)
 
             except Exception as e:
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, f"Query failed.\n\n{e}", delete_after=5.0, is_ephemeral=True)
@@ -439,7 +455,7 @@ class adminCommandHandler:
             ## pull remote back into instance
             await kanrisha_client.remote_handler.load_remote_storage()
 
-            embed = discord.Embed(title="Query Sent.", description=query, color=0xC0C0C0)
+            embed = discord.Embed(title="Query Sent.", description=description, color=0xC0C0C0)
 
             await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)
 
