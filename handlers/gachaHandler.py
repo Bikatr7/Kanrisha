@@ -161,7 +161,7 @@ class gachaHandler:
 
         """
 
-        if(user_id in self.lucky_number_ids):
+        if(user_id not in self.lucky_number_ids):
             chances = {
                 "<:shining:1144089713934864444>": 0.05,
                 "<:glowing:1144089680934080512>": 0.12,

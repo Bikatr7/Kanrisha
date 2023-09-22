@@ -397,10 +397,12 @@ class adminCommandHandler:
             ## admin check
             if(await check_if_admin(interaction) == False):
                 return
+            
+            await interaction.response.defer(ephemeral=True, thinking=True)
 
             await kanrisha_client.remote_handler.load_local_storage()
 
-            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "Loaded from local.", delete_after=3.0, is_ephemeral=True)
+            await interaction.followup.send("Loaded from local.", ephemeral=True, )
 
 ##-------------------start-of-send-query()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -426,8 +428,13 @@ class adminCommandHandler:
             ## get remote up to date
             await kanrisha_client.refresh_remote_storage()
 
-            ## change remote via query
-            await kanrisha_client.remote_handler.connection_handler.execute_query(query)
+            try:
+                ## change remote via query
+                await kanrisha_client.remote_handler.connection_handler.execute_query(query)
+
+            except Exception as e:
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, f"Query failed.\n\n{e}", delete_after=5.0, is_ephemeral=True)
+                return
 
             ## pull remote back into instance
             await kanrisha_client.remote_handler.load_remote_storage()

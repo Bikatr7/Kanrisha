@@ -43,6 +43,8 @@ class eventHandler:
 
         archive_channel_id = 1146979933416067163
 
+        syndicate_role_id = 1146901009248026734 
+
         self.banned_messages = []
 
         ##-------------------start-of-on_member_remove()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -255,7 +257,7 @@ class eventHandler:
                     ## acknowledge the interaction immediately
                     await interaction.response.defer()
 
-                    await kanrisha_client.remote_handler.member_handler.add_new_member(interaction.user.id, interaction.user.name, tuple([0,0,0]), 50000) # type: ignore
+                    await kanrisha_client.remote_handler.member_handler.add_new_member(interaction.user.id, interaction.user.name, tuple([0,0,0,0,0]), 50000) # type: ignore
 
                     await interaction.delete_original_response()
 
@@ -308,6 +310,10 @@ class eventHandler:
 
                     await interaction.response.edit_message(embed=new_embed)
 
+                elif(custom_id and custom_id.startswith("deck_left_")):
+
+                    await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not authorized to use this button.", delete_after=5.0, is_ephemeral=True)
+
             ##----------------------------------------------/
 
             async def check_right_deck_button(interaction: discord.Interaction, custom_id) -> None:
@@ -328,6 +334,10 @@ class eventHandler:
                     new_embed.set_footer(text=f"{new_index + 1}/{len(owned_cards)}")
 
                     await interaction.response.edit_message(embed=new_embed)
+
+                elif(custom_id and custom_id.startswith("deck_right_")):
+
+                    await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not authorized to use this button.", delete_after=5.0, is_ephemeral=True)
 
             ##----------------------------------------------/
                 

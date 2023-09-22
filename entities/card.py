@@ -1,3 +1,6 @@
+## third-party libraries
+import discord
+
 ##-------------------start-of-rarity--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 class rarity:
@@ -126,3 +129,24 @@ class card:
 
         ## url to the card's picture
         self.picture_url = inc_picture_url
+
+##-------------------start-of-get_display_embed()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    def get_display_embed(self):
+
+        """
+        
+        Returns an embed to display the card.\n
+
+        Parameters:\n
+        self (object - card) : card object.\n
+
+        Returns:\n
+        embed (object - discord.Embed) : embed to display the card.\n
+
+        """
+
+        embed = discord.Embed(title= f"{self.name}", description=f"{self.rarity.name}", color = 0xC0C0C0)
+        embed.set_image(url = self.picture_url)
+
+        return embed

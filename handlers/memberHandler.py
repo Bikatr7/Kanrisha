@@ -111,7 +111,8 @@ class memberHandler:
 
                 self.members.append(syndicateMember(int(values[0]), values[1], spin_scores, card_ids, int(values[4]))) 
 
-        await self.file_ensurer.logger.log_action("INFO", "memberHandler", "Loaded members from local.")        
+        await self.file_ensurer.logger.log_action("INFO", "memberHandler", "Loaded members from local.") 
+               
 ##-------------------start-of-add_new_member()---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     async def add_new_member(self, inc_member_id:int, inc_member_name:str, inc_spin_scores:typing.Tuple[int,int,int,int,int],  inc_credits:int) -> None:

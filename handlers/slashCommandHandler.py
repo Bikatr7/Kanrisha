@@ -46,8 +46,6 @@ class slashCommandHandler:
 
         archive_channel_id = 1146979933416067163
 
-        syndicate_role_id = 1146901009248026734 
-
         self.event_handler = eventHandler(kanrisha_client)
 
         self.goose_exam = gooseExam(kanrisha_client)
@@ -175,8 +173,7 @@ class slashCommandHandler:
 
             card = await kanrisha_client.remote_handler.gacha_handler.spin_gacha(interaction.user.id)
 
-            embed = discord.Embed(title=f"{card.name}", description=f"{card.rarity.name}", color=0xC0C0C0)
-            embed.set_image(url=card.picture_url)
+            embed = card.get_display_embed()
 
             ## get the syndicateMember object for the target member, and add the card id to the member's owned_card_ids list if not already owned
             target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction)
@@ -190,7 +187,6 @@ class slashCommandHandler:
                 target_member.credits += credits_to_add ## type: ignore (we know it's not None)
                 embed.set_footer(text=f"You already own this card. You have been awarded {credits_to_add} credits.")
     
-
             await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, embed=embed)
 
         ##-------------------start-of-register()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -397,10 +393,54 @@ class slashCommandHandler:
         
             await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)
 
+##-------------------start-of-get_card()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        @kanrisha_client.tree.command(name="card", description="Displays a card.")
+        async def get_card(interaction:discord.Interaction, member:discord.Member | None, card_name:str) -> None:
+
+            """
+            
+            Gets a card.\n
+
+            Parameters:\n
+            interaction (object - discord.Interaction) : the interaction object.\n
+            member (object - discord.Member | None) : the member object.\n
+
+            Returns:\n
+            None.\n
+
+            """
+
+            ## Check if the user is registered
+            if(await check_if_registered(interaction) == False):
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not registered.", delete_after=5.0, is_ephemeral=True)
+                return
+            
+            ## get the syndicateMember object for the target member
+            target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, member)
+
+            ## make sure the target member is registered
+            if(target_member == None):
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That user is not registered.", delete_after=5.0, is_ephemeral=True)
+                return
+
+            owned_card_names = [card.name for card in kanrisha_client.remote_handler.gacha_handler.cards if card.id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
+
+            ## if member has the card, get the card object
+            if(card_name in owned_card_names): ## type: ignore (we know it's not None)
+                card = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.name == card_name][0] ## type: ignore (we know it's not None)
+
+            else:
+                card = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.name == card_name][0]
+
+            embed = card.get_display_embed()
+
+            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)
+
 ##-------------------start-of-get_deck()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.tree.command(name="deck", description="Displays the user's deck.")
-        async def get_deck(interaction: discord.Interaction, member:discord.Member | None) -> None:
+        async def get_deck(interaction:discord.Interaction, member:discord.Member | None) -> None:
 
             """
 
@@ -424,7 +464,7 @@ class slashCommandHandler:
             target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, member)
 
             if(target_member.owned_card_ids == []): ## type: ignore (we know it's not None)
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You don't have any cards.", delete_after=5.0, is_ephemeral=True)
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That deck doesn't have any cards.", delete_after=5.0, is_ephemeral=True)
                 return
             
             ## get the card objects for the target member's owned cards
@@ -437,8 +477,8 @@ class slashCommandHandler:
             embed.set_image(url=owned_cards[0].picture_url)
             embed.set_footer(text=f"1/{len(owned_cards)}")
 
-            left_button = discord.ui.Button(style=discord.ButtonStyle.gray, custom_id=f"deck_left_{interaction.user.id}", label=":arrow_backward:")
-            right_button = discord.ui.Button(style=discord.ButtonStyle.gray, custom_id=f"deck_right_{interaction.user.id}", label=":arrow_forward:")
+            left_button = discord.ui.Button(style=discord.ButtonStyle.gray, custom_id=f"deck_left_{interaction.user.id}", emoji="◀️")
+            right_button = discord.ui.Button(style=discord.ButtonStyle.gray, custom_id=f"deck_right_{interaction.user.id}",emoji="▶️")
 
             view = discord.ui.View(timeout=300)
 
