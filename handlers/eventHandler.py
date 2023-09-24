@@ -255,11 +255,11 @@ class eventHandler:
                     syndicate_role = kanrisha_client.get_guild(interaction.guild_id).get_role(syndicate_role_id) ## type: ignore (we know it's not None)
 
                     ## acknowledge the interaction immediately
-                    await interaction.response.defer(ephemeral=True, thinking=True)
+                    await kanrisha_client.interaction_handler.defer_interaction(interaction, is_ephemeral=True, is_thinking=True) 
+
+                    await interaction.message.delete() ## type: ignore (we know it's not None)
 
                     await kanrisha_client.remote_handler.member_handler.add_new_member(interaction.user.id, interaction.user.name, tuple([0,0,0,0,0]), 50000) # type: ignore
-
-                    await interaction.delete_original_response()
 
                     await interaction.followup.send("You have been registered.", ephemeral=True)
 
