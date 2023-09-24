@@ -69,7 +69,7 @@ class rarity:
             self.likelihood = .30
 
         elif(self.identifier == 3):
-            self.name = "Distinct"
+            self.name = "Distinguished"
             self.acronym = "D"
             self.likelihood = .12
 
