@@ -422,19 +422,21 @@ class slashCommandHandler:
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That user is not registered.", delete_after=5.0, is_ephemeral=True)
                 return
 
-            owned_card_names = [card.name for card in kanrisha_client.remote_handler.gacha_handler.cards if card.id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
-            all_card_names = [card.name for card in kanrisha_client.remote_handler.gacha_handler.cards]
+            owned_card_names = [card.name.lower() for card in kanrisha_client.remote_handler.gacha_handler.cards if card.id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
+            all_card_names = [card.name.lower() for card in kanrisha_client.remote_handler.gacha_handler.cards]
 
             ## if member has the card, get the card object
-            if(card_name in owned_card_names): ## type: ignore (we know it's not None)
-                card = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.name == card_name][0] ## type: ignore (we know it's not None)
+            if(card_name.lower() in owned_card_names): ## type: ignore (we know it's not None)
+                card = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.name.lower() == card_name.lower()][0] ## type: ignore (we know it's not None)
 
-            elif(card_name in all_card_names):
-                card = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.name == card_name][0]
+            elif(card_name.lower() in all_card_names):
+                card = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.name.lower() == card_name.lower()][0]
             
             else:
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That card doesn't exist.", delete_after=5.0, is_ephemeral=True)
-                return
+
+                card_name = await kanrisha_client.toolkit.get_intended_card(card_name, all_card_names)
+
+                card = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.name.lower() == card_name.lower()][0]
 
             embed = card.get_display_embed()
 
