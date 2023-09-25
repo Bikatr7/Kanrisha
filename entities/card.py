@@ -97,7 +97,7 @@ class card:
 ##-------------------start-of-__init__()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    def __init__(self, inc_id:int, inc_name:str, inc_rarity_identifier:int, inc_picture_path:str, inc_picture_url:str):
+    def __init__(self, inc_id:int, inc_name:str, inc_rarity_identifier:int, inc_picture_path:str, inc_picture_url:str, inc_person_id:int):
 
         """
         
@@ -109,6 +109,7 @@ class card:
         inc_rarity_identifier (int) : rarity of the card.\n
         inc_picture_path (str) : path to the card's picture.\n
         inc_picture_url (str) : url to the card's picture.\n
+        inc_person_id (int) : id of the person who the card represents.\n
 
         Returns:\n
         None.\n
@@ -129,6 +130,9 @@ class card:
 
         ## url to the card's picture
         self.picture_url = inc_picture_url
+
+        ## id of the person who the card represents
+        self.person_id = inc_person_id
 
 ##-------------------start-of-get_display_embed()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

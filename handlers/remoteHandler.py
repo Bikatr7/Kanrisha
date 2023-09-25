@@ -188,7 +188,8 @@ class remoteHandler():
             card_name varchar(256) not null,
             card_rarity int not null,
             card_picture_path varchar(256) not null,
-            card_picture_url varchar(256) not null
+            card_picture_url varchar(256) not null,
+            person_id bigint not null
         )
         """
 
@@ -281,15 +282,17 @@ class remoteHandler():
                 new_rarity = card.rarity.identifier
                 new_picture_path = os.path.basename(card.picture_path)
                 new_picture_url = card.picture_url
+                new_card_id = card.person_id
 
-                card_details = [str(new_id), new_name, str(new_rarity), new_picture_path, new_picture_url]
+                card_details = [str(new_id), new_name, str(new_rarity), new_picture_path, new_picture_url, str(new_card_id)]
 
                 insert_dict = {
                     "card_id" : new_id,
                     "card_name" : new_name,
                     "card_rarity" : new_rarity,
                     "card_picture_path" : new_picture_path,
-                    "card_picture_url" : new_picture_url
+                    "card_picture_url" : new_picture_url,
+                    "person_id" : new_card_id
                 }
 
                 await self.connection_handler.insert_into_table(table_name, insert_dict)

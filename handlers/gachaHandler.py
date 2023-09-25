@@ -97,11 +97,11 @@ class gachaHandler:
 
         self.cards.clear()
 
-        id_list, name_list, rarity_list, picture_path_list, picture_url_list = await self.connection_handler.read_multi_column_query("select card_id, card_name, card_rarity, card_picture_path, card_picture_url from cards")
+        id_list, name_list, rarity_list, picture_path_list, picture_url_list, person_id_list = await self.connection_handler.read_multi_column_query("select card_id, card_name, card_rarity, card_picture_path, card_picture_url, person_id from cards")
 
         for i in range(len(id_list)):
 
-            new_card = card(int(id_list[i]), name_list[i], int(rarity_list[i]), picture_path_list[i], picture_url_list[i])
+            new_card = card(int(id_list[i]), name_list[i], int(rarity_list[i]), picture_path_list[i], picture_url_list[i], int(person_id_list[i]))
 
             self.cards.append(new_card)
 
@@ -136,8 +136,9 @@ class gachaHandler:
                 card_rarity = int(values[2])
                 card_picture_path = os.path.join(self.file_ensurer.gacha_images_dir, values[3])
                 card_picture_url = values[4]
+                card_person_id = int(values[5])
 
-                new_card = card(card_id, card_name, card_rarity, card_picture_path, card_picture_url)
+                new_card = card(card_id, card_name, card_rarity, card_picture_path, card_picture_url, card_person_id)
 
                 self.cards.append(new_card)
 
