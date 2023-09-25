@@ -148,7 +148,7 @@ class slashCommandHandler:
 
         ##-------------------start-of-gacha_spin()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        @kanrisha_client.tree.command(name="gacha-spin", description="Spins the gacha wheel.")
+        @kanrisha_client.tree.command(name="gacha-spin", description="Spins the wheel to obtain a card.")
         async def gacha_spin(interaction: discord.Interaction):
 
             """
@@ -191,7 +191,7 @@ class slashCommandHandler:
 
         ##-------------------start-of-register()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        @kanrisha_client.tree.command(name="register", description="Registers a user to the bot.")
+        @kanrisha_client.tree.command(name="register", description="Signs you up for the Syndicates System.")
         async def register(interaction: discord.Interaction):
 
             """
@@ -232,7 +232,7 @@ class slashCommandHandler:
 
          ##-------------------start-of-snipe()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        @kanrisha_client.tree.command(name="snipe", description="Nobody's safe.")
+        @kanrisha_client.tree.command(name="snipe", description="Fetches the last deleted message in a channel.")
         async def snipe(interaction: discord.Interaction):
 
             """
@@ -279,7 +279,7 @@ class slashCommandHandler:
 
         ##-------------------start-of-profile()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        @kanrisha_client.tree.command(name="profile", description="Sends the user's profile.")
+        @kanrisha_client.tree.command(name="profile", description="Sends a members Syndicate profile.")
         async def profile(interaction: discord.Interaction, member:typing.Union[discord.Member , None]):
 
             """
@@ -548,7 +548,7 @@ class slashCommandHandler:
             
 ##-------------------start-of-leaderboard()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        @kanrisha_client.tree.command(name="leaderboard", description="Sends the leaderboard.")
+        @kanrisha_client.tree.command(name="leaderboard", description="Sends the leaderboards.")
         async def leaderboard(interaction: discord.Interaction):
 
             """
@@ -692,7 +692,7 @@ class slashCommandHandler:
         
 ##-------------------start-of-help_commands()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         
-        @kanrisha_client.tree.command(name="help-commands", description="Sends the help message.")
+        @kanrisha_client.tree.command(name="help-commands", description="Shows all commands.")
         async def help_commands(interaction: discord.Interaction):
 
             """
@@ -709,14 +709,18 @@ class slashCommandHandler:
             """
 
             help_message = (
-                "**/spin** - Spins a wheel.\n"
-                "**/multispin** - Spins a wheel 10 times.\n"
-                "**/register** - Registers a user to the bot.\n"
-                "**/snipe** - Snipes the last deleted message in a channel.\n"
-                "**/profile** - Sends the user's profile.\n"
-                "**/leaderboard** - Sends the leaderboards.\n"
-                "**/transfer** - Transfers credits from one user to another.\n"
-                "**/help-commands** - Sends this message.\n"
+                "**/spin** - Spins a wheel.\n\n"
+                "**/multispin** - Spins a wheel 10 times.\n\n"
+                "**/gacha-spin** - Spins the gacha wheel.\n\n"
+                "**/register** - Signs you up for the Syndicates System.\n\n"
+                "**/snipe** - Fetches the last deleted message in a channel.\n\n"
+                "**/profile** - Sends a members Syndicate profile.\n\n"
+                "**/transfer** - Transfers credits from one user to another.\n\n"
+                "**/card** - Displays a card.\n\n"
+                "**/deck** - Displays the user's deck.\n\n"
+                "**/catalog** - Shows all cards.\n\n"
+                "**/leaderboard** - Sends the leaderboards.\n\n"
+                "**/help-commands** - Sends this message.\n\n"
             )
 
             embed = discord.Embed(title="Help", description=help_message, color=0xC0C0C0)

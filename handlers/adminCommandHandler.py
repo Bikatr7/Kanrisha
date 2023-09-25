@@ -406,7 +406,7 @@ class adminCommandHandler:
 
 ##-------------------start-of-send-query()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        @kanrisha_client.tree.command(name="send-query", description="Sends an sql query to the Nusevei database. (ADMIN)")
+        @kanrisha_client.tree.command(name="send-query", description="Sends an sql query to the local database. (ADMIN)")
         async def send_query(interaction:discord.Interaction, query:str) -> None:
 
             """
@@ -461,7 +461,7 @@ class adminCommandHandler:
 
 ##-------------------start-of-help_admin()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         
-        @kanrisha_client.tree.command(name="help-admin", description="Sends the admin help message. (ADMIN)")
+        @kanrisha_client.tree.command(name="help-admin", description="Lists admin commands. (ADMIN)")
         async def help_admin(interaction: discord.Interaction) -> None:
 
             """
@@ -481,14 +481,15 @@ class adminCommandHandler:
                 return
 
             help_message = (
-                "**/force-log-push** - Forces a Kanrisha log push. (ADMIN)\n"
-                "**/force-remote-reset** - Overrides Nusevei with the current instance's data. (ADMIN)\n"
-                "**/execute-order-66** - It is time. (ADMIN)\n"
-                "**/sync-roles** - Syncs the roles of all users in the server with the role persistence database. (ADMIN)\n"
-                "**/get-running-config-directory** - Gets the running config directory. (ADMIN)\n"
-                "**/load-members-from-local** - (DO NOT USE THIS WITH A LOADED INSTANCE) Loads members from the local file. (ADMIN))\n"
-                "**/send-query** - Sends an sql query to the Nusevei database. (ADMIN)\n"
-                "**/help-admin** - Sends the admin help message. (ADMIN)\n"
+                "**/trigger-early-shutdown** - Shuts down the bot. (ADMIN)\n\n"
+                "**/force-log-push** - Forces a Kanrisha log push. (ADMIN)\n\n"
+                "**/force-remote-reset** - Overrides the local database with the current instance's data. (ADMIN)\n\n"
+                "**/execute-order-66** - It is time. (ADMIN)\n\n"
+                "**/sync-roles** - Syncs the roles of all users in the server with the role persistence database. (ADMIN)\n\n"
+                "**/get-running-config-directory** - Gets the running config directory. (ADMIN)\n\n"
+                "**/load-local-storage** - (DO NOT USE THIS WITH A LOADED INSTANCE) Loads from the local file. (ADMIN))\n\n"
+                "**/send-query** - Sends an sql query to the local database. (ADMIN)\n\n"
+                "**/help-admin** - Sends this message.\n\n"
             )
 
             embed = discord.Embed(title="Help", description=help_message, color=0xC0C0C0)
@@ -500,4 +501,4 @@ class adminCommandHandler:
 
         trigger_early_shutdown = kanrisha_client.tree.command(name="trigger-early-shutdown", description="Shuts down the bot. (ADMIN)")(trigger_early_shutdown_logic)
         force_log_push = kanrisha_client.tree.command(name="force-log-push", description="Forces a Kanrisha log push. (ADMIN)")(force_log_push_logic)
-        force_remote_reset = kanrisha_client.tree.command(name="force-remote-reset", description="Overrides Nusevei with the current instance's data. (ADMIN)")(force_remote_reset_logic)
+        force_remote_reset = kanrisha_client.tree.command(name="force-remote-reset", description="Overrides the local database with the current instance's data. (ADMIN)")(force_remote_reset_logic)
