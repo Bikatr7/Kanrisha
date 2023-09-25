@@ -40,8 +40,8 @@ class interactionHandler:
         self.whitelisted_channel_names = ["#general-bot", "#bot-testing", "#syndicate-bot"]
         self.whitelisted_channel_ids = [1144136660691460126, 1146174110548901979, 1146922710698557560]  
 
-        self.admin_user_ids = [957451091748986972, 277933921315061761, 125751325760684033]
-        self.admin_usernames = ["seinu", "tommy.3", "lombardia"]
+        self.admin_user_ids = [957451091748986972, 277933921315061761, 125751325760684033, 1146646164838555699, 1144166968979628072]
+        self.admin_usernames = ["seinu", "tommy.3", "lombardia","dairinyn", "kanrisha"]
 
         self.owner_id = 957451091748986972
 

@@ -48,7 +48,7 @@ class slashCommandHandler:
 
         self.event_handler = eventHandler(kanrisha_client)
 
-        self.goose_exam = gooseExam(kanrisha_client)
+        ##self.goose_exam = gooseExam(kanrisha_client)
 
         self.admin_command_handler = adminCommandHandler(kanrisha_client)
     
@@ -485,6 +485,56 @@ class slashCommandHandler:
             ##  id of command caller | id of member whose deck is being viewed
             ## _{interaction.user.id}.{member.id}
             custom_id = f"_{interaction.user.id}.{target_member.member_id}" ## type: ignore (we know it's not None)
+
+            left_button = discord.ui.Button(style=discord.ButtonStyle.gray, custom_id=f"deck_left{custom_id}", emoji="◀️")
+            right_button = discord.ui.Button(style=discord.ButtonStyle.gray, custom_id=f"deck_right{custom_id}", emoji="▶️")
+
+            view = discord.ui.View(timeout=300)
+
+            view.add_item(left_button)
+            view.add_item(right_button)
+
+            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed, view=view)
+
+##-------------------start-of-catalog()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        @kanrisha_client.tree.command(name="catalog", description="Shows all cards.")
+        async def catalog(interaction:discord.Interaction) -> None:
+
+            """
+
+            Shows all cards.\n
+
+            Parameters:\n
+            interaction (object - discord.Interaction) : the interaction object.\n
+
+            Returns:\n
+            None.\n
+
+            """
+
+            ## Check if the user is registered
+            if(not await check_if_registered(interaction)):
+                return
+
+            kanrisha_member = await kanrisha_client.fetch_user(kanrisha_client.interaction_handler.admin_user_ids[-1])
+
+            kanrisha_syndicate_object, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, kanrisha_member) ## type: ignore (we know it's not None)
+
+            ## get the card objects for the target member's owned cards
+            owned_cards = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.id in kanrisha_syndicate_object.owned_card_ids] ## type: ignore (we know it's not None)
+
+            ## sort the cards by rarity
+            owned_cards.sort(key=lambda x: x.rarity.identifier, reverse=True)
+
+            embed = discord.Embed(title="Catalog", description=f"{owned_cards[0].rarity.name} {owned_cards[0].name}", color=0xC0C0C0)
+            embed.set_image(url=owned_cards[0].picture_url)
+            embed.set_footer(text=f"1/{len(owned_cards)}")
+
+            ## custom id structure
+            ##  id of command caller | id of member whose deck is being viewed
+            ## _{interaction.user.id}.{member.id}
+            custom_id = f"_{interaction.user.id}.{kanrisha_syndicate_object.member_id}" ## type: ignore (we know it's not None)
 
             left_button = discord.ui.Button(style=discord.ButtonStyle.gray, custom_id=f"deck_left{custom_id}", emoji="◀️")
             right_button = discord.ui.Button(style=discord.ButtonStyle.gray, custom_id=f"deck_right{custom_id}", emoji="▶️")
