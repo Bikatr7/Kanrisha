@@ -54,7 +54,7 @@ class gachaHandler:
 
         self.STANDARD_LIKELIHOOD = .55
         self.NOTABLE_LIKELIHOOD = .30
-        self.DISTINCT_LIKELIHOOD = .11
+        self.DISTINGUISHED_LIKELIHOOD = .11
         self.PRIME_LIKELIHOOD = .03
         self.EXCLUSIVE_LIKELIHOOD = .01
 
@@ -63,7 +63,7 @@ class gachaHandler:
         self.rarity_to_credits = {
             'Standard': 300,
             'Notable': 600,
-            'Distinct': 1200,
+            'Distinguished': 1200,
             'Prime': 2500,
             'Exclusive': 5000
         }
@@ -174,7 +174,7 @@ class gachaHandler:
             chances = {
                 "Standard": self.STANDARD_LIKELIHOOD,
                 "Notable": self.NOTABLE_LIKELIHOOD,
-                "Distinct": self.DISTINCT_LIKELIHOOD,
+                "Distinguished": self.DISTINGUISHED_LIKELIHOOD,
                 "Prime": self.PRIME_LIKELIHOOD,
                 "Exclusive": self.EXCLUSIVE_LIKELIHOOD
             }
@@ -197,7 +197,7 @@ class gachaHandler:
             elif(selection == "Notable"):
                 rarity = 2
 
-            elif(selection == "Distinct"):
+            elif(selection == "Distinguished"):
                 rarity = 3
             
             elif(selection == "Prime"):

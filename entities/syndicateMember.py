@@ -13,7 +13,7 @@ class syndicateMember:
 
 ##-------------------start-of-__init__()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def __init__(self, inc_member_id:int, inc_member_name:str, inc_spin_scores:typing.Tuple[int,int,int,int,int], inc_owned_card_ids:typing.List[int], inc_credits:int) -> None:
+    def __init__(self, inc_member_id:int, inc_member_name:str, inc_spin_scores:typing.Tuple[int,int,int,int,int], inc_owned_card_ids:typing.List[int], inc_credits:int, inc_merit_points:int) -> None:
 
         """
 
@@ -25,6 +25,7 @@ class syndicateMember:
         inc_spin_scores (tuple - int) : The spin scores of the member.\n
         inc_owned_card_ids (list - int) : The IDs of the cards owned by the member.\n
         inc_credits (int) : The credits of the member.\n
+        inc_merit_points (int) : The merit points of the member.\n
 
         Returns:\n
         None.\n
@@ -45,3 +46,6 @@ class syndicateMember:
 
         ## the credits of the member
         self.credits = inc_credits
+
+        ## merit points of the member
+        self.merit_points = inc_merit_points

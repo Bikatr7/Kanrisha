@@ -63,7 +63,7 @@ class memberHandler:
 
         self.members.clear()
 
-        id_list, name_list, spin_scores_list, owned_card_ids, credits_list = await self.connection_handler.read_multi_column_query("select member_id, member_name, spin_scores, owned_card_ids, credits from members")
+        id_list, name_list, spin_scores_list, owned_card_ids, credits_list, merit_point_list = await self.connection_handler.read_multi_column_query("select member_id, member_name, spin_scores, owned_card_ids, credits, merit_points from members")
 
         for i in range(len(id_list)):
 
@@ -73,7 +73,7 @@ class memberHandler:
 
             owned_cards = [int(card_id) for card_id in owned_card_ids[i].strip("[").strip("]").split(",")] if owned_card_ids[i].strip("[").strip("]") != "" else []
 
-            new_member = syndicateMember(int(id_list[i]), name_list[i], spin_scores, owned_cards, int(credits_list[i]))
+            new_member = syndicateMember(int(id_list[i]), name_list[i], spin_scores, owned_cards, int(credits_list[i]), int(merit_point_list[i]))
             self.members.append(new_member)
 
         await self.file_ensurer.logger.log_action("INFO", "memberHandler", "Loaded members from remote.")
@@ -109,13 +109,13 @@ class memberHandler:
                 ## explicit type hinting to avoid pylance warning below
                 spin_scores = (spin_scores[0], spin_scores[1], spin_scores[2], spin_scores[3], spin_scores[4])
 
-                self.members.append(syndicateMember(int(values[0]), values[1], spin_scores, card_ids, int(values[4]))) 
+                self.members.append(syndicateMember(int(values[0]), values[1], spin_scores, card_ids, int(values[4]), int(values[5])))
 
         await self.file_ensurer.logger.log_action("INFO", "memberHandler", "Loaded members from local.") 
                
 ##-------------------start-of-add_new_member()---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def add_new_member(self, inc_member_id:int, inc_member_name:str, inc_spin_scores:typing.Tuple[int,int,int,int,int],  inc_credits:int) -> None:
+    async def add_new_member(self, inc_member_id:int, inc_member_name:str, inc_spin_scores:typing.Tuple[int,int,int,int,int]) -> None:
 
         """
         
@@ -133,12 +133,12 @@ class memberHandler:
 
         card_id_string = ""
 
-        member_details = [str(inc_member_id), inc_member_name, score_string, card_id_string, str(inc_credits)]
+        member_details = [str(inc_member_id), inc_member_name, score_string, card_id_string, "0", "0"]
 
         await self.file_ensurer.file_handler.write_sei_line(self.file_ensurer.member_path, member_details)
 
         ## adds new member to current instance of bot
-        new_member = syndicateMember(inc_member_id, inc_member_name, inc_spin_scores, [], inc_credits)
+        new_member = syndicateMember(inc_member_id, inc_member_name, inc_spin_scores, inc_owned_card_ids=[], inc_credits=50000, inc_merit_points=0)
 
         ## logs action
         await self.file_ensurer.logger.log_action("INFO", "memberHandler", f"Added new member: {inc_member_name}.")

@@ -280,8 +280,6 @@ class slashCommandHandler:
 
             if(await check_if_registered(interaction) == False):
                 return
-            
-            is_ephemeral = True
 
             target_member, _, image_url, self_request = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, member)
 
@@ -289,28 +287,20 @@ class slashCommandHandler:
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That user is not registered.", delete_after=5.0, is_ephemeral=True)
                 return
             
-            ## if user is admin or if user is requesting their own profile
-            if(self_request or interaction.user.id in kanrisha_client.interaction_handler.admin_user_ids):
-                profile_message = (
-                    f"**Name:** {target_member.member_name}\n"
-                    f"**Credits:** {target_member.credits}\n"
-                    f"**Shining Rolls:** {target_member.spin_scores[0]}\n"
-                    f"**Glowing Rolls:** {target_member.spin_scores[1]}\n"
-                    f"**Common Rolls:** {target_member.spin_scores[2]}"
-                )
-            else:
-                is_ephemeral = False
-                profile_message = (
-                    f"**Name:** {target_member.member_name}\n"
-                    f"**Shining Rolls:** {target_member.spin_scores[0]}\n"
-                    f"**Glowing Rolls:** {target_member.spin_scores[1]}\n"
-                    f"**Common Rolls:** {target_member.spin_scores[2]}"
-                )
+            profile_message = (
+                f"**Name:** {target_member.member_name}\n"
+                f"**Credits:** {target_member.credits}\n"
+                f"**Standard Spins:** {target_member.spin_scores[0]}\n"
+                f"**Notable Spins:** {target_member.spin_scores[1]}\n"
+                f"**Distinguished Spins:** {target_member.spin_scores[2]}\n"
+                f"**Prime Spins:** {target_member.spin_scores[3]}\n"
+                f"**Exclusive Spins:** {target_member.spin_scores[4]}"
+            )
 
             embed = discord.Embed(title="Profile", description=profile_message, color=0xC0C0C0)
             embed.set_thumbnail(url=image_url)
 
-            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed, is_ephemeral=is_ephemeral)
+            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)
 
         ##-------------------start-of-transfer()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -874,18 +864,16 @@ class slashCommandHandler:
             """
 
             help_message = (
-                "**/spin** - Spins a wheel.\n\n"
-                "**/multispin** - Spins a wheel 10 times.\n\n"
-                "**/gacha-spin** - Spins the gacha wheel.\n\n"
                 "**/register** - Signs you up for the Syndicates System.\n\n"
-                "**/snipe** - Fetches the last deleted message in a channel.\n\n"
                 "**/profile** - Sends a members Syndicate profile.\n\n"
+                "**/spin** - Spins the gacha wheel.\n\n"
                 "**/transfer** - Transfers credits from one user to another.\n\n"
                 "**/card** - Displays a card.\n\n"
                 "**/deck** - Displays the user's deck.\n\n"
                 "**/catalog** - Shows all cards.\n\n"
                 "**/request-card-change** - Requests a card change.\n\n"
                 "**/leaderboard** - Sends the leaderboards.\n\n"
+                "**/snipe** - Fetches the last deleted message in a channel.\n\n"
                 "**/help-commands** - Sends this message.\n\n"
             )
 

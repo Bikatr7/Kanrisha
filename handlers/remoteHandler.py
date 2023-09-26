@@ -178,7 +178,8 @@ class remoteHandler():
             member_name varchar(256) not null,
             spin_scores varchar(256) not null,
             owned_card_ids text(65535) not null,
-            credits int not null
+            credits int not null,
+            merit_points int not null
         )
         """
 
@@ -244,6 +245,7 @@ class remoteHandler():
                 new_spin_scores = member.spin_scores
                 owned_card_ids = member.owned_card_ids
                 new_credits = member.credits
+                new_merit_points = member.merit_points
 
                 score_string = ""
                 card_string = ""
@@ -257,7 +259,7 @@ class remoteHandler():
 
                 card_string = '"' + card_string + '"'
 
-                member_details = [str(new_id), new_name, score_string, card_string, str(new_credits)]
+                member_details = [str(new_id), new_name, score_string, card_string, str(new_credits), str(new_merit_points)]
 
                 table_name = "members"
                 insert_dict = {
@@ -265,7 +267,8 @@ class remoteHandler():
                     "member_name" : new_name,
                     "spin_scores" : new_spin_scores,
                     "owned_card_ids" : owned_card_ids,
-                    "credits" : new_credits
+                    "credits" : new_credits,
+                    "merit_points" : new_merit_points
                 }
 
                 await self.connection_handler.insert_into_table(table_name, insert_dict)
@@ -286,9 +289,9 @@ class remoteHandler():
                 new_rarity = card.rarity.identifier
                 new_picture_path = os.path.basename(card.picture_path)
                 new_picture_url = card.picture_url
-                new_card_id = card.person_id
+                new_person_id = card.person_id
 
-                card_details = [str(new_id), new_name, str(new_rarity), new_picture_path, new_picture_url, str(new_card_id)]
+                card_details = [str(new_id), new_name, str(new_rarity), new_picture_path, new_picture_url, str(new_person_id)]
 
                 insert_dict = {
                     "card_id" : new_id,
@@ -296,7 +299,7 @@ class remoteHandler():
                     "card_rarity" : new_rarity,
                     "card_picture_path" : new_picture_path,
                     "card_picture_url" : new_picture_url,
-                    "person_id" : new_card_id
+                    "person_id" : new_person_id
                 }
 
                 await self.connection_handler.insert_into_table(table_name, insert_dict)
