@@ -206,6 +206,10 @@ class remoteHandler():
         
         Fills the remote storage with the local storage.\n
 
+        Note that this will reset everything remotely stored on the connected database.\n
+
+        As well as wipe local storage.\n
+        
         Parameters:\n
         self (object - remoteHandler) : The handler object.\n
 
@@ -216,19 +220,19 @@ class remoteHandler():
 
         ##----------------------------------------------------------------clears----------------------------------------------------------------
         
-        async def clear_members():
+        async def clear_members() -> None:
     
             with open(self.file_ensurer.member_path, "w+") as member_file:
                 member_file.truncate(0)
 
-        async def clear_cards():
+        async def clear_cards() -> None:
 
             with open(self.file_ensurer.card_path, "w+") as card_file:
                 card_file.truncate(0)
 
         ##----------------------------------------------------------------members----------------------------------------------------------------
 
-        async def fill_members():
+        async def fill_members() -> None:
 
             table_name = "members"
 
@@ -270,7 +274,7 @@ class remoteHandler():
 
         ##----------------------------------------------------------------cards----------------------------------------------------------------
 
-        async def fill_cards():
+        async def fill_cards() -> None:
 
             table_name = "cards"
 

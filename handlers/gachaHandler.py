@@ -30,7 +30,9 @@ class gachaHandler:
         Constructor for the gachaHandler class.\n
 
         Parameters:\n
-        None.\n
+        file_ensurer (object - fileEnsurer) : the fileEnsurer object.\n
+        toolkit (object - toolkit) : the toolkit object.\n
+        connection_handler (object - connectionHandler) : the connectionHandler object.\n
 
         Returns:\n
         None.\n
@@ -45,15 +47,16 @@ class gachaHandler:
 
         self.connection_handler = connection_handler
 
+        ## all the base cards
         self.cards:typing.List[card] = []
 
         ##----------------------------------------------------------------likelihoods----------------------------------------------------------------
 
         self.STANDARD_LIKELIHOOD = .55
         self.NOTABLE_LIKELIHOOD = .30
-        self.DISTINCT_LIKELIHOOD = .12
+        self.DISTINCT_LIKELIHOOD = .11
         self.PRIME_LIKELIHOOD = .03
-        self.EXCLUSIVE_LIKELIHOOD = .00
+        self.EXCLUSIVE_LIKELIHOOD = .01
 
         ##----------------------------------------------------------------ids----------------------------------------------------------------
 
@@ -95,6 +98,7 @@ class gachaHandler:
 
         """
 
+        ## clear the cards list
         self.cards.clear()
 
         id_sequence_list, name_list, rarity_list, picture_path_list, picture_url_list, person_id_list = await self.connection_handler.read_multi_column_query("select card_id, card_name, card_rarity, card_picture_path, card_picture_url, person_id from cards")
@@ -123,6 +127,7 @@ class gachaHandler:
 
         """
 
+        ## clear the cards list
         self.cards.clear()
 
         with open(self.file_ensurer.card_path, "r", encoding="utf-8") as file:
@@ -207,8 +212,10 @@ class gachaHandler:
 
         possible_options = []
 
+        ## get the rarity
         rarity = await get_rarity()
 
+        ## picks a random card from the list of cards in matching rarity
         for card in self.cards:
 
             if(card.rarity.identifier == rarity):

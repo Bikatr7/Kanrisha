@@ -129,8 +129,6 @@ class memberHandler:
 
         """
 
-        ## member id, member_name
-
         score_string = f'"{inc_spin_scores[0]}.{inc_spin_scores[1]}.{inc_spin_scores[2]}.{inc_spin_scores[3]}.{inc_spin_scores[4]}"'
 
         card_id_string = ""
@@ -182,7 +180,9 @@ class memberHandler:
 
         """
         
-        Gets the member id of the member.\n
+        Gets the syndicate member object from the member id. Also returns the member id and image url. Also returns whether or not the request is for the user's own profile.\n
+
+        Will grab syndicate object from {member} if provided, otherwise will grab from {interaction}.\n
         
         Parameters:\n
         interaction (object - discord.Interaction) : the interaction object.\n
@@ -200,11 +200,13 @@ class memberHandler:
 
         is_self_request = False
 
+        ## if we're given a member object, use that
         if(member):
 
             target_member_id = member.id
             image_url = member.display_avatar.url
             
+        ## otherwise, use the interaction object
         else:
             is_self_request = True
             target_member_id = interaction.user.id

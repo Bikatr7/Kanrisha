@@ -248,7 +248,7 @@ class fileEnsurer:
       finally:
             return token
       
-##-------------------start-of-get_host_name()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+##-------------------start-of-get_db_credentials()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
    async def get_db_credentials(self) -> typing.Tuple[str,str]:
        
@@ -282,7 +282,6 @@ class fileEnsurer:
 
          with open(self.user_name_path, 'w+', encoding='utf-8') as file: 
             file.write(user_name)
-
 
       finally:
          

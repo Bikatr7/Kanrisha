@@ -310,6 +310,9 @@ class interactionHandler:
 
         Parameters:\n
         self (object - interactionHandler) : the interactionHandler object.\n
+        channel (object - discord.channel.GroupChannel | discord.Thread) : the channel to send the message to.\n
+        is_forced (bool) : whether or not the log file was forcibly pushed.\n
+        forced_by (str | optional) : who forced the log file to be pushed.\n
 
         Returns:\n
         None.\n

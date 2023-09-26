@@ -10,7 +10,6 @@ from modules.toolkit import toolkit
 from handlers.slashCommandHandler import slashCommandHandler
 
 from handlers.interactionHandler import interactionHandler
-from handlers.gachaHandler import gachaHandler
 
 from handlers.remoteHandler import remoteHandler
 

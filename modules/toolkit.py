@@ -74,7 +74,7 @@ class toolkit():
             
             msvcrt.getch() 
 
-        else:  ## Linux, No idea if any of this works lmao
+        else:  ## Linux
 
             import termios
 

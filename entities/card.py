@@ -245,11 +245,8 @@ class card:
 
         """
 
-        print(self.replica.identifier)
-
+        ## needs to sync attributes before displaying, because it's highly likely that the card was just modified.
         await self.determine_attributes()
-
-        print(self.replica.identifier)
 
         embed = discord.Embed(title= f"{self.rarity.emoji}{self.name} {self.replica.emoji} ({self.rarity.current_xp}/{self.rarity.max_xp})", description=f"{self.rarity.name}", color = self.rarity.color)
         embed.set_image(url = self.picture_url)

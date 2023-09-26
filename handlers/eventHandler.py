@@ -106,7 +106,7 @@ class eventHandler:
                 if roles:
                     role_objects = [discord.utils.get(member.guild.roles, id=role_id) for role_id in roles if discord.utils.get(member.guild.roles, id=role_id) is not None]
 
-                    if role_objects:
+                    if(role_objects):
                         await member.add_roles(*[role for role in role_objects if role is not None])
 
                     del data[str(member.id)]
@@ -172,10 +172,10 @@ class eventHandler:
 
                         await kanrisha_client.file_ensurer.logger.log_action("ALERT", "eventHandler", f"Deleted banned message from {member.name} in {channel.name}.") ## type: ignore (we know it's not None)
 
-                        await member.send(f"Your banned message has been deleted in {channel.name}. You will be muted when admins come online.") ## type: ignore (we know it's not None)
-                        await seinu.send(f"You need to timeout {member.name} for sending a banned message in {channel.name}.") ## type: ignore (we know it's not None)  
+                        await member.send(f"Your banned message has been deleted in {channel.name}. You may face penalties depending on severity.") ## type: ignore (we know it's not None)
+                        await seinu.send(f"{member.name} sent a banned message in {channel.name}. See {banned_message} for details.") ## type: ignore (we know it's not None)  
 
-                        await kanrisha_client.file_ensurer.logger.log_action("ALERT", "eventHandler", f"You need to timeout {member.name} for sending a banned message in {channel.name}.") ## type: ignore (we know it's not None)
+                        await kanrisha_client.file_ensurer.logger.log_action("ALERT", "eventHandler", f"{member.name} sent a banned message in {channel.name}. See {banned_message} for details.") ## type: ignore (we know it's not None)
 
                     except:
                         pass
@@ -257,6 +257,7 @@ class eventHandler:
                     ## acknowledge the interaction immediately
                     await kanrisha_client.interaction_handler.defer_interaction(interaction, is_ephemeral=True, is_thinking=True) 
 
+                    ## delete the register message
                     await interaction.message.delete() ## type: ignore (we know it's not None)
 
                     await kanrisha_client.remote_handler.member_handler.add_new_member(interaction.user.id, interaction.user.name, tuple([0,0,0,0,0]), 50000) # type: ignore
@@ -282,7 +283,7 @@ class eventHandler:
                 ## get the target member's syndicateMember object
                 target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, deck_owner) 
 
-                ## get first 3 digits of card id for all member owned cards
+                ## get first 4 digits of card id for all member owned cards
                 owned_card_ids = [int(str(card_id)[0:4]) for card_id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
 
                 ## get the card objects for the target member's owned cards, as well as the sequence ids
@@ -304,10 +305,9 @@ class eventHandler:
 
             async def check_left_deck_button(interaction: discord.Interaction, custom_id:str) -> None:
 
-                ## if left deck button was pressed by the correct user
-
                 target_id_portion = f"deck_left_{interaction.user.id}."
 
+                ## if left deck button was pressed by the correct user
                 if(target_id_portion in custom_id):
 
                     ## get deck owner member object
@@ -320,9 +320,11 @@ class eventHandler:
                     ## calculate the new index to display
                     new_index = current_index - 1 if current_index > 0 else len(owned_cards) - 1
 
+                    ## get the card to display, and create a safe copy of it
                     card_to_display = owned_cards[new_index]
                     safe_card_to_display = card_to_display
 
+                    ## alter card to match user's sequence id
                     card_to_display.replica.identifier = int(str(sequence_ids[new_index])[4]) ## type: ignore (we know it's not going to be empty)
                     card_to_display.rarity.current_xp = int(str(sequence_ids[new_index])[5]) ## type: ignore (we know it's not going to be empty)
 
@@ -330,10 +332,12 @@ class eventHandler:
 
                     new_embed.set_footer(text=f"{new_index + 1}/{len(owned_cards)}")
 
+                    ## set card to display back to the safe copy
                     card_to_display = safe_card_to_display
 
                     await interaction.response.edit_message(embed=new_embed)
 
+                ## if left deck button was pressed by the wrong user
                 elif(custom_id and custom_id.startswith("deck_left_")):
 
                     await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not authorized to use this button.", delete_after=5.0, is_ephemeral=True)
@@ -342,9 +346,9 @@ class eventHandler:
 
             async def check_right_deck_button(interaction: discord.Interaction, custom_id:str) -> None:
 
-                ## if right deck button was pressed by the correct user
-
                 target_id_portion = f"deck_right_{interaction.user.id}."
+
+                ## if right deck button was pressed by the correct user
 
                 if(target_id_portion in custom_id):
 
@@ -358,10 +362,11 @@ class eventHandler:
                     ## calculate the new index to display
                     new_index = current_index + 1 if current_index < len(owned_cards) - 1 else 0
 
+                    ## get the card to display, and create a safe copy of it
                     card_to_display = owned_cards[new_index]
-
                     safe_card_to_display = card_to_display
 
+                    ## alter card to match user's sequence id
                     card_to_display.replica.identifier = int(str(sequence_ids[new_index])[4]) ## type: ignore (we know it's not going to be empty)
                     card_to_display.rarity.current_xp = int(str(sequence_ids[new_index])[5]) ## type: ignore (we know it's not going to be empty)
 
@@ -369,10 +374,12 @@ class eventHandler:
 
                     new_embed.set_footer(text=f"{new_index + 1}/{len(owned_cards)}")
 
+                    ## set card to display back to the safe copy
                     card_to_display = safe_card_to_display
 
                     await interaction.response.edit_message(embed=new_embed)
 
+                ## if right deck button was pressed by the wrong user
                 elif(custom_id and custom_id.startswith("deck_right_")):
 
                     await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not authorized to use this button.", delete_after=5.0, is_ephemeral=True)
@@ -388,8 +395,8 @@ class eventHandler:
                 ## check if the button is the register button
                 await check_register_button(interaction, custom_id)
 
+                ## check deck/catalog buttons
                 await check_left_deck_button(interaction, custom_id)
-
                 await check_right_deck_button(interaction, custom_id)
 
 

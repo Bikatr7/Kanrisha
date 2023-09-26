@@ -246,7 +246,7 @@ class adminCommandHandler:
                 if(20 <= i < 30):
                     await interaction.followup.send(f"Banning in {30 - i} seconds...")
 
-
+            ## ban loop
             for member in marked_for_death:
                 
                 try:
@@ -328,12 +328,13 @@ class adminCommandHandler:
             ## config dir name
             outer_dir_name = os.path.basename(src)
 
+            ## destination
             if(os.name == 'nt'):  ## Windows
                 dest = os.path.join(os.environ['USERPROFILE'],"KanrishaConfig-Copy")
             else:  ## Linux
                 dest = os.path.join(os.path.expanduser("~"), "KanrishaConfig-Copy")
 
-            excluded_file = [kanrisha_client.file_ensurer.credentials_path, kanrisha_client.file_ensurer.user_name_path]
+            excluded_files = [kanrisha_client.file_ensurer.credentials_path, kanrisha_client.file_ensurer.user_name_path]
 
             with tempfile.TemporaryDirectory() as tmpdirname:
                 ## Prepare the temp directory path with the outer directory name
@@ -347,10 +348,10 @@ class adminCommandHandler:
                             os.makedirs(dest_dir_path)
 
                     for filename in filenames:
-                        if(os.path.join(dirpath, filename) != excluded_file):
+                        if(os.path.join(dirpath, filename) not in excluded_files):
                             shutil.copy2(os.path.join(dirpath, filename), os.path.join(tmp_dest, os.path.relpath(dirpath, src), filename))
 
-                # Create the ZIP from the temporary directory
+                ## Create the ZIP from the temporary directory
                 await asyncio.to_thread(shutil.make_archive, dest, 'zip', tmpdirname)
 
             ## send the zip file
@@ -398,11 +399,11 @@ class adminCommandHandler:
             if(await check_if_admin(interaction) == False):
                 return
             
-            await interaction.response.defer(ephemeral=True, thinking=True)
+            await kanrisha_client.interaction_handler.defer_interaction(interaction, is_ephemeral=True, is_thinking=True)
 
             await kanrisha_client.remote_handler.load_local_storage()
 
-            await interaction.followup.send("Loaded from local.", ephemeral=True, )
+            await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, "Loaded from local.", is_ephemeral=True)
 
 ##-------------------start-of-send-query()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -415,6 +416,7 @@ class adminCommandHandler:
 
             Parameters:\n
             interaction (object - discord.Interaction) : the interaction object.\n
+            query (str) : the query to send.\n
 
             Returns:\n
             None.\n
@@ -431,12 +433,13 @@ class adminCommandHandler:
                 return
             
             ## get remote up to date
-            await kanrisha_client.refresh_remote_storage()
+            await kanrisha_client.remote_handler.reset_remote_storage(is_forced=False)
 
             description = f"Query : {query}"
 
             try:
 
+                ## if requesting data
                 if(query.lower().startswith("select")):
 
                     result = await kanrisha_client.remote_handler.connection_handler.read_multi_column_query(query)
@@ -498,6 +501,9 @@ class adminCommandHandler:
             await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)
 
         ##-------------------start-of-banners--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        ## banners for logic functions, so that they can be accessed internally
+        ## cause functions with decorations cannot be accessed internally
 
         trigger_early_shutdown = kanrisha_client.tree.command(name="trigger-early-shutdown", description="Shuts down the bot. (ADMIN)")(trigger_early_shutdown_logic)
         force_log_push = kanrisha_client.tree.command(name="force-log-push", description="Forces a Kanrisha log push. (ADMIN)")(force_log_push_logic)

@@ -32,7 +32,7 @@ class connectionHandler():
 
         Parameters:\n
         file_ensurer (object - fileEnsurer) : The file ensurer object.\n
-        logger (object - logger) : The logger object.\n
+        toolkit (object - toolkit) : The toolkit object.\n
 
         Returns:\n
         None.\n
@@ -51,7 +51,7 @@ class connectionHandler():
 
         ##----------------------------------------------------------------other----------------------------------------------------------------
 
-        ## the database connection and cursor, can either be itself or none
+        ## the database connection and cursor, can either be themselves or None
         self.connection, self.cursor = None, None
 
 ##--------------------start-of-check_connection()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
