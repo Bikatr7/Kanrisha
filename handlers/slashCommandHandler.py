@@ -597,9 +597,13 @@ class slashCommandHandler:
 
             balance_leaderboard = await get_balance_leaderboard(interaction)
 
+            merit_leaderboard = await get_merit_leaderboard(interaction)
+
             await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=luck_leaderboard)
 
             await interaction.followup.send(embed=balance_leaderboard)
+
+            await interaction.followup.send(embed=merit_leaderboard)
 
 ##-------------------start-of-get_luck_leaderboard()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -710,10 +714,61 @@ class slashCommandHandler:
             balance_leaderboard.set_thumbnail(url=kanrisha_client.file_ensurer.bot_thumbnail_url)
             
             ## Only set the footer with rank if the user is not an admin
-            if user_rank is not None:
+            if(user_rank is not None):
                 balance_leaderboard.set_footer(text=f"Your rank is #{user_rank}.")
             
             return balance_leaderboard
+        
+##-------------------start-of-get_merit_leaderboard()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        async def get_merit_leaderboard(interaction: discord.Interaction) -> discord.Embed:
+
+            """
+
+            Gets the merit leaderboard.\n
+
+            Parameters:\n
+            interaction (object - discord.Interaction) : the interaction object.\n
+
+            Returns:\n
+            merit_leaderboard (object - discord.Embed) : the embed object.\n
+
+            """
+
+            ## get members that are not admins and have at least 1 merit point
+            non_admin_members = [
+                member for member in kanrisha_client.remote_handler.member_handler.members 
+                if member.member_id not in kanrisha_client.interaction_handler.admin_user_ids and member.merit_points > 0
+            ]
+
+            ## sort the members based on merit points in descending order
+            sorted_non_admin_members = sorted(non_admin_members, key=lambda x: x.merit_points, reverse=True)
+
+            ## take the top 10 members for the leaderboard, or less if there are less than 10 members
+            top_10_members = sorted_non_admin_members[:10]
+
+            ## find the rank of the user calling the command if they are not an admin
+            user_rank = None
+            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
+                for rank, member in enumerate(sorted_non_admin_members, 1):
+                    if(member.member_id == interaction.user.id):
+                        user_rank = rank
+                        break
+
+            ## construct the leaderboard message
+            leaderboard_message = ""
+            for member in top_10_members:
+                leaderboard_message += f"**{member.member_name}** - {member.merit_points}\n"
+
+            merit_leaderboard = discord.Embed(title="Merit Leaderboard", description=leaderboard_message, color=0xC0C0C0)
+
+            merit_leaderboard.set_thumbnail(url=kanrisha_client.file_ensurer.bot_thumbnail_url)
+
+            ## only set the footer with rank if the user is not an admin
+            if(user_rank is not None):
+                merit_leaderboard.set_footer(text=f"Your rank is #{user_rank}.")
+            
+            return merit_leaderboard
 
 ##-------------------start-of-request_card_change()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
