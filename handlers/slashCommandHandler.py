@@ -13,10 +13,6 @@ import requests
 from handlers.eventHandler import eventHandler
 from handlers.adminCommandHandler import adminCommandHandler
 
-from entities.syndicateMember import syndicateMember
-
-from exam.gooseExam import gooseExam
-
 if(typing.TYPE_CHECKING): ## used for cheating the circular import issue that occurs when i need to type check some things
     from bot.Kanrisha import Kanrisha
 
@@ -38,7 +34,7 @@ class slashCommandHandler:
         Initializes the slash command handler.\n
 
         Parameters:\n
-        None.\n
+        inc_kanrisha_client (object - Kanrisha) : the Kanrisha client object.\n
 
         Returns:\n
         None.\n
@@ -51,8 +47,6 @@ class slashCommandHandler:
 
         self.event_handler = eventHandler(kanrisha_client)
 
-        ##self.goose_exam = gooseExam(kanrisha_client)
-
         self.admin_command_handler = adminCommandHandler(kanrisha_client)
     
         ##-------------------start-of-check_if_registered()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -62,6 +56,8 @@ class slashCommandHandler:
             """
 
             Checks if the user is registered.\n
+
+            register_check is used to determine if the check is for the register command. In which case the function is inverted.\n
 
             Parameters:\n
             interaction (object - discord.Interaction) : the interaction object.\n
@@ -111,16 +107,17 @@ class slashCommandHandler:
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
                 return
 
+            ## get card and create safe card object
             card = await kanrisha_client.remote_handler.gacha_handler.spin_gacha()
             safe_card = card
 
-            ## get the syndicateMember object for the target member, and add the card id to the member's owned_card_ids list if not already owned
+            ## get the syndicateMember object for the target member
             target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction)
 
             ## update spin scores (identifier - 1 because the spin scores are stored in a list and the rarity identifier starts at 1)
             await kanrisha_client.remote_handler.member_handler.update_spin_value(target_member.member_id, 1, card.rarity.identifier - 1) ## type: ignore (we know it's not None)
 
-            ## get first 3 digits of card id for all member owned cards
+            ## get first 4 digits of card id for all member owned cards, because this is what is used to determine cards
             owned_card_ids = [int(str(card_id)[0:4]) for card_id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
 
             ## if the member doesn't own the card, add it to their owned_card_ids list, use a blank 0 for rarity and xp identifiers
@@ -133,25 +130,28 @@ class slashCommandHandler:
                 
                 ## the whole idea of this is that the member doesn't actually have any "card" objects, they just have the id sequence of the card
                 ## gacha_handler has the "Base" card objects, and the member's owned_card_ids list is just how the card should be altered
-                ## card needs to be reset after display.
+                ## card needs to be reset after display due to objects being passed by reference
 
                 ## if card is owned get the id sequence from the member's owned cards
                 full_user_sequence = target_member.owned_card_ids[owned_card_ids.index(card.actual_id)] ## type: ignore (we know it's not None)
                 
+                ## modify card object to match user's id sequence
                 card.replica.identifier = int(str(full_user_sequence)[4])
                 card.rarity.current_xp = int(str(full_user_sequence)[5])
 
-                if(card.replica.identifier != 7):
+                ## if the card's replica is not maxed, increase the xp and identifier
+                if(card.replica.identifier != 6):
                     card.rarity.current_xp += 1
 
+                    ## if the card's xp is maxed, reset the xp and increase the identifier
                     if(card.rarity.current_xp >= card.rarity.max_xp):
                         card.rarity.current_xp = 0
                         card.replica.identifier += 1
 
-                    ## get new sequence
+                    ## get new sequence id for user's card
                     new_id_sequence = int(str(card.id_sequence)[0:4] + f"{card.replica.identifier}{card.rarity.current_xp}")
 
-                    ## replace in array
+                    ## replace in array 
                     target_member.owned_card_ids[owned_card_ids.index(card.actual_id)] = new_id_sequence ## type: ignore (we know it's not None)
 
                     ## user card for embed
@@ -167,7 +167,7 @@ class slashCommandHandler:
 
                     embed.set_footer(text=f"You have this card maxed out. You have been awarded {credits_to_add} credits.")
 
-            ## reset card
+            ## reset card to default
             card = safe_card
     
             await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, embed=embed)
@@ -208,7 +208,7 @@ class slashCommandHandler:
             embed.set_thumbnail(url=kanrisha_client.file_ensurer.bot_thumbnail_url)
             embed.set_footer(text="This message will be deleted in 60 seconds.")
 
-            # Store the user's ID as a custom attribute of the button
+            ## Store the user's ID as a custom attribute of the button
             view = discord.ui.View().add_item(discord.ui.Button(style=discord.ButtonStyle.green, custom_id=f"register_{interaction.user.id}", label="Register"))
 
             await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, embed=embed, view=view, delete_after=60.0)
@@ -355,14 +355,17 @@ class slashCommandHandler:
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You can't transfer credits to yourself.", delete_after=5.0, is_ephemeral=True)
                 return
 
+            ## Check if the amount is negative, allows admins to transfer negative credits
             if(amount < 0 and not is_admin):
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You can't transfer negative credits.", delete_after=5.0, is_ephemeral=True)
                 return
 
+            ## Check if the sender has enough credits, allows admins to transfer more credits than they have
             if(amount > sender_member.credits and not is_admin): ## type: ignore (we know it's not None)
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You don't have enough credits.", delete_after=5.0, is_ephemeral=True)
                 return
             
+            ## deduct credits from sender and add to transfer target, admins are not deducted credits
             if(not is_admin):
                 sender_member.credits -= amount ## type: ignore (we know it's not None)
                 
@@ -408,7 +411,7 @@ class slashCommandHandler:
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That user is not registered.", delete_after=5.0, is_ephemeral=True)
                 return
             
-            ## get first 3 digits of card id for all member owned cards
+            ## get first 4 digits of card id for all member owned cards
             owned_card_ids = [int(str(card_id)[0:4]) for card_id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
 
             ## get all names
@@ -430,6 +433,7 @@ class slashCommandHandler:
                 card = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.actual_id == card_id][0] ## type: ignore (we know it's not None)
                 safe_card = card
 
+                ## modify card object to match user's id sequence
                 card.replica.identifier = int(str(full_user_sequence)[4])
                 card.rarity.current_xp = int(str(full_user_sequence)[5])
 
@@ -472,6 +476,7 @@ class slashCommandHandler:
             ## get the syndicateMember object for the target member
             target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, member)
 
+            ## ensure user owns cards
             if(target_member.owned_card_ids == []): ## type: ignore (we know it's not None)
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That deck doesn't have any cards.", delete_after=5.0, is_ephemeral=True)
                 return
@@ -492,9 +497,11 @@ class slashCommandHandler:
             ## Separate the sorted pairs back into two lists
             owned_cards, sequence_ids = zip(*paired_list)
 
+            ## get the base card and a copy of it
             base_card = owned_cards[0]
             safe_card = base_card
 
+            ## modify the base card to match the user's card
             base_card.replica.identifier = int(str(sequence_ids[0])[4]) ## type: ignore (we know it's not going to be empty)
             base_card.rarity.current_xp = int(str(sequence_ids[0])[5]) ## type: ignore (we know it's not going to be empty)
 
@@ -529,6 +536,8 @@ class slashCommandHandler:
 
             Shows all cards.\n
 
+            Is essentially a copy of the get_deck() function but with kanrisha as the target member.\n
+
             Parameters:\n
             interaction (object - discord.Interaction) : the interaction object.\n
 
@@ -545,7 +554,7 @@ class slashCommandHandler:
 
             kanrisha_syndicate_object, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, kanrisha_member) ## type: ignore (we know it's not None)
 
-            ## get first 3 digits of card id for all member owned cards
+            ## get first 4 digits of card id for all member owned cards
             owned_card_ids = [int(str(card_id)[0:4]) for card_id in kanrisha_syndicate_object.owned_card_ids] ## type: ignore (we know it's not None)
 
             ## get the card objects for the target member's owned cards
@@ -734,6 +743,7 @@ class slashCommandHandler:
 
             """
 
+            ## makes sure the message is from the user who called the command and is in DMs
             def check(message:discord.Message):
                 return message.author == user_requesting and isinstance(message.channel, discord.DMChannel)
 
@@ -874,6 +884,7 @@ class slashCommandHandler:
                 "**/card** - Displays a card.\n\n"
                 "**/deck** - Displays the user's deck.\n\n"
                 "**/catalog** - Shows all cards.\n\n"
+                "**/request-card-change** - Requests a card change.\n\n"
                 "**/leaderboard** - Sends the leaderboards.\n\n"
                 "**/help-commands** - Sends this message.\n\n"
             )
