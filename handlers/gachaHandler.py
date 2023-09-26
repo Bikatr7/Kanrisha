@@ -97,11 +97,11 @@ class gachaHandler:
 
         self.cards.clear()
 
-        id_list, name_list, rarity_list, picture_path_list, picture_url_list, person_id_list = await self.connection_handler.read_multi_column_query("select card_id, card_name, card_rarity, card_picture_path, card_picture_url, person_id from cards")
+        id_sequence_list, name_list, rarity_list, picture_path_list, picture_url_list, person_id_list = await self.connection_handler.read_multi_column_query("select card_id, card_name, card_rarity, card_picture_path, card_picture_url, person_id from cards")
 
-        for i in range(len(id_list)):
+        for i in range(len(id_sequence_list)):
 
-            new_card = card(int(id_list[i]), name_list[i], int(rarity_list[i]), picture_path_list[i], picture_url_list[i], int(person_id_list[i]))
+            new_card = card(int(id_sequence_list[i]), name_list[i], int(rarity_list[i]), picture_path_list[i], picture_url_list[i], int(person_id_list[i]))
 
             self.cards.append(new_card)
 
@@ -131,84 +131,23 @@ class gachaHandler:
 
                 values = line.strip().split(',')
 
-                card_id = int(values[0])
+                id_sequence = values[0]
+
                 card_name = values[1]
                 card_rarity = int(values[2])
                 card_picture_path = os.path.join(self.file_ensurer.gacha_images_dir, values[3])
                 card_picture_url = values[4]
                 card_person_id = int(values[5])
 
-                new_card = card(card_id, card_name, card_rarity, card_picture_path, card_picture_url, card_person_id)
+                new_card = card(int(id_sequence), card_name, card_rarity, card_picture_path, card_picture_url, card_person_id)
 
                 self.cards.append(new_card)
 
         await self.file_ensurer.logger.log_action("INFO", "gachaHandler", "Loaded cards from local.")
 
-##-------------------start-of-spin_wheel()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    async def spin_wheel(self, user_id:int) -> typing.Tuple[str,int]:
-
-        """
-
-        Spins the wheel and returns the result.\n
-
-        Parameters:\n
-        self (object - gachaHandler) : the gachaHandler object.\n
-        user_id (int) : the id of the user.\n
-
-        Returns:\n
-        value_to_return (str) : the result of the spin.\n
-        spin_index (int) : the type of spin.\n
-
-        """
-
-        if(user_id not in self.lucky_number_ids):
-            chances = {
-                "<:shining:1144089713934864444>": 0.05,
-                "<:glowing:1144089680934080512>": 0.12,
-                "<:common:1144089649174814730>": 0.83
-            }
-
-        elif(user_id not in self.godlike_ids):
-            chances = {
-                "<:shining:1144089713934864444>": 0.08,
-                "<:glowing:1144089680934080512>": 0.14,
-                "<:common:1144089649174814730>": 0.78
-            }
-
-        else:
-            chances = {
-                "<:shining:1144089713934864444>": 0.50,
-                "<:glowing:1144089680934080512>": 0.30,
-                "<:common:1144089649174814730>": 0.20,
-            }
-
-        value_to_return = ""
-        
-        random_number = random.random()
-
-        cumulative_probability = 0
-
-        for value, probability in chances.items():
-            cumulative_probability += probability
-
-            if(random_number <= cumulative_probability):
-                value_to_return = value
-                break
-
-        if(value_to_return == "<:shining:1144089713934864444>"):
-            spin_index = 0
-        elif(value_to_return == "<:glowing:1144089680934080512>"):
-            spin_index = 1
-        else:
-            spin_index = 2
-
-        return value_to_return, spin_index
-
-
 ##-------------------start-of-spin_gacha()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def spin_gacha(self, user_id:int) -> card:
+    async def spin_gacha(self) -> card:
 
         """
         
@@ -216,7 +155,6 @@ class gachaHandler:
 
         Parameters:\n
         self (object - gachaHandler) : the gachaHandler object.\n
-        user_id (int) : the id of the user.\n
 
         Returns:\n
         random_card (object - card) : the result of the spin.\n

@@ -177,7 +177,7 @@ class remoteHandler():
             member_id bigint primary key,
             member_name varchar(256) not null,
             spin_scores varchar(256) not null,
-            owned_card_ids varchar(256) not null,
+            owned_card_ids text(65535) not null,
             credits int not null
         )
         """
@@ -234,7 +234,7 @@ class remoteHandler():
 
             for member in self.member_handler.members:
 
-                ## member_id, member_name, spin_scores, owned care_ids, credits
+                ## member_id, member_name, spin_scores, owned card_ids, credits
                 new_id = member.member_id
                 new_name = member.member_name
                 new_spin_scores = member.spin_scores
@@ -277,7 +277,7 @@ class remoteHandler():
             for card in self.gacha_handler.cards:
 
                 ## card_id, card_name, card_rarity, card_picture_path, card_picture_url
-                new_id = card.id
+                new_id = card.id_sequence
                 new_name = card.name
                 new_rarity = card.rarity.identifier
                 new_picture_path = os.path.basename(card.picture_path)

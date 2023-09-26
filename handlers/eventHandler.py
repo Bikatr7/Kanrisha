@@ -274,7 +274,7 @@ class eventHandler:
 
             ##----------------------------------------------/
 
-            async def get_owned_cards(deck_owner:discord.User) -> typing.Tuple[typing.List[card], int]:
+            async def get_owned_cards(deck_owner:discord.User) -> typing.Tuple[typing.List[card], typing.List[int], int]:
 
                 ## get the current card index
                 current_index = int(interaction.message.embeds[0].footer.text.split("/")[0]) - 1 ## type: ignore (we know it's not None)
@@ -282,11 +282,23 @@ class eventHandler:
                 ## get the target member's syndicateMember object
                 target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, deck_owner) 
 
-                owned_cards = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
+                ## get first 3 digits of card id for all member owned cards
+                owned_card_ids = [int(str(card_id)[0:4]) for card_id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
 
-                owned_cards.sort(key=lambda x: x.rarity.identifier, reverse=True)
+                ## get the card objects for the target member's owned cards, as well as the sequence ids
+                owned_cards = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.actual_id in owned_card_ids] ## type: ignore (we know it's not None)
+                sequence_ids = [target_member.owned_card_ids[owned_card_ids.index(card.actual_id)] for card in owned_cards] ## type: ignore (we know it's not None)
 
-                return owned_cards, current_index
+                ## Create pairs of (owned_card, sequence_id)
+                paired_list = list(zip(owned_cards, sequence_ids))
+
+                ## Sort the pairs based on the rarity of the owned_card
+                paired_list.sort(key=lambda x: x[0].rarity.identifier, reverse=True)
+
+                ## Separate the sorted pairs back into two lists
+                owned_cards, sequence_ids = zip(*paired_list)
+
+                return owned_cards, sequence_ids, current_index ## type: ignore (we know it's not empty)
 
             ##----------------------------------------------/
 
@@ -303,16 +315,22 @@ class eventHandler:
                     deck_owner = await kanrisha_client.fetch_user(member_id)
 
                     ## get the current cards and index
-                    owned_cards, current_index = await get_owned_cards(deck_owner)
+                    owned_cards, sequence_ids, current_index = await get_owned_cards(deck_owner)
 
                     ## calculate the new index to display
                     new_index = current_index - 1 if current_index > 0 else len(owned_cards) - 1
 
                     card_to_display = owned_cards[new_index]
+                    safe_card_to_display = card_to_display
 
-                    new_embed = discord.Embed(title="Deck", description=f"{card_to_display.rarity.name} {card_to_display.name}", color=0xC0C0C0)
-                    new_embed.set_image(url=card_to_display.picture_url)
+                    card_to_display.replica.identifier = int(str(sequence_ids[new_index])[4]) ## type: ignore (we know it's not going to be empty)
+                    card_to_display.rarity.current_xp = int(str(sequence_ids[new_index])[5]) ## type: ignore (we know it's not going to be empty)
+
+                    new_embed = await card_to_display.get_display_embed()
+
                     new_embed.set_footer(text=f"{new_index + 1}/{len(owned_cards)}")
+
+                    card_to_display = safe_card_to_display
 
                     await interaction.response.edit_message(embed=new_embed)
 
@@ -335,16 +353,23 @@ class eventHandler:
                     deck_owner = await kanrisha_client.fetch_user(member_id)
 
                     ## get the current cards and index
-                    owned_cards, current_index = await get_owned_cards(deck_owner)
+                    owned_cards, sequence_ids, current_index = await get_owned_cards(deck_owner)
 
                     ## calculate the new index to display
                     new_index = current_index + 1 if current_index < len(owned_cards) - 1 else 0
 
                     card_to_display = owned_cards[new_index]
 
-                    new_embed = discord.Embed(title="Deck", description=f"{card_to_display.rarity.name} {card_to_display.name}", color=0xC0C0C0)
-                    new_embed.set_image(url=card_to_display.picture_url)
+                    safe_card_to_display = card_to_display
+
+                    card_to_display.replica.identifier = int(str(sequence_ids[new_index])[4]) ## type: ignore (we know it's not going to be empty)
+                    card_to_display.rarity.current_xp = int(str(sequence_ids[new_index])[5]) ## type: ignore (we know it's not going to be empty)
+
+                    new_embed = await card_to_display.get_display_embed()
+
                     new_embed.set_footer(text=f"{new_index + 1}/{len(owned_cards)}")
+
+                    card_to_display = safe_card_to_display
 
                     await interaction.response.edit_message(embed=new_embed)
 
