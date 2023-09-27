@@ -43,7 +43,7 @@ class eventHandler:
 
         archive_channel_id = 1146979933416067163
 
-        syndicate_role_id = 1146901009248026734 
+        self.syndicate_role_id = 1146901009248026734 
 
         self.banned_messages = []
 
@@ -252,7 +252,7 @@ class eventHandler:
                 ## if register button was pressed by the correct user
                 if(custom_id == f"register_{interaction.user.id}"):
 
-                    syndicate_role = kanrisha_client.get_guild(interaction.guild_id).get_role(syndicate_role_id) ## type: ignore (we know it's not None)
+                    syndicate_role = kanrisha_client.get_guild(interaction.guild_id).get_role(self.syndicate_role_id) ## type: ignore (we know it's not None)
 
                     ## acknowledge the interaction immediately
                     await kanrisha_client.interaction_handler.defer_interaction(interaction, is_ephemeral=True, is_thinking=True) 

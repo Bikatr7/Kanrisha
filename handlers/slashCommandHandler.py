@@ -200,6 +200,15 @@ class slashCommandHandler:
             if(await check_if_registered(interaction, register_check=True) == True):
                 error_message = "You are already registered."
 
+                ## get syndicate role
+                syndicate_role = kanrisha_client.get_guild(interaction.guild_id).get_role(self.event_handler.syndicate_role_id) ## type: ignore (we know it's not None)
+
+                ## check if the member has the syndicate role
+                if(syndicate_role not in interaction.user.roles): ## type: ignore (we know it's not None)
+                    error_message += "But are missing the Syndicate role. You have been given the Syndicate role."
+
+                    await interaction.user.add_roles(syndicate_role) ## type: ignore (we know it's not None)
+
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, response=error_message, delete_after=5.0, is_ephemeral=True)
 
                 return
