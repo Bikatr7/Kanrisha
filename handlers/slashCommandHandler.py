@@ -399,6 +399,11 @@ class slashCommandHandler:
             if(await check_if_registered(interaction) == False):
                 return
             
+            ## admin check
+            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
+                return
+            
             ## make safe card object
             safe_card = None
             
@@ -470,6 +475,11 @@ class slashCommandHandler:
 
             ## Check if the user is registered
             if(not await check_if_registered(interaction)):
+                return
+            
+            ## admin check
+            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
                 return
             
             ## get the syndicateMember object for the target member
@@ -547,6 +557,11 @@ class slashCommandHandler:
 
             ## Check if the user is registered
             if(not await check_if_registered(interaction)):
+                return
+            
+            ## admin check
+            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
                 return
 
             kanrisha_member = await kanrisha_client.fetch_user(kanrisha_client.interaction_handler.admin_user_ids[-1])
