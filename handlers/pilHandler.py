@@ -106,6 +106,7 @@ class pilHandler():
         rarity_image = Image.open(rarity_path).convert("RGBA")
         replica_image = Image.open(replica_path).convert("RGBA")
 
+        ## async download pfp
         async with aiohttp.ClientSession() as session:
             async with session.get(pfp_url) as resp:
                 if resp.status == 200:
@@ -194,6 +195,7 @@ class pilHandler():
 
 
         draw = ImageDraw.Draw(frame)
+
         name_font = ImageFont.truetype(self.file_ensurer.title_font_path, size=35)
         description_font = ImageFont.truetype(self.file_ensurer.subtitle_font_path, size=20)
 
@@ -234,14 +236,17 @@ class pilHandler():
         frame = await self.get_built_frame(card,user)
         frame = await self.add_text_to_frame(frame, card, user)
 
+        ## save image to byte stream
         byte_io = io.BytesIO()
         frame.save(byte_io, format='PNG')
 
         ## needs to sync attributes before displaying, because it's highly likely that the card was just modified.
         await card.determine_attributes()
 
-        embed = discord.Embed(title= f"{card.rarity.emoji}{card.name} {card.replica.emoji} ({card.rarity.current_xp}{card.rarity.max_xp})", description=f"{card.rarity.name}", color = card.rarity.color)
+        ## build embed
+        embed = discord.Embed(title= f"{card.rarity.emoji}{card.name} {card.replica.emoji} ({card.rarity.current_xp}/{card.rarity.max_xp})", description=f"{card.rarity.name}", color = card.rarity.color)
 
+        ## get image from byte stream
         byte_io.seek(0)
         file = discord.File(byte_io, filename=f"{card.id_sequence}.png")
 

@@ -401,11 +401,6 @@ class slashCommandHandler:
             if(await check_if_registered(interaction) == False):
                 return
             
-            ## admin check
-            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
-                return
-            
             ## make safe card object
             safe_card = None
             
@@ -477,11 +472,6 @@ class slashCommandHandler:
 
             ## Check if the user is registered
             if(not await check_if_registered(interaction)):
-                return
-            
-            ## admin check
-            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
                 return
             
             ## get the syndicateMember object for the target member
@@ -559,11 +549,6 @@ class slashCommandHandler:
 
             ## Check if the user is registered
             if(not await check_if_registered(interaction)):
-                return
-            
-            ## admin check
-            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
                 return
 
             kanrisha_member = await kanrisha_client.fetch_user(kanrisha_client.interaction_handler.admin_user_ids[-1])
@@ -796,128 +781,6 @@ class slashCommandHandler:
             
             return merit_leaderboard
 
-##-------------------start-of-request_card_change()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-        @kanrisha_client.tree.command(name="request-card-change", description="Requests a card change.")
-        async def request_card_change(interaction:discord.Interaction):
-
-            """
-            
-            Requests a card change.\n
-
-            Parameters:\n
-            interaction (object - discord.Interaction) : the interaction object.\n
-
-            Returns:\n
-            None.\n
-
-
-            """
-
-            ## makes sure the message is from the user who called the command and is in DMs
-            def check(message:discord.Message):
-                return message.author == user_requesting and isinstance(message.channel, discord.DMChannel)
-
-            ## Check if the user is registered
-            if(not await check_if_registered(interaction)):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not registered.", delete_after=5.0, is_ephemeral=True)
-                return
-            
-            required_string = "https://i.imgur.com/"
-
-            img_url = ""
-
-            user_requesting = interaction.user
-
-            user_requesting_syndicate_object, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, user_requesting) ## type: ignore (we know it's not None)
-
-            card_to_alter = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.person_id == user_requesting_syndicate_object.member_id][0] ## type: ignore (we know it's not None)
-        
-            if(card_to_alter == None):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You don't have a card to alter.", delete_after=5.0, is_ephemeral=True)
-                return
-            
-            card_guidelines = """
-            **Guidelines:**\n
-            Failure to adhere to these guidelines will result in penalties. These penalties may include, but are not limited to, a credit fine, command permissions being revoked, or card removal.\n
-            
-            A 5000 credit fee will be charged for each card change request.\n
-
-            - Title must be your name.\n
-            - Subtitle may be anything.\n
-            - Description must be blank.\n
-            - No adding anything else to the card.\n
-            - No Icons.\n
-            - Must choose matching background of your card's rarity.\n
-
-            **Backgrounds:**\n
-            - Exclusive (Onyx)
-            - Prime (Quartz)
-            - Distinguished (Fire)
-            - Notable (Sky)
-            - Standard (Earth)
-
-            **Instructions:**\n
-            - Create your card on the following website: https://bighugelabs.com/deck.php\n
-            - Upload your image to imgur.com\n
-            - Grab the link to the image.\n
-            - The link must be the direct link to the image. For example, a i.imgur link. (https://i.imgur.com/...)\n
-            - The link must end in .jpg, .png.
-            
-            Please send the link when you are ready.
-            """
-
-            embed = discord.Embed(title="Card Change Request", description=card_guidelines, color=0xC0C0C0)
-
-
-            try:
-
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, response="Please check your DMs.", is_ephemeral=True)
-
-            except:
-                pass
-
-            await user_requesting.send(embed=embed)
-
-            try:
-                msg = await kanrisha_client.wait_for('message', timeout=60.0, check=check)
-
-            except asyncio.TimeoutError:
-                await user_requesting.send("You took too long to respond. Please use the command again to try again.")
-                return
-
-            else:
-                img_url = msg.content
-
-            if(not img_url.startswith(required_string)):
-                await user_requesting.send("Invalid image link. Please use the command again to try again.")
-                return
-            
-            ## download the image
-            img_data = requests.get(img_url).content
-
-            ## check if the image is valid
-            if(not img_data):
-                await user_requesting.send("Invalid image link. Please use the command again to try again.")
-                return
-            
-            ## check if the image is a valid format
-            if(not img_url.endswith(".jpg") and not img_url.endswith(".png") and not img_url.endswith(".jpeg")):
-                await user_requesting.send("Invalid image link. Please use the command again to try again.")
-                return
-            
-            ## update the card object
-            card_to_alter.picture_url = img_url
-
-            ## notify the user
-            await user_requesting.send("Your card has been updated.")
-
-            ## deduct the fee
-            user_requesting_syndicate_object.credits -= 5000 ## type: ignore (we know it's not None)
-
-            ## log the action
-            await kanrisha_client.file_ensurer.logger.log_action("INFO", "Kanrisha", f"{user_requesting.name} changed their card to {img_url}.") ## type: ignore (we know it's not None)
-
 ##-------------------start-of-help_commands()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         
         @kanrisha_client.tree.command(name="help-commands", description="Shows all commands.")
@@ -944,7 +807,6 @@ class slashCommandHandler:
                 "**/card** - Displays a card.\n\n"
                 "**/deck** - Displays the user's deck.\n\n"
                 "**/catalog** - Shows all cards.\n\n"
-                "**/request-card-change** - Requests a card change.\n\n"
                 "**/leaderboard** - Sends the leaderboards.\n\n"
                 "**/snipe** - Fetches the last deleted message in a channel.\n\n"
                 "**/help-commands** - Sends this message.\n\n"
