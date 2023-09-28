@@ -105,7 +105,7 @@ class gachaHandler:
 
         for i in range(len(id_sequence_list)):
 
-            new_card = card(int(id_sequence_list[i]), name_list[i], int(rarity_list[i]), picture_url_list[i], picture_name_list[i], picture_subtitle_list[i], picture_description_list[i], int(person_id_list[i]))
+            new_card = card(id_sequence_list[i], name_list[i], int(rarity_list[i]), picture_url_list[i], picture_name_list[i], picture_subtitle_list[i], picture_description_list[i], int(person_id_list[i]))
 
             self.cards.append(new_card)
 
@@ -144,10 +144,9 @@ class gachaHandler:
                 card_picture_name = values[4]
                 card_picture_subtitle = values[5]
                 card_picture_description = values[6]
-                card_person_id = int(values[7])
+                card_person_id = values[7]
 
-
-                new_card = card(int(id_sequence), card_name, card_rarity, card_picture_url, card_picture_name, card_picture_subtitle, card_picture_description, card_person_id)
+                new_card = card(id_sequence, card_name, card_rarity, card_picture_url, card_picture_name, card_picture_subtitle, card_picture_description, int(card_person_id))
 
                 self.cards.append(new_card)
 

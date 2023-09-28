@@ -118,7 +118,7 @@ class slashCommandHandler:
             await kanrisha_client.remote_handler.member_handler.update_spin_value(target_member.member_id, 1, card.rarity.identifier - 1) ## type: ignore (we know it's not None)
 
             ## get first 4 digits of card id for all member owned cards, because this is what is used to determine cards
-            owned_card_ids = [int(str(card_id)[0:4]) for card_id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
+            owned_card_ids = [card_id[0:4] for card_id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
 
             ## if the member doesn't own the card, add it to their owned_card_ids list, use a blank 0 for rarity and xp identifiers
             if(card.actual_id not in owned_card_ids): ## type: ignore (we know it's not None)
@@ -149,7 +149,7 @@ class slashCommandHandler:
                         card.replica.identifier += 1
 
                     ## get new sequence id for user's card
-                    new_id_sequence = int(str(card.id_sequence)[0:4] + f"{card.replica.identifier}{card.rarity.current_xp}")
+                    new_id_sequence = card.id_sequence[0:4] + f"{card.replica.identifier}{card.rarity.current_xp}"
 
                     ## replace in array 
                     target_member.owned_card_ids[owned_card_ids.index(card.actual_id)] = new_id_sequence ## type: ignore (we know it's not None)
@@ -290,7 +290,7 @@ class slashCommandHandler:
             if(await check_if_registered(interaction) == False):
                 return
 
-            target_member, _, image_url, self_request = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, member)
+            target_member, _, image_url, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, member)
 
             if(target_member == None):
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That user is not registered.", delete_after=5.0, is_ephemeral=True)
@@ -411,7 +411,7 @@ class slashCommandHandler:
                 return
             
             ## get first 4 digits of card id for all member owned cards
-            owned_card_ids = [int(str(card_id)[0:4]) for card_id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
+            owned_card_ids = [card_id[0:4] for card_id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
 
             ## get all names
             all_card_names = [card.name.lower() for card in kanrisha_client.remote_handler.gacha_handler.cards]
@@ -433,8 +433,8 @@ class slashCommandHandler:
                 safe_card = card
 
                 ## modify card object to match user's id sequence
-                card.replica.identifier = int(str(full_user_sequence)[4])
-                card.rarity.current_xp = int(str(full_user_sequence)[5])
+                card.replica.identifier = int(full_user_sequence[4])
+                card.rarity.current_xp = int(full_user_sequence[5])
 
             ## if not, get the base card
             else:
@@ -481,7 +481,7 @@ class slashCommandHandler:
                 return
             
             ## get first 4 digits of card id for all member owned cards
-            owned_card_ids = [int(str(card_id)[0:4]) for card_id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
+            owned_card_ids = [card_id[0:4] for card_id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
 
             ## get the card objects for the target member's owned cards, also grab full sequence id from owned cards
             owned_cards = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.actual_id in owned_card_ids] ## type: ignore (we know it's not None)
@@ -501,8 +501,8 @@ class slashCommandHandler:
             safe_card = base_card
 
             ## modify the base card to match the user's card
-            base_card.replica.identifier = int(str(sequence_ids[0])[4]) ## type: ignore (we know it's not going to be empty)
-            base_card.rarity.current_xp = int(str(sequence_ids[0])[5]) ## type: ignore (we know it's not going to be empty)
+            base_card.replica.identifier = int(sequence_ids[0][4]) ## type: ignore (we know it's not going to be empty)
+            base_card.rarity.current_xp = int(sequence_ids[0][5]) ## type: ignore (we know it's not going to be empty)
 
             embed = await base_card.get_display_embed() ## type: ignore (we know it's not going to be empty)
             
@@ -554,7 +554,7 @@ class slashCommandHandler:
             kanrisha_syndicate_object, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, kanrisha_member) ## type: ignore (we know it's not None)
 
             ## get first 4 digits of card id for all member owned cards
-            owned_card_ids = [int(str(card_id)[0:4]) for card_id in kanrisha_syndicate_object.owned_card_ids] ## type: ignore (we know it's not None)
+            owned_card_ids = [card_id[0:4] for card_id in kanrisha_syndicate_object.owned_card_ids] ## type: ignore (we know it's not None)
 
             ## get the card objects for the target member's owned cards
             owned_cards = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.actual_id in owned_card_ids] ## type: ignore (we know it's not None)

@@ -275,7 +275,7 @@ class eventHandler:
 
             ##----------------------------------------------/
 
-            async def get_owned_cards(deck_owner:discord.User) -> typing.Tuple[typing.List[card], typing.List[int], int]:
+            async def get_owned_cards(deck_owner:discord.User) -> typing.Tuple[typing.List[card], typing.List[str], int]:
 
                 ## get the current card index
                 current_index = int(interaction.message.embeds[0].footer.text.split("/")[0]) - 1 ## type: ignore (we know it's not None)
@@ -284,7 +284,7 @@ class eventHandler:
                 target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, deck_owner) 
 
                 ## get first 4 digits of card id for all member owned cards
-                owned_card_ids = [int(str(card_id)[0:4]) for card_id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
+                owned_card_ids = [card_id[0:4] for card_id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
 
                 ## get the card objects for the target member's owned cards, as well as the sequence ids
                 owned_cards = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.actual_id in owned_card_ids] ## type: ignore (we know it's not None)
@@ -325,8 +325,8 @@ class eventHandler:
                     safe_card_to_display = card_to_display
 
                     ## alter card to match user's sequence id
-                    card_to_display.replica.identifier = int(str(sequence_ids[new_index])[4]) ## type: ignore (we know it's not going to be empty)
-                    card_to_display.rarity.current_xp = int(str(sequence_ids[new_index])[5]) ## type: ignore (we know it's not going to be empty)
+                    card_to_display.replica.identifier = int(sequence_ids[new_index][4]) ## type: ignore (we know it's not going to be empty)
+                    card_to_display.rarity.current_xp = int(sequence_ids[new_index][5]) ## type: ignore (we know it's not going to be empty)
 
                     new_embed = await card_to_display.get_display_embed()
 
@@ -367,8 +367,8 @@ class eventHandler:
                     safe_card_to_display = card_to_display
 
                     ## alter card to match user's sequence id
-                    card_to_display.replica.identifier = int(str(sequence_ids[new_index])[4]) ## type: ignore (we know it's not going to be empty)
-                    card_to_display.rarity.current_xp = int(str(sequence_ids[new_index])[5]) ## type: ignore (we know it's not going to be empty)
+                    card_to_display.replica.identifier = int(sequence_ids[new_index][4]) ## type: ignore (we know it's not going to be empty)
+                    card_to_display.rarity.current_xp = int(sequence_ids[new_index][5]) ## type: ignore (we know it's not going to be empty)
 
                     new_embed = await card_to_display.get_display_embed()
 

@@ -155,9 +155,12 @@ class remoteHandler():
 
         ##----------------------------------------------------------------calls----------------------------------------------------------------
 
+        ## drop member_cards first because of foreign key constraints
+        await self.connection_handler.execute_query(delete_member_cards_query)
+
         await self.connection_handler.execute_query(delete_members_query)
         await self.connection_handler.execute_query(delete_cards_query)
-        await self.connection_handler.execute_query(delete_member_cards_query)
+
 
 ##--------------------start-of-create_remote_storage()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -189,7 +192,7 @@ class remoteHandler():
 
         create_cards_query = """
         create table if not exists cards (
-            card_id bigint primary key,
+            card_id varchar(256) primary key,
             card_name varchar(256) not null,
             card_rarity int not null,
             card_picture_url varchar(256),
@@ -203,7 +206,7 @@ class remoteHandler():
         create_member_cards_query = """
         create table if not exists member_cards (
             member_id bigint not null,
-            card_id bigint not null,
+            card_id varchar(256) not null,
             foreign key (member_id) references members(member_id),
             foreign key (card_id) references cards(card_id)
         )
@@ -271,7 +274,7 @@ class remoteHandler():
                 score_string = f'"{new_spin_scores[0]}.{new_spin_scores[1]}.{new_spin_scores[2]}.{new_spin_scores[3]}.{new_spin_scores[4]}"'
 
                 ## create a list of the member details
-                member_details = [str(new_id), new_name, score_string, str(new_credits), str(new_merit_points)]
+                member_details = [new_id, new_name, score_string, str(new_credits), str(new_merit_points)]
 
                 table_name = "members"
                 insert_dict = {
@@ -304,7 +307,7 @@ class remoteHandler():
                 new_picture_description = card.picture_description
                 new_person_id = card.person_id
 
-                card_details = [str(new_id), new_name, str(new_rarity), new_picture_url, new_picture_name, new_picture_subtitle, new_picture_description, str(new_person_id)]
+                card_details = [new_id, new_name, str(new_rarity), new_picture_url, new_picture_name, new_picture_subtitle, new_picture_description, str(new_person_id)]
 
                 insert_dict = {
                     "card_id" : new_id,

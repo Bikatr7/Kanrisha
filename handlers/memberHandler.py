@@ -63,17 +63,17 @@ class memberHandler:
 
         self.members.clear()
 
-        id_list, name_list, spin_scores_list, owned_card_ids, credits_list, merit_point_list = await self.connection_handler.read_multi_column_query("select member_id, member_name, spin_scores, owned_card_ids, credits, merit_points from members")
+        id_list, name_list, spin_scores_list, credits_list, merit_point_list = await self.connection_handler.read_multi_column_query("select member_id, member_name, spin_scores, credits, merit_points from members")
 
         for i in range(len(id_list)):
 
             spin_scores = spin_scores_list[i].strip("(").strip(")").split(",")
 
+            owned_card_id_list = await self.connection_handler.read_single_column_query(f"select card_id from member_cards where member_id = {id_list[i]}")
+
             spin_scores = (int(spin_scores[0]), int(spin_scores[1]), int(spin_scores[2]), int(spin_scores[3]), int(spin_scores[4]))
 
-            owned_cards = [int(card_id) for card_id in owned_card_ids[i].strip("[").strip("]").split(",")] if owned_card_ids[i].strip("[").strip("]") != "" else []
-
-            new_member = syndicateMember(int(id_list[i]), name_list[i], spin_scores, owned_cards, int(credits_list[i]), int(merit_point_list[i]))
+            new_member = syndicateMember(int(id_list[i]), name_list[i], spin_scores, owned_card_id_list, int(credits_list[i]), int(merit_point_list[i]))
             self.members.append(new_member)
 
         await self.file_ensurer.logger.log_action("INFO", "memberHandler", "Loaded members from remote.")
@@ -96,6 +96,19 @@ class memberHandler:
 
         self.members.clear()
 
+        # Read card IDs once and store in a dictionary
+        card_ids_dict = {}
+        with open(self.file_ensurer.member_card_path, "r", encoding="utf-8") as member_cards_file:
+
+            for member_cards_line in member_cards_file:
+
+                member_cards_values = member_cards_line.strip().split(',')
+
+                if(member_cards_values[0] not in card_ids_dict):
+                    card_ids_dict[member_cards_values[0]] = []
+
+                card_ids_dict[member_cards_values[0]].append(member_cards_values[1])
+
         with open(self.file_ensurer.member_path, "r", encoding="utf-8") as file:
 
             for line in file:
@@ -104,14 +117,15 @@ class memberHandler:
 
                 spin_scores = tuple([int(score) for score in values[2].strip('"').split('.')[:5]]) 
 
-                card_ids = [int(card_id) for card_id in values[3].strip('"').split('.')] if values[3].strip('"') != "" else []
+                card_ids = card_ids_dict.get(values[0], [])
 
                 ## explicit type hinting to avoid pylance warning below
                 spin_scores = (spin_scores[0], spin_scores[1], spin_scores[2], spin_scores[3], spin_scores[4])
 
-                self.members.append(syndicateMember(int(values[0]), values[1], spin_scores, card_ids, int(values[4]), int(values[5])))
+                self.members.append(syndicateMember(int(values[0]), values[1], spin_scores, card_ids, int(values[3]), int(values[4])))
 
         await self.file_ensurer.logger.log_action("INFO", "memberHandler", "Loaded members from local.") 
+
                
 ##-------------------start-of-add_new_member()---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -133,7 +147,7 @@ class memberHandler:
 
         card_id_string = ""
 
-        member_details = [str(inc_member_id), inc_member_name, score_string, card_id_string, "0", "0"]
+        member_details = [inc_member_id, inc_member_name, score_string, card_id_string, 0, 0]
 
         await self.file_ensurer.file_handler.write_sei_line(self.file_ensurer.member_path, member_details)
 

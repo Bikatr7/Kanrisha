@@ -186,7 +186,7 @@ class card:
 
 
     def __init__(self, 
-                 inc_id_sequence:int, 
+                 inc_id_sequence:str, 
                  inc_name:str, 
                  inc_rarity_identifier:int, 
                  inc_picture_url:str,
@@ -215,19 +215,19 @@ class card:
         """
 
         ## id of the card, includes the actual_id, replica_identifier, and xp_identifier.
-        self.id_sequence = inc_id_sequence
+        self.id_sequence  = inc_id_sequence
 
         ## actual id of the card. 4 digits.
-        self.actual_id = int(str(inc_id_sequence)[0:4])
+        self.actual_id = inc_id_sequence[0:4]
 
         ## name of the card
         self.name = inc_name
 
         ## rarity of the card
-        self.rarity = rarity(inc_rarity_identifier, inc_xp=int(str(inc_id_sequence)[5]))
+        self.rarity = rarity(inc_rarity_identifier, inc_xp=int(inc_id_sequence[5]))
         
         ## replica of the card
-        self.replica = replica(int(str(inc_id_sequence)[4]))
+        self.replica = replica(int(inc_id_sequence[4]))
 
         ## url to the card's picture
         self.picture_url = inc_picture_url

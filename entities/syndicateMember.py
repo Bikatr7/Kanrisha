@@ -13,7 +13,12 @@ class syndicateMember:
 
 ##-------------------start-of-__init__()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def __init__(self, inc_member_id:int, inc_member_name:str, inc_spin_scores:typing.Tuple[int,int,int,int,int], inc_owned_card_ids:typing.List[int], inc_credits:int, inc_merit_points:int) -> None:
+    def __init__(self, inc_member_id:int, 
+                 inc_member_name:str, 
+                 inc_spin_scores:typing.Tuple[int,int,int,int,int], 
+                 inc_owned_card_ids:typing.List[str], 
+                 inc_credits:int, 
+                 inc_merit_points:int) -> None:
 
         """
 
@@ -33,7 +38,7 @@ class syndicateMember:
         """
 
         ## the ID of the member
-        self.member_id = inc_member_id
+        self.member_id = int(inc_member_id)
 
         ## the discord username of the member
         self.member_name = inc_member_name
@@ -42,7 +47,7 @@ class syndicateMember:
         self.spin_scores: typing.Tuple[int,int,int,int,int] = inc_spin_scores
 
         ## the IDs of the cards owned by the member
-        self.owned_card_ids: typing.List[int] = inc_owned_card_ids
+        self.owned_card_ids: typing.List[str] = inc_owned_card_ids
 
         ## the credits of the member
         self.credits = inc_credits
