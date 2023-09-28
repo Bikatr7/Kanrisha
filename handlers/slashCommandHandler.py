@@ -2,7 +2,6 @@
 from __future__ import annotations ## used for cheating the circular import issue that occurs when i need to type check some things
 
 import typing
-import os
 import asyncio
 
 ## third-party libraries
@@ -12,6 +11,7 @@ import requests
 ## custom libraries
 from handlers.eventHandler import eventHandler
 from handlers.adminCommandHandler import adminCommandHandler
+from handlers.pilHandler import pilHandler
 
 if(typing.TYPE_CHECKING): ## used for cheating the circular import issue that occurs when i need to type check some things
     from bot.Kanrisha import Kanrisha
@@ -48,6 +48,8 @@ class slashCommandHandler:
         self.event_handler = eventHandler(kanrisha_client)
 
         self.admin_command_handler = adminCommandHandler(kanrisha_client)
+
+        self.pil_handler = pilHandler(kanrisha_client)
     
         ##-------------------start-of-check_if_registered()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

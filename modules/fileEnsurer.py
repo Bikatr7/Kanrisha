@@ -210,11 +210,52 @@ class fileEnsurer:
       
       """
 
+      ## overhead directories
       self.bot_images_dir = os.path.join(self.images_dir, "bot images")
       self.gacha_images_dir = os.path.join(self.images_dir, "gacha images")
 
+      ## gacha subdirectories
+      self.fonts_dir = os.path.join(self.gacha_images_dir, "Fonts")
+      self.frames_dir = os.path.join(self.gacha_images_dir, "Frames")
+      self.rarity_dir = os.path.join(self.gacha_images_dir, "Rarity Images")
+      self.replica_dir = os.path.join(self.gacha_images_dir, "Replica Images")
+
+      ## font paths
+      self.title_font_path = os.path.join(self.fonts_dir, "impact.ttf")
+      self.subtitle_font_path = os.path.join(self.fonts_dir, "verdanai.ttf")
+
+      ## frame paths
+      self.standard_frame_path = os.path.join(self.frames_dir, "standard frame.png")
+      self.notable_frame_path = os.path.join(self.frames_dir, "notable frame.png")
+      self.distinguished_frame_path = os.path.join(self.frames_dir, "distinguished frame.png")
+      self.prime_frame_path = os.path.join(self.frames_dir, "prime frame.png")
+      self.exclusive_frame_path = os.path.join(self.frames_dir, "exclusive frame.png")
+
+      ## rarity paths
+      self.standard_rarity_path = os.path.join(self.rarity_dir, "standard.png")
+      self.notable_rarity_path = os.path.join(self.rarity_dir, "notable.png")
+      self.distinguished_rarity_path = os.path.join(self.rarity_dir, "distinguished.png")
+      self.prime_rarity_path = os.path.join(self.rarity_dir, "prime.png")
+      self.exclusive_rarity_path = os.path.join(self.rarity_dir, "exclusive.png")
+
+      ## replica paths
+      self.R0_replica_path = os.path.join(self.replica_dir, "R0.png")
+      self.R1_replica_path = os.path.join(self.replica_dir, "R1.png")
+      self.R2_replica_path = os.path.join(self.replica_dir, "R2.png")
+      self.R3_replica_path = os.path.join(self.replica_dir, "R3.png")
+      self.R4_replica_path = os.path.join(self.replica_dir, "R4.png")
+      self.R5_replica_path = os.path.join(self.replica_dir, "R5.png")
+      self.R6_replica_path = os.path.join(self.replica_dir, "R6.png")
+
+      ##----------------------------------------------------------------calls----------------------------------------------------------------
+
       await self.file_handler.standard_create_directory(self.bot_images_dir)
       await self.file_handler.standard_create_directory(self.gacha_images_dir)
+
+      await self.file_handler.standard_create_directory(self.fonts_dir)
+      await self.file_handler.standard_create_directory(self.frames_dir)
+      await self.file_handler.standard_create_directory(self.rarity_dir)
+      await self.file_handler.standard_create_directory(self.replica_dir)
 
 ##-------------------start-of-get_elapsed_time()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
