@@ -13,6 +13,8 @@ if(typing.TYPE_CHECKING): ## used for cheating the circular import issue that oc
 
 from entities.card import card
 
+from handlers.pilHandler import pilHandler
+
 class eventHandler:
 
     """
@@ -23,7 +25,7 @@ class eventHandler:
 
 ##-------------------start-of-__init__()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def __init__(self, inc_kanrisha_client:Kanrisha) -> None:
+    def __init__(self, inc_kanrisha_client:Kanrisha, inc_pil_handler:pilHandler) -> None:
 
         """
         
@@ -46,6 +48,8 @@ class eventHandler:
         self.syndicate_role_id = 1146901009248026734 
 
         self.banned_messages = []
+
+        self.pil_handler = inc_pil_handler
 
         ##-------------------start-of-on_member_remove()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -331,14 +335,20 @@ class eventHandler:
                     card_to_display.replica.identifier = int(sequence_ids[new_index][4]) ## type: ignore (we know it's not going to be empty)
                     card_to_display.rarity.current_xp = int(sequence_ids[new_index][5]) ## type: ignore (we know it's not going to be empty)
 
-                    new_embed = await card_to_display.get_display_embed()
+                    new_embed, file = await self.pil_handler.assemble_embed(card_to_display)
+
+                    new_embed.set_footer(text=f"{new_index + 1}/{len(owned_cards)}")
+
+                    new_embed, file = await self.pil_handler.assemble_embed(card_to_display)
 
                     new_embed.set_footer(text=f"{new_index + 1}/{len(owned_cards)}")
 
                     ## set card to display back to the safe copy
                     card_to_display = safe_card_to_display
 
-                    await interaction.response.edit_message(embed=new_embed)
+                    new_embed.set_image(url=f"attachment://{file.filename}")
+
+                    await interaction.response.edit_message(embed=new_embed,attachments=[file])
 
                 ## if left deck button was pressed by the wrong user
                 elif(custom_id and custom_id.startswith("deck_left_")):
@@ -373,14 +383,16 @@ class eventHandler:
                     card_to_display.replica.identifier = int(sequence_ids[new_index][4]) ## type: ignore (we know it's not going to be empty)
                     card_to_display.rarity.current_xp = int(sequence_ids[new_index][5]) ## type: ignore (we know it's not going to be empty)
 
-                    new_embed = await card_to_display.get_display_embed()
+                    new_embed, file = await self.pil_handler.assemble_embed(card_to_display)
 
                     new_embed.set_footer(text=f"{new_index + 1}/{len(owned_cards)}")
 
                     ## set card to display back to the safe copy
                     card_to_display = safe_card_to_display
 
-                    await interaction.response.edit_message(embed=new_embed)
+                    new_embed.set_image(url=f"attachment://{file.filename}")
+
+                    await interaction.response.edit_message(embed=new_embed, attachments=[file])
 
                 ## if right deck button was pressed by the wrong user
                 elif(custom_id and custom_id.startswith("deck_right_")):

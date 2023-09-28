@@ -45,11 +45,11 @@ class slashCommandHandler:
 
         archive_channel_id = 1146979933416067163
 
-        self.event_handler = eventHandler(kanrisha_client)
+        self.pil_handler = pilHandler(kanrisha_client)
+
+        self.event_handler = eventHandler(kanrisha_client, self.pil_handler)
 
         self.admin_command_handler = adminCommandHandler(kanrisha_client)
-
-        self.pil_handler = pilHandler(kanrisha_client)
     
         ##-------------------start-of-check_if_registered()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -126,7 +126,7 @@ class slashCommandHandler:
             if(card.actual_id not in owned_card_ids): ## type: ignore (we know it's not None)
                 target_member.owned_card_ids.append(card.id_sequence) ## type: ignore (we know it's not None)
 
-                embed = await card.get_display_embed()
+                embed, file = await self.pil_handler.assemble_embed(card)
 
             else:
                 
@@ -157,7 +157,7 @@ class slashCommandHandler:
                     target_member.owned_card_ids[owned_card_ids.index(card.actual_id)] = new_id_sequence ## type: ignore (we know it's not None)
 
                     ## user card for embed
-                    embed = await card.get_display_embed()
+                    embed, file = await self.pil_handler.assemble_embed(card)
 
 
                 ## add credits to the member's balance based on the card's rarity if the card's replica is maxed
@@ -165,14 +165,14 @@ class slashCommandHandler:
                     credits_to_add = kanrisha_client.remote_handler.gacha_handler.rarity_to_credits.get(card.rarity.name, 0) 
                     target_member.credits += credits_to_add ## type: ignore (we know it's not None)
 
-                    embed = await card.get_display_embed()
+                    embed, file = await self.pil_handler.assemble_embed(card)
 
                     embed.set_footer(text=f"You have this card maxed out. You have been awarded {credits_to_add} credits.")
 
             ## reset card to default
             card = safe_card
     
-            await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, embed=embed)
+            await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, embed=embed, file=file)
 
         ##-------------------start-of-register()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -449,13 +449,13 @@ class slashCommandHandler:
                 ## get card object from all cards
                 card = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.actual_id == card_id][0]
 
-            embed = await card.get_display_embed()
+            embed, file = await self.pil_handler.assemble_embed(card)
 
             ## reset card
             if(safe_card):
                 card = safe_card
 
-            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)
+            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed, file=file)
 
 ##-------------------start-of-get_deck()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -516,7 +516,7 @@ class slashCommandHandler:
             base_card.replica.identifier = int(sequence_ids[0][4]) ## type: ignore (we know it's not going to be empty)
             base_card.rarity.current_xp = int(sequence_ids[0][5]) ## type: ignore (we know it's not going to be empty)
 
-            embed = await base_card.get_display_embed() ## type: ignore (we know it's not going to be empty)
+            embed, file = await self.pil_handler.assemble_embed(base_card) ## type: ignore (we know it's not None)
             
             embed.set_footer(text=f"1/{len(owned_cards)}")
 
@@ -536,7 +536,7 @@ class slashCommandHandler:
             ## reset card
             base_card = safe_card
 
-            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed, view=view)
+            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed, file=file, view=view)
 
 ##-------------------start-of-catalog()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -579,7 +579,7 @@ class slashCommandHandler:
             ## sort the cards by rarity
             owned_cards.sort(key=lambda x: x.rarity.identifier, reverse=True)
 
-            embed = await owned_cards[0].get_display_embed()
+            embed, file = await self.pil_handler.assemble_embed(owned_cards[0])
             embed.set_footer(text=f"1/{len(owned_cards)}")
 
             ## custom id structure
@@ -595,7 +595,7 @@ class slashCommandHandler:
             view.add_item(left_button)
             view.add_item(right_button)
 
-            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed, view=view)
+            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed, file=file, view=view)
             
 ##-------------------start-of-leaderboard()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

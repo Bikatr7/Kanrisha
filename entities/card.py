@@ -244,30 +244,6 @@ class card:
         ## id of the person who the card represents
         self.person_id = inc_person_id
 
-##-------------------start-of-get_display_embed()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    async def get_display_embed(self):
-
-        """
-        
-        Returns an embed to display the card.\n
-
-        Parameters:\n
-        self (object - card) : card object.\n
-
-        Returns:\n
-        embed (object - discord.Embed) : embed to display the card.\n
-
-        """
-
-        ## needs to sync attributes before displaying, because it's highly likely that the card was just modified.
-        await self.determine_attributes()
-
-        embed = discord.Embed(title= f"{self.rarity.emoji}{self.name} {self.replica.emoji} ({self.rarity.current_xp}/{self.rarity.max_xp})", description=f"{self.rarity.name}", color = self.rarity.color)
-        embed.set_image(url = self.picture_url)
-
-        return embed
-
 ##-------------------start-of-determine_attributes()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     async def determine_attributes(self):
