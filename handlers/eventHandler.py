@@ -103,11 +103,14 @@ class eventHandler:
                 ## checks if the member is in the json object, if they are, adds the roles to the member.
                 roles = data.get(str(member.id))
 
-                if roles:
+                if(roles):
                     role_objects = [discord.utils.get(member.guild.roles, id=role_id) for role_id in roles if discord.utils.get(member.guild.roles, id=role_id) is not None]
 
                     if(role_objects):
-                        await member.add_roles(*[role for role in role_objects if role is not None])
+                        try:
+                            await member.add_roles(*[role for role in role_objects if role is not None])
+                        except:
+                            pass
 
                     del data[str(member.id)]
                     
