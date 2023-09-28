@@ -185,7 +185,15 @@ class card:
 ##-------------------start-of-__init__()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    def __init__(self, inc_id_sequence:int, inc_name:str, inc_rarity_identifier:int, inc_picture_path:str, inc_picture_url:str, inc_person_id:int):
+    def __init__(self, 
+                 inc_id_sequence:int, 
+                 inc_name:str, 
+                 inc_rarity_identifier:int, 
+                 inc_picture_url:str,
+                 inc_picture_name:str,
+                 inc_picture_subtitle:str,
+                 inc_picture_description:str, 
+                 inc_person_id:int):
 
         """
         
@@ -195,8 +203,10 @@ class card:
         inc_id_sequence (int) : id of the card.\n
         inc_name (str) : name of the card.\n
         inc_rarity_identifier (int) : rarity of the card.\n
-        inc_picture_path (str) : path to the card's picture.\n
         inc_picture_url (str) : url to the card's picture.\n
+        inc_picture_name (str) : name of the card's picture.\n
+        inc_picture_subtitle (str) : subtitle of the card's picture.\n
+        inc_picture_description (str) : description of the card's picture.\n
         inc_person_id (int) : id of the person who the card represents.\n
 
         Returns:\n
@@ -219,11 +229,17 @@ class card:
         ## replica of the card
         self.replica = replica(int(str(inc_id_sequence)[4]))
 
-        ## path to the card's picture
-        self.picture_path = inc_picture_path
-
         ## url to the card's picture
         self.picture_url = inc_picture_url
+
+        ## name of the card's picture
+        self.picture_name = inc_picture_name
+
+        ## subtitle of the card's picture
+        self.picture_subtitle = inc_picture_subtitle
+
+        ## description of the card's picture
+        self.picture_description = inc_picture_description
 
         ## id of the person who the card represents
         self.person_id = inc_person_id

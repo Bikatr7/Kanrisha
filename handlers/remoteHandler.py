@@ -149,10 +149,15 @@ class remoteHandler():
         drop table if exists cards
         """
 
+        delete_member_cards_query = """
+        drop table if exists member_cards
+        """
+
         ##----------------------------------------------------------------calls----------------------------------------------------------------
 
         await self.connection_handler.execute_query(delete_members_query)
         await self.connection_handler.execute_query(delete_cards_query)
+        await self.connection_handler.execute_query(delete_member_cards_query)
 
 ##--------------------start-of-create_remote_storage()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -177,7 +182,6 @@ class remoteHandler():
             member_id bigint primary key,
             member_name varchar(256) not null,
             spin_scores varchar(256) not null,
-            owned_card_ids text(65535) not null,
             credits int not null,
             merit_points int not null
         )
@@ -188,9 +192,20 @@ class remoteHandler():
             card_id bigint primary key,
             card_name varchar(256) not null,
             card_rarity int not null,
-            card_picture_path varchar(256) not null,
-            card_picture_url varchar(256) not null,
+            card_picture_url varchar(256),
+            card_picture_name varchar(256),
+            card_picture_subtitle varchar(256),
+            card_picture_description varchar(256),
             person_id bigint not null
+        )
+        """
+
+        create_member_cards_query = """
+        create table if not exists member_cards (
+            member_id bigint not null,
+            card_id bigint not null,
+            foreign key (member_id) references members(member_id),
+            foreign key (card_id) references cards(card_id)
         )
         """
 
@@ -198,6 +213,7 @@ class remoteHandler():
 
         await self.connection_handler.execute_query(create_members_query)
         await self.connection_handler.execute_query(create_cards_query)
+        await self.connection_handler.execute_query(create_member_cards_query)
 
 ##--------------------start-of-fill_remote_storage()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -231,6 +247,11 @@ class remoteHandler():
             with open(self.file_ensurer.card_path, "w+") as card_file:
                 card_file.truncate(0)
 
+        async def clear_member_cards() -> None:
+
+            with open(self.file_ensurer.member_card_path, "w+") as member_card_file:
+                member_card_file.truncate(0)
+
         ##----------------------------------------------------------------members----------------------------------------------------------------
 
         async def fill_members() -> None:
@@ -239,34 +260,24 @@ class remoteHandler():
 
             for member in self.member_handler.members:
 
-                ## member_id, member_name, spin_scores, owned card_ids, credits
+                ## member_id, member_name, spin_scores, credits, merit_points
                 new_id = member.member_id
                 new_name = member.member_name
                 new_spin_scores = member.spin_scores
-                owned_card_ids = member.owned_card_ids
                 new_credits = member.credits
                 new_merit_points = member.merit_points
 
-                score_string = ""
-                card_string = ""
-
+                ## turn spin_scores into a string
                 score_string = f'"{new_spin_scores[0]}.{new_spin_scores[1]}.{new_spin_scores[2]}.{new_spin_scores[3]}.{new_spin_scores[4]}"'
 
-                for card_id in owned_card_ids:
-                    card_string += f"{card_id}."
-
-                card_string = card_string[:-1]
-
-                card_string = '"' + card_string + '"'
-
-                member_details = [str(new_id), new_name, score_string, card_string, str(new_credits), str(new_merit_points)]
+                ## create a list of the member details
+                member_details = [str(new_id), new_name, score_string, str(new_credits), str(new_merit_points)]
 
                 table_name = "members"
                 insert_dict = {
                     "member_id" : new_id,
                     "member_name" : new_name,
                     "spin_scores" : new_spin_scores,
-                    "owned_card_ids" : owned_card_ids,
                     "credits" : new_credits,
                     "merit_points" : new_merit_points
                 }
@@ -287,18 +298,22 @@ class remoteHandler():
                 new_id = card.id_sequence
                 new_name = card.name
                 new_rarity = card.rarity.identifier
-                new_picture_path = os.path.basename(card.picture_path)
                 new_picture_url = card.picture_url
+                new_picture_name = card.picture_name
+                new_picture_subtitle = card.picture_subtitle
+                new_picture_description = card.picture_description
                 new_person_id = card.person_id
 
-                card_details = [str(new_id), new_name, str(new_rarity), new_picture_path, new_picture_url, str(new_person_id)]
+                card_details = [str(new_id), new_name, str(new_rarity), new_picture_url, new_picture_name, new_picture_subtitle, new_picture_description, str(new_person_id)]
 
                 insert_dict = {
                     "card_id" : new_id,
                     "card_name" : new_name,
                     "card_rarity" : new_rarity,
-                    "card_picture_path" : new_picture_path,
                     "card_picture_url" : new_picture_url,
+                    "card_picture_name" : new_picture_name,
+                    "card_picture_subtitle" : new_picture_subtitle,
+                    "card_picture_description" : new_picture_description,
                     "person_id" : new_person_id
                 }
 
@@ -306,10 +321,38 @@ class remoteHandler():
 
                 await self.file_ensurer.file_handler.write_sei_line(self.file_ensurer.card_path, card_details)
 
+
+        ##----------------------------------------------------------------member_cards----------------------------------------------------------------
+
+        async def fill_member_cards() -> None:
+
+            table_name = "member_cards"
+
+            for member in self.member_handler.members:
+
+                for id in member.owned_card_ids:
+
+                    ## member_id, card_id
+                    new_member_id = member.member_id
+                    new_card_id = id
+
+                    member_card_details = [str(new_member_id), str(new_card_id)]
+
+                    insert_dict = {
+                        "member_id" : new_member_id,
+                        "card_id" : new_card_id
+                    }
+
+                    await self.connection_handler.insert_into_table(table_name, insert_dict)
+
+                    await self.file_ensurer.file_handler.write_sei_line(self.file_ensurer.member_card_path, member_card_details)
+
         ##----------------------------------------------------------------calls----------------------------------------------------------------
 
         await clear_members()
         await clear_cards()
+        await clear_member_cards()
 
         await fill_members()
         await fill_cards()
+        await fill_member_cards()

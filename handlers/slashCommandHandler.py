@@ -889,14 +889,6 @@ class slashCommandHandler:
                 await user_requesting.send("Invalid image link. Please use the command again to try again.")
                 return
             
-            ## delete old image, and replace it with the new one
-            picture_path = os.path.join(kanrisha_client.file_ensurer.gacha_images_dir, card_to_alter.picture_path)
-
-            os.remove(picture_path)
-
-            with open(picture_path, "wb") as f:
-                f.write(img_data)
-
             ## update the card object
             card_to_alter.picture_url = img_url
 

@@ -101,11 +101,11 @@ class gachaHandler:
         ## clear the cards list
         self.cards.clear()
 
-        id_sequence_list, name_list, rarity_list, picture_path_list, picture_url_list, person_id_list = await self.connection_handler.read_multi_column_query("select card_id, card_name, card_rarity, card_picture_path, card_picture_url, person_id from cards")
+        id_sequence_list, name_list, rarity_list, picture_url_list, picture_name_list, picture_subtitle_list, picture_description_list, person_id_list = await self.connection_handler.read_multi_column_query("select card_id, card_name, card_rarity, card_picture_url, card_picture_name, card_picture_subtitle, card_picture_description, person_id from cards")
 
         for i in range(len(id_sequence_list)):
 
-            new_card = card(int(id_sequence_list[i]), name_list[i], int(rarity_list[i]), picture_path_list[i], picture_url_list[i], int(person_id_list[i]))
+            new_card = card(int(id_sequence_list[i]), name_list[i], int(rarity_list[i]), picture_url_list[i], picture_name_list[i], picture_subtitle_list[i], picture_description_list[i], int(person_id_list[i]))
 
             self.cards.append(new_card)
 
@@ -140,11 +140,14 @@ class gachaHandler:
 
                 card_name = values[1]
                 card_rarity = int(values[2])
-                card_picture_path = os.path.join(self.file_ensurer.gacha_images_dir, values[3])
-                card_picture_url = values[4]
-                card_person_id = int(values[5])
+                card_picture_url = values[3]
+                card_picture_name = values[4]
+                card_picture_subtitle = values[5]
+                card_picture_description = values[6]
+                card_person_id = int(values[7])
 
-                new_card = card(int(id_sequence), card_name, card_rarity, card_picture_path, card_picture_url, card_person_id)
+
+                new_card = card(int(id_sequence), card_name, card_rarity, card_picture_url, card_picture_name, card_picture_subtitle, card_picture_description, card_person_id)
 
                 self.cards.append(new_card)
 
