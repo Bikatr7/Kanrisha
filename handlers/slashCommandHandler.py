@@ -518,6 +518,84 @@ class slashCommandHandler:
 
             await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed, file=file, view=view)
 
+##-------------------start-of-summary()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        @kanrisha_client.tree.command(name="summary", description="Show all cards and their ranks in a user's deck in a list format")
+        async def summary(interaction:discord.Interaction, member:discord.Member | None) -> None:
+
+            """
+
+            Displays the user's deck in a list format.\n
+
+            Parameters:\n
+            interaction (object - discord.Interaction) : the interaction object.\n
+            member (object - discord.Member | None) : the member object.\n
+            
+            Returns:\n
+            None.\n
+
+            """
+
+            ## Check if the user is registered
+            if(not await check_if_registered(interaction)):
+                return
+            
+            ## get the syndicateMember object for the target member
+            target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, member)
+
+            ## ensure user owns cards
+            if(target_member.owned_card_ids == []): ## type: ignore (we know it's not None)
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That deck doesn't have any cards.", delete_after=5.0, is_ephemeral=True)
+                return
+            
+            ## get first 4 digits of card id for all member owned cards
+            owned_card_ids = [card_id[0:4] for card_id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
+
+            ## get the card objects for the target member's owned cards, also grab full sequence id from owned cards
+            owned_cards = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.id in owned_card_ids]
+            sequence_ids = [target_member.owned_card_ids[owned_card_ids.index(card.id)] for card in owned_cards] ## type: ignore (we know it's not None)
+
+            ## Clone the original cards before modifying them
+            owned_cards_clone = copy.deepcopy(owned_cards)
+
+            ## Modify the cards based on sequence_ids
+            for card, sequence_id in zip(owned_cards_clone, sequence_ids):
+                card.replica.id = int(str(sequence_id)[4])  # Adjust index based on your actual sequence_id format
+                card.rarity.current_xp = int(str(sequence_id)[5])  # Adjust index based on your actual sequence_id format
+
+            ## Create pairs of (owned_card, sequence_id)
+            paired_list = list(zip(owned_cards_clone, sequence_ids))
+
+            ## First, sort the pairs based on the replica.id of the owned_card in descending order
+            paired_list.sort(key=lambda x: x[0].replica.id, reverse=True)
+
+            ## Then, sort the pairs based on the rarity.id of the owned_card in descending order
+            paired_list.sort(key=lambda x: x[0].rarity.id, reverse=True)
+
+            ## Separate the sorted pairs back into two lists
+            owned_cards, sequence_ids = zip(*paired_list)
+
+            card_list = ""
+
+            for i, (card, sequence_id) in enumerate(zip(owned_cards, sequence_ids)):
+                
+                ## modify the card to match the user's sequence id
+                card.replica.id = int(str(sequence_id)[4]) ## type: ignore (we know it's not going to be a string)
+                card.rarity.current_xp = int(str(sequence_id)[5]) ## type: ignore (we know it's not going to be a string)
+
+                ## need to force attribute update because it's usually handled by embed generation, which we're not using here
+                await card.determine_attributes() ## type: ignore (we know it's not going to be a string)
+
+                ## add card to embed
+                card_list += f"{i + 1}. {card.rarity.emoji} {card.name} {card.replica.emoji}\n" ## type: ignore (we know it's not going to be a string)
+
+                ## reset card to default values if it was altered
+                await card.reset_to_default() ## type: ignore (we know it's not a string)
+
+            embed = discord.Embed(title= f"{target_member.member_name}'s Deck", description=card_list) ## type: ignore (we know it's not None)
+
+            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)
+
 ##-------------------start-of-catalog()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.tree.command(name="catalog", description="Shows all cards.")
@@ -804,62 +882,5 @@ class slashCommandHandler:
 
             embed = discord.Embed(title="Help", description=help_message, color=0xC0C0C0)
             embed.set_thumbnail(url=kanrisha_client.file_ensurer.bot_thumbnail_url)
-
-            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)
-
-##-------------------start-of-summary()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-        @kanrisha_client.tree.command(name="summary", description="Show all cards and their ranks in a user's deck in a list format")
-        async def summary(interaction:discord.Interaction, member:discord.Member | None) -> None:
-
-            """
-
-            Displays the user's deck in a list format.\n
-
-            Parameters:\n
-            interaction (object - discord.Interaction) : the interaction object.\n
-            member (object - discord.Member | None) : the member object.\n
-            
-            Returns:\n
-            None.\n
-
-            """
-
-            ## Check if the user is registered
-            if(not await check_if_registered(interaction)):
-                return
-            
-            ## get the syndicateMember object for the target member
-            target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, member)
-
-            ## ensure user owns cards
-            if(target_member.owned_card_ids == []): ## type: ignore (we know it's not None)
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That deck doesn't have any cards.", delete_after=5.0, is_ephemeral=True)
-                return
-            
-            ## get first 4 digits of card id for all member owned cards
-            owned_card_ids = [int(str(card_id)[0:4]) for card_id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
-
-            ## get the card objects for the target member's owned cards, also grab full sequence id from owned cards
-            owned_cards = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.actual_id in owned_card_ids] ## type: ignore (we know it's not None)
-            sequence_ids = [target_member.owned_card_ids[owned_card_ids.index(card.actual_id)] for card in owned_cards] ## type: ignore (we know it's not None)
-
-            ## Create pairs of (owned_card, sequence_id)
-            paired_list = list(zip(owned_cards, sequence_ids))
-
-            ## Sort the pairs based on the rarity of the owned_card
-            paired_list.sort(key=lambda x: x[0].rarity.identifier, reverse=True)
-
-            ## Separate the sorted pairs back into two lists
-            owned_cards, sequence_ids = zip(*paired_list)
-
-            ## get the base card and a copy of it
-
-            card_list = ""
-
-            for i in range(len(owned_cards)):
-                card_list += owned_cards[i].rarity.name + " " + owned_cards[i].name + " R" + str(sequence_ids[i])[4] + "\n"
-
-            embed = discord.Embed(title= f"{target_member.member_name}'s Deck", description=card_list)
 
             await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)
