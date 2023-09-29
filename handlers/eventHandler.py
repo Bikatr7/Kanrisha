@@ -6,6 +6,7 @@ import typing
 ## third-party libraries
 import discord
 import json
+import copy
 
 ## custom libraries
 if(typing.TYPE_CHECKING): ## used for cheating the circular import issue that occurs when i need to type check some things
@@ -267,7 +268,7 @@ class eventHandler:
                     ## delete the register message
                     await interaction.message.delete() ## type: ignore (we know it's not None)
 
-                    await kanrisha_client.remote_handler.member_handler.add_new_member(interaction.user.id, interaction.user.name, tuple([0,0,0,0,0]), 50000) # type: ignore
+                    await kanrisha_client.remote_handler.member_handler.add_new_member(interaction.user.id, interaction.user.name, tuple([0,0,0,0,0])) ## type: ignore (we know it's not None)
 
                     await interaction.followup.send("You have been registered.", ephemeral=True)
 
@@ -275,7 +276,7 @@ class eventHandler:
 
                     await interaction.user.add_roles(syndicate_role) ## type: ignore (we know it's not None)
 
-                ## if register button was pressed by the wrong user
+                ## if register button was pressed by the wrong userW
                 elif(custom_id and custom_id.startswith("register_")):
 
                     await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not authorized to use this button.", delete_after=5.0, is_ephemeral=True)
@@ -294,14 +295,14 @@ class eventHandler:
                 owned_card_ids = [card_id[0:4] for card_id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
 
                 ## get the card objects for the target member's owned cards, as well as the sequence ids
-                owned_cards = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.actual_id in owned_card_ids] ## type: ignore (we know it's not None)
-                sequence_ids = [target_member.owned_card_ids[owned_card_ids.index(card.actual_id)] for card in owned_cards] ## type: ignore (we know it's not None)
+                owned_cards = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.id in owned_card_ids] ## type: ignore (we know it's not None)
+                sequence_ids = [target_member.owned_card_ids[owned_card_ids.index(card.id)] for card in owned_cards] ## type: ignore (we know it's not None)
 
                 ## Create pairs of (owned_card, sequence_id)
                 paired_list = list(zip(owned_cards, sequence_ids))
 
                 ## Sort the pairs based on the rarity of the owned_card
-                paired_list.sort(key=lambda x: x[0].rarity.identifier, reverse=True)
+                paired_list.sort(key=lambda x: x[0].rarity.id, reverse=True)
 
                 ## Separate the sorted pairs back into two lists
                 owned_cards, sequence_ids = zip(*paired_list)
@@ -329,10 +330,9 @@ class eventHandler:
 
                     ## get the card to display, and create a safe copy of it
                     card_to_display = owned_cards[new_index]
-                    safe_card_to_display = card_to_display
 
                     ## alter card to match user's sequence id
-                    card_to_display.replica.identifier = int(sequence_ids[new_index][4]) ## type: ignore (we know it's not going to be empty)
+                    card_to_display.replica.id = int(sequence_ids[new_index][4]) ## type: ignore (we know it's not going to be empty)
                     card_to_display.rarity.current_xp = int(sequence_ids[new_index][5]) ## type: ignore (we know it's not going to be empty)
 
                     new_embed, file = await self.pil_handler.assemble_embed(card_to_display)
@@ -344,7 +344,7 @@ class eventHandler:
                     new_embed.set_footer(text=f"{new_index + 1}/{len(owned_cards)}")
 
                     ## set card to display back to the safe copy
-                    card_to_display = safe_card_to_display
+                    await card_to_display.reset_to_default()
 
                     new_embed.set_image(url=f"attachment://{file.filename}")
 
@@ -377,18 +377,17 @@ class eventHandler:
 
                     ## get the card to display, and create a safe copy of it
                     card_to_display = owned_cards[new_index]
-                    safe_card_to_display = card_to_display
 
                     ## alter card to match user's sequence id
-                    card_to_display.replica.identifier = int(sequence_ids[new_index][4]) ## type: ignore (we know it's not going to be empty)
+                    card_to_display.replica.id = int(sequence_ids[new_index][4]) ## type: ignore (we know it's not going to be empty)
                     card_to_display.rarity.current_xp = int(sequence_ids[new_index][5]) ## type: ignore (we know it's not going to be empty)
 
                     new_embed, file = await self.pil_handler.assemble_embed(card_to_display)
 
                     new_embed.set_footer(text=f"{new_index + 1}/{len(owned_cards)}")
 
-                    ## set card to display back to the safe copy
-                    card_to_display = safe_card_to_display
+                    ## set card back to default
+                    await card_to_display.reset_to_default()
 
                     new_embed.set_image(url=f"attachment://{file.filename}")
 

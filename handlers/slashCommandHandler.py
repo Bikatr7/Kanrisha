@@ -2,11 +2,10 @@
 from __future__ import annotations ## used for cheating the circular import issue that occurs when i need to type check some things
 
 import typing
-import asyncio
+import copy
 
 ## third-party libraries
 import discord
-import requests
 
 ## custom libraries
 from handlers.eventHandler import eventHandler
@@ -109,22 +108,23 @@ class slashCommandHandler:
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
                 return
 
-            ## get card and create safe card object
+            ## get card
             card = await kanrisha_client.remote_handler.gacha_handler.spin_gacha()
-            safe_card = card
 
             ## get the syndicateMember object for the target member
             target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction)
 
-            ## update spin scores (identifier - 1 because the spin scores are stored in a list and the rarity identifier starts at 1)
-            await kanrisha_client.remote_handler.member_handler.update_spin_value(target_member.member_id, 1, card.rarity.identifier - 1) ## type: ignore (we know it's not None)
+            ## update spin scores (id - 1 because the spin scores are stored in a list and the rarity id starts at 1)
+            await kanrisha_client.remote_handler.member_handler.update_spin_value(target_member.member_id, 1, card.rarity.id - 1) ## type: ignore (we know it's not None)
 
             ## get first 4 digits of card id for all member owned cards, because this is what is used to determine cards
             owned_card_ids = [card_id[0:4] for card_id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
 
-            ## if the member doesn't own the card, add it to their owned_card_ids list, use a blank 0 for rarity and xp identifiers
-            if(card.actual_id not in owned_card_ids): ## type: ignore (we know it's not None)
-                target_member.owned_card_ids.append(card.id_sequence) ## type: ignore (we know it's not None)
+            ## if the member doesn't own the card, add it to their owned_card_ids list, use a blank 0 for rarity and xp ids
+            if(card.id not in owned_card_ids): ## type: ignore (we know it's not None)
+
+                ## remember that the owned_card_ids list holds a full sequence id, so we need to get the id from the card object and add 2 0's to the end to get the full sequence id (6 digits)
+                target_member.owned_card_ids.append(f"{card.id}00") ## type: ignore (we know it's not None)
 
                 embed, file = await self.pil_handler.assemble_embed(card)
 
@@ -135,26 +135,26 @@ class slashCommandHandler:
                 ## card needs to be reset after display due to objects being passed by reference
 
                 ## if card is owned get the id sequence from the member's owned cards
-                full_user_sequence = target_member.owned_card_ids[owned_card_ids.index(card.actual_id)] ## type: ignore (we know it's not None)
-                
+                full_user_sequence = target_member.owned_card_ids[owned_card_ids.index(card.id)] ## type: ignore (we know it's not None)
+
                 ## modify card object to match user's id sequence
-                card.replica.identifier = int(str(full_user_sequence)[4])
+                card.replica.id = int(str(full_user_sequence)[4])
                 card.rarity.current_xp = int(str(full_user_sequence)[5])
 
-                ## if the card's replica is not maxed, increase the xp and identifier
-                if(card.replica.identifier != 6):
+                ## if the card's replica is not maxed, increase the xp and id
+                if(card.replica.id != 6):
                     card.rarity.current_xp += 1
 
-                    ## if the card's xp is maxed, reset the xp and increase the identifier
+                    ## if the card's xp is maxed, reset the xp and increase the id
                     if(card.rarity.current_xp >= card.rarity.max_xp):
                         card.rarity.current_xp = 0
-                        card.replica.identifier += 1
+                        card.replica.id += 1
 
                     ## get new sequence id for user's card
-                    new_id_sequence = card.id_sequence[0:4] + f"{card.replica.identifier}{card.rarity.current_xp}"
+                    new_id_sequence = card.id + f"{card.replica.id}{card.rarity.current_xp}"
 
                     ## replace in array 
-                    target_member.owned_card_ids[owned_card_ids.index(card.actual_id)] = new_id_sequence ## type: ignore (we know it's not None)
+                    target_member.owned_card_ids[owned_card_ids.index(card.id)] = new_id_sequence ## type: ignore (we know it's not None)
 
                     ## user card for embed
                     embed, file = await self.pil_handler.assemble_embed(card)
@@ -162,6 +162,7 @@ class slashCommandHandler:
 
                 ## add credits to the member's balance based on the card's rarity if the card's replica is maxed
                 else:
+
                     credits_to_add = kanrisha_client.remote_handler.gacha_handler.rarity_to_credits.get(card.rarity.name, 0) 
                     target_member.credits += credits_to_add ## type: ignore (we know it's not None)
 
@@ -169,9 +170,9 @@ class slashCommandHandler:
 
                     embed.set_footer(text=f"You have this card maxed out. You have been awarded {credits_to_add} credits.")
 
-            ## reset card to default
-            card = safe_card
-    
+            ## reset card to default values if it was altered
+            await card.reset_to_default()
+
             await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, embed=embed, file=file)
 
         ##-------------------start-of-register()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -382,7 +383,7 @@ class slashCommandHandler:
 ##-------------------start-of-get_card()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.tree.command(name="card", description="Displays a card.")
-        async def get_card(interaction:discord.Interaction, member:discord.Member | None, card_name:str) -> None:
+        async def get_card(interaction:discord.Interaction, card_name:str) -> None:
 
             """
             
@@ -401,16 +402,8 @@ class slashCommandHandler:
             if(await check_if_registered(interaction) == False):
                 return
             
-            ## make safe card object
-            safe_card = None
-            
             ## get the syndicateMember object for the target member
-            target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, member)
-
-            ## make sure the target member is registered
-            if(target_member == None):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That user is not registered.", delete_after=5.0, is_ephemeral=True)
-                return
+            target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction)
             
             ## get first 4 digits of card id for all member owned cards
             owned_card_ids = [card_id[0:4] for card_id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
@@ -422,33 +415,31 @@ class slashCommandHandler:
             card_name = await kanrisha_client.toolkit.get_intended_card(card_name.lower(), all_card_names)
 
             ## get the card id for the given card name
-            card_id = [card.actual_id for card in kanrisha_client.remote_handler.gacha_handler.cards if card.name.lower() == card_name.lower()][0] ## type: ignore (we know it's not None)
+            card_id = [card.id for card in kanrisha_client.remote_handler.gacha_handler.cards if card.name.lower() == card_name.lower()][0] ## type: ignore (we know it's not None)
 
             ## if target member owns card, get it
             if(card_id in owned_card_ids): ## type: ignore (we know it's not None)
 
-                ## get full sequence id from owned cards
+                ## get card object from all cards
+                card = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.id == card_id][0] ## type: ignore (we know it's not None)
+
+                ## get full sequence id from owned cards as well old id sequence
                 full_user_sequence = target_member.owned_card_ids[owned_card_ids.index(card_id)] ## type: ignore (we know it's not None)
 
-                ## modify card object to match user's card
-                card = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.actual_id == card_id][0] ## type: ignore (we know it's not None)
-                safe_card = card
-
                 ## modify card object to match user's id sequence
-                card.replica.identifier = int(full_user_sequence[4])
+                card.replica.id = int(full_user_sequence[4])
                 card.rarity.current_xp = int(full_user_sequence[5])
 
             ## if not, get the base card
             else:
 
                 ## get card object from all cards
-                card = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.actual_id == card_id][0]
-
+                card = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.id == card_id][0]
+    
             embed, file = await self.pil_handler.assemble_embed(card)
 
-            ## reset card
-            if(safe_card):
-                card = safe_card
+            ## reset card to default values if it was altered
+            await card.reset_to_default()
 
             await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed, file=file)
 
@@ -486,24 +477,23 @@ class slashCommandHandler:
             owned_card_ids = [card_id[0:4] for card_id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
 
             ## get the card objects for the target member's owned cards, also grab full sequence id from owned cards
-            owned_cards = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.actual_id in owned_card_ids] ## type: ignore (we know it's not None)
-            sequence_ids = [target_member.owned_card_ids[owned_card_ids.index(card.actual_id)] for card in owned_cards] ## type: ignore (we know it's not None)
+            owned_cards = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.id in owned_card_ids] ## type: ignore (we know it's not None)
+            sequence_ids = [target_member.owned_card_ids[owned_card_ids.index(card.id)] for card in owned_cards] ## type: ignore (we know it's not None)
 
             ## Create pairs of (owned_card, sequence_id)
             paired_list = list(zip(owned_cards, sequence_ids))
 
             ## Sort the pairs based on the rarity of the owned_card
-            paired_list.sort(key=lambda x: x[0].rarity.identifier, reverse=True)
+            paired_list.sort(key=lambda x: x[0].rarity.id, reverse=True)
 
             ## Separate the sorted pairs back into two lists
             owned_cards, sequence_ids = zip(*paired_list)
 
-            ## get the base card and a copy of it
+            ## get the base card
             base_card = owned_cards[0]
-            safe_card = base_card
 
             ## modify the base card to match the user's card
-            base_card.replica.identifier = int(sequence_ids[0][4]) ## type: ignore (we know it's not going to be empty)
+            base_card.replica.id = int(sequence_ids[0][4]) ## type: ignore (we know it's not going to be empty)
             base_card.rarity.current_xp = int(sequence_ids[0][5]) ## type: ignore (we know it's not going to be empty)
 
             embed, file = await self.pil_handler.assemble_embed(base_card) ## type: ignore (we know it's not None)
@@ -523,8 +513,8 @@ class slashCommandHandler:
             view.add_item(left_button)
             view.add_item(right_button)
 
-            ## reset card
-            base_card = safe_card
+            ## reset card to default values if it was altered
+            await base_card.reset_to_default() ## type: ignore (we know it's not a string)
 
             await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed, file=file, view=view)
 
@@ -559,10 +549,10 @@ class slashCommandHandler:
             owned_card_ids = [card_id[0:4] for card_id in kanrisha_syndicate_object.owned_card_ids] ## type: ignore (we know it's not None)
 
             ## get the card objects for the target member's owned cards
-            owned_cards = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.actual_id in owned_card_ids] ## type: ignore (we know it's not None)
+            owned_cards = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.id in owned_card_ids] ## type: ignore (we know it's not None)
 
             ## sort the cards by rarity
-            owned_cards.sort(key=lambda x: x.rarity.identifier, reverse=True)
+            owned_cards.sort(key=lambda x: x.rarity.id, reverse=True)
 
             embed, file = await self.pil_handler.assemble_embed(owned_cards[0])
             embed.set_footer(text=f"1/{len(owned_cards)}")

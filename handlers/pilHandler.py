@@ -94,9 +94,9 @@ class pilHandler():
         }
 
         ## get images given card attributes
-        frame_path = frame_image_dict[str(card.rarity.identifier)]
-        rarity_path = rarity_image_dict[str(card.rarity.identifier)]
-        replica_path = replica_image_dict[str(card.replica.identifier)]
+        frame_path = frame_image_dict[str(card.rarity.id)]
+        rarity_path = rarity_image_dict[str(card.rarity.id)]
+        replica_path = replica_image_dict[str(card.replica.id)]
 
         ## get pfp given card person identifier
         pfp_url = user.avatar.url ## type: ignore (We know it will find a user)
@@ -248,7 +248,7 @@ class pilHandler():
 
         ## get image from byte stream
         byte_io.seek(0)
-        file = discord.File(byte_io, filename=f"{card.id_sequence}.png")
+        file = discord.File(byte_io, filename=f"{card.id}{card.replica.id}{card.rarity.current_xp}.png")
 
         embed.set_image(url=f"attachment://{file.filename}")
 

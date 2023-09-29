@@ -69,11 +69,14 @@ class memberHandler:
 
             spin_scores = spin_scores_list[i].strip("(").strip(")").split(",")
 
-            owned_card_id_list = await self.connection_handler.read_single_column_query(f"select card_id from member_cards where member_id = {id_list[i]}")
+            owned_card_id_list, replica_id_list, xp_id_list = await self.connection_handler.read_multi_column_query(f"select card_id, card_replica_id, card_xp_id from member_cards where member_id = {id_list[i]}")
 
             spin_scores = (int(spin_scores[0]), int(spin_scores[1]), int(spin_scores[2]), int(spin_scores[3]), int(spin_scores[4]))
 
-            new_member = syndicateMember(int(id_list[i]), name_list[i], spin_scores, owned_card_id_list, int(credits_list[i]), int(merit_point_list[i]))
+            ## take the card ids and merge them into a single string for each card owned by the member
+            owned_id_list = [f"{owned_card_id_list[ii]}{replica_id_list[ii]}{xp_id_list[ii]}" for ii in range(len(owned_card_id_list))]
+
+            new_member = syndicateMember(int(id_list[i]), name_list[i], spin_scores, owned_id_list, int(credits_list[i]), int(merit_point_list[i]))
             self.members.append(new_member)
 
         await self.file_ensurer.logger.log_action("INFO", "memberHandler", "Loaded members from remote.")
@@ -107,7 +110,8 @@ class memberHandler:
                 if(member_cards_values[0] not in card_ids_dict):
                     card_ids_dict[member_cards_values[0]] = []
 
-                card_ids_dict[member_cards_values[0]].append(member_cards_values[1])
+                ## card ids are stored as a single 6 digit number, so we need to merge the 3 values together
+                card_ids_dict[member_cards_values[0]].append(f"{member_cards_values[1]}{member_cards_values[2]}{member_cards_values[3]}")
 
         with open(self.file_ensurer.member_path, "r", encoding="utf-8") as file:
 

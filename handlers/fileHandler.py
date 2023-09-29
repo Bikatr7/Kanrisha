@@ -99,7 +99,7 @@ class fileHandler():
             await self.logger.log_action("INFO", "fileHandler", file_path + " was created due to lack of the file or the file was empty")
 ##--------------------start-of-write_sei_line()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def write_sei_line(self, sei_file_path:str, items_to_write:typing.List[str]) -> None:
+    async def write_sei_line(self, sei_file_path:str, items_to_write:typing.List[typing.Any]) -> None:
 
         """
         

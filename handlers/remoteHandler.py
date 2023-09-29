@@ -193,6 +193,8 @@ class remoteHandler():
         create_cards_query = """
         create table if not exists cards (
             card_id varchar(256) primary key,
+            card_replica_id int not null,
+            card_xp_id int not null,
             card_name varchar(256) not null,
             card_rarity int not null,
             card_picture_url varchar(256),
@@ -207,6 +209,9 @@ class remoteHandler():
         create table if not exists member_cards (
             member_id bigint not null,
             card_id varchar(256) not null,
+            card_replica_id int not null,
+            card_xp_id int not null,
+            primary key (member_id, card_id),
             foreign key (member_id) references members(member_id),
             foreign key (card_id) references cards(card_id)
         )
@@ -274,7 +279,7 @@ class remoteHandler():
                 score_string = f'"{new_spin_scores[0]}.{new_spin_scores[1]}.{new_spin_scores[2]}.{new_spin_scores[3]}.{new_spin_scores[4]}"'
 
                 ## create a list of the member details
-                member_details = [new_id, new_name, score_string, str(new_credits), str(new_merit_points)]
+                member_details = [new_id, new_name, score_string, new_credits, new_merit_points]
 
                 table_name = "members"
                 insert_dict = {
@@ -297,20 +302,24 @@ class remoteHandler():
 
             for card in self.gacha_handler.cards:
 
-                ## card_id, card_name, card_rarity, card_picture_path, card_picture_url
-                new_id = card.id_sequence
+                ## card_id, card_replica_id, card_xp_id, card_name, card_rarity, card_picture_url, card_picture_name, card_picture_subtitle, card_picture_description, person_id
+                new_id = card.id
+                new_replica_id = card.replica.id
+                new_xp_id = card.rarity.current_xp
                 new_name = card.name
-                new_rarity = card.rarity.identifier
+                new_rarity = card.rarity.id
                 new_picture_url = card.picture_url
                 new_picture_name = card.picture_name
                 new_picture_subtitle = card.picture_subtitle
                 new_picture_description = card.picture_description
                 new_person_id = card.person_id
 
-                card_details = [new_id, new_name, str(new_rarity), new_picture_url, new_picture_name, new_picture_subtitle, new_picture_description, str(new_person_id)]
+                card_details = [new_id, new_replica_id, new_xp_id, new_name, new_rarity, new_picture_url, new_picture_name, new_picture_subtitle, new_picture_description, new_person_id]
 
                 insert_dict = {
                     "card_id" : new_id,
+                    "card_replica_id" : new_replica_id,
+                    "card_xp_id" : new_xp_id,
                     "card_name" : new_name,
                     "card_rarity" : new_rarity,
                     "card_picture_url" : new_picture_url,
@@ -335,15 +344,22 @@ class remoteHandler():
 
                 for id in member.owned_card_ids:
 
-                    ## member_id, card_id
-                    new_member_id = member.member_id
-                    new_card_id = id
+                    id_sequence = id
 
-                    member_card_details = [str(new_member_id), str(new_card_id)]
+                    ## member_id, card_id, card_replica_id, card_xp_id
+                    new_member_id = member.member_id
+                    new_card_id = id_sequence[0:4]
+                    new_replica_id = id_sequence[4]
+                    new_xp_id = id_sequence[5]
+
+                    member_card_details = [new_member_id, new_card_id, new_replica_id, new_xp_id]
 
                     insert_dict = {
                         "member_id" : new_member_id,
-                        "card_id" : new_card_id
+                        "card_id" : new_card_id,
+                        "card_replica_id" : new_replica_id,
+                        "card_xp_id" : new_xp_id
+
                     }
 
                     await self.connection_handler.insert_into_table(table_name, insert_dict)

@@ -101,11 +101,11 @@ class gachaHandler:
         ## clear the cards list
         self.cards.clear()
 
-        id_sequence_list, name_list, rarity_list, picture_url_list, picture_name_list, picture_subtitle_list, picture_description_list, person_id_list = await self.connection_handler.read_multi_column_query("select card_id, card_name, card_rarity, card_picture_url, card_picture_name, card_picture_subtitle, card_picture_description, person_id from cards")
+        card_id_list, replica_id_list, xp_id_list, name_list, rarity_list, picture_url_list, picture_name_list, picture_subtitle_list, picture_description_list, person_id_list = await self.connection_handler.read_multi_column_query("select card_id, card_replica_id, card_xp_id, card_name, card_rarity, card_picture_url, card_picture_name, card_picture_subtitle, card_picture_description, person_id from cards")
 
-        for i in range(len(id_sequence_list)):
+        for i in range(len(card_id_list)):
 
-            new_card = card(id_sequence_list[i], name_list[i], int(rarity_list[i]), picture_url_list[i], picture_name_list[i], picture_subtitle_list[i], picture_description_list[i], int(person_id_list[i]))
+            new_card = card(card_id_list[i], int(replica_id_list[i]), int(xp_id_list[i]), name_list[i], int(rarity_list[i]), picture_url_list[i], picture_name_list[i], picture_subtitle_list[i], picture_description_list[i], int(person_id_list[i]))
 
             self.cards.append(new_card)
 
@@ -136,17 +136,18 @@ class gachaHandler:
 
                 values = line.strip().split(',')
 
-                id_sequence = values[0]
+                card_id = values[0]
+                card_replica_id = int(values[1])
+                card_xp_id = int(values[2])
+                card_name = values[3]
+                card_rarity = int(values[4])
+                card_picture_url = values[5]
+                card_picture_name = values[6]
+                card_picture_subtitle = values[7]
+                card_picture_description = values[8]
+                card_person_id = int(values[9])
 
-                card_name = values[1]
-                card_rarity = int(values[2])
-                card_picture_url = values[3]
-                card_picture_name = values[4]
-                card_picture_subtitle = values[5]
-                card_picture_description = values[6]
-                card_person_id = values[7]
-
-                new_card = card(id_sequence, card_name, card_rarity, card_picture_url, card_picture_name, card_picture_subtitle, card_picture_description, int(card_person_id))
+                new_card = card(card_id, card_replica_id, card_xp_id, card_name, card_rarity, card_picture_url, card_picture_name, card_picture_subtitle, card_picture_description, card_person_id)
 
                 self.cards.append(new_card)
 
@@ -220,7 +221,7 @@ class gachaHandler:
         ## picks a random card from the list of cards in matching rarity
         for card in self.cards:
 
-            if(card.rarity.identifier == rarity):
+            if(card.rarity.id == rarity):
                 possible_options.append(card)
 
         random_card = random.choice(possible_options)
