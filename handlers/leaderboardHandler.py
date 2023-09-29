@@ -1,8 +1,13 @@
+## built-in libraries
+from __future__ import annotations ## used for cheating the circular import issue that occurs when i need to type check some things
+
+import typing
+
 ## third party libraries
 import discord
 
-## custom modules
-from bot.Kanrisha import Kanrisha
+if(typing.TYPE_CHECKING): ## used for cheating the circular import issue that occurs when i need to type check some things
+    from bot.Kanrisha import Kanrisha
 
 class leaderboardHandler:
 
