@@ -76,6 +76,39 @@ class Kanrisha(discord.Client):
         ## Kanrisha and the slash command handler are coupled, as the slash command handler needs an instance of Kanrisha for it's function decorators to work
         self.slash_command_handler = slashCommandHandler(self)
 
+    ##-------------------start-of-check_if_registered()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    async def check_if_registered(self, interaction:discord.Interaction, register_check:bool = False):
+
+        """
+
+        Checks if the user is registered.\n
+
+        register_check is used to determine if the check is for the register command. In which case the function is inverted.\n
+
+        Parameters:\n
+        interaction (object - discord.Interaction) : the interaction object.\n
+        register_check (bool) : whether or not the check is for the register command.\n
+
+        Returns:\n
+        None.\n
+
+        """
+
+        registered_member_ids = [member.member_id for member in self.remote_handler.member_handler.members]
+
+        if(interaction.user.id not in registered_member_ids):
+
+            if(register_check == False):
+                error_message = "You are not registered. Please use the /register command to register."
+
+                await self.interaction_handler.send_response_no_filter_channel(interaction, response=error_message, delete_after=5.0, is_ephemeral=True)
+
+            return False
+        
+        else:
+            return True
+
 ##-------------------start-of-run_post_init_tasks()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     async def run_post_init_tasks(self) -> None:
