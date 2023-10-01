@@ -406,8 +406,10 @@ class adminCommandHandler:
             if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
                 return
             
+            await kanrisha_client.interaction_handler.defer_interaction(interaction, is_ephemeral=True, is_thinking=True)
+            
             if("drop" in query.lower()):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You cannot drop tables.", delete_after=5.0, is_ephemeral=True)
+                await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, "You can't drop tables.", is_ephemeral=True)
                 return
             
             ## get remote up to date
@@ -430,7 +432,7 @@ class adminCommandHandler:
                     await kanrisha_client.remote_handler.connection_handler.execute_query(query)
 
             except Exception as e:
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, f"Query failed.\n\n{e}", delete_after=5.0, is_ephemeral=True)
+                await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, f"Error : {e}", is_ephemeral=True)
                 return
 
             ## pull remote back into instance
@@ -438,7 +440,7 @@ class adminCommandHandler:
 
             embed = discord.Embed(title="Query Sent.", description=description, color=0xC0C0C0)
 
-            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)
+            await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, embed=embed, is_ephemeral=True)
 
         ##-------------------start-of-transfer()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
