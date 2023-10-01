@@ -299,6 +299,8 @@ class adminCommandHandler:
 
             if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
                 return
+            
+            await kanrisha_client.interaction_handler.defer_interaction(interaction, is_ephemeral=True, is_thinking=True)
                     
             member_requesting = interaction.user
             
@@ -355,7 +357,7 @@ class adminCommandHandler:
             except:
                 pass
 
-            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "Running config directory sent.", delete_after=3.0, is_ephemeral=True)
+            await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, "Config sent. Check your DMs.", is_ephemeral=True)
 
 ##-------------------start-of-load-members-from-local()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

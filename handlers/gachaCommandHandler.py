@@ -330,9 +330,10 @@ class gachaCommandHandler:
                             footer = f"You have the following cards maxed out."
                         
                         footer += f"{card.rarity.emoji} {card.name}\n"
+                        
 
-                        ## reset card to default values if it was altered
-                        await card.reset_card_identifiers()
+                    ## reset card to default values if it was altered
+                    await card.reset_card_identifiers()
 
             ## build embed
             embed = discord.Embed(title="Multispin", description=display_message, color=0xC0C0C0)

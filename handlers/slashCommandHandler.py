@@ -180,11 +180,13 @@ class slashCommandHandler:
 
             if(not await kanrisha_client.check_if_registered(interaction)):
                 return
+            
+            await kanrisha_client.interaction_handler.defer_interaction(interaction)
 
             target_member, _, image_url, _ = await kanrisha_client.remote_handler.member_handler.get_aibg_member_object(interaction, member)
 
             if(target_member == None):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That user is not registered.", delete_after=5.0, is_ephemeral=True)
+                await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, "That user is not registered.", is_ephemeral=True)
                 return
             
             profile_message = (
@@ -200,7 +202,7 @@ class slashCommandHandler:
             embed = discord.Embed(title="Profile", description=profile_message, color=0xC0C0C0)
             embed.set_thumbnail(url=image_url)
 
-            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed, is_ephemeral=True)
+            await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, embed=embed)
 
 ##-------------------start-of-get_card()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -302,7 +304,7 @@ class slashCommandHandler:
 
             ## ensure user owns cards
             if(target_member.owned_card_ids == []): ## type: ignore (we know it's not None)
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That deck doesn't have any cards.", delete_after=5.0, is_ephemeral=True)
+                await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, "That deck doesn't have any cards.", is_ephemeral=True)
                 return
             
             ## get first 4 digits of card id for all member owned cards
