@@ -202,72 +202,6 @@ class slashCommandHandler:
 
             await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed, is_ephemeral=True)
 
-        ##-------------------start-of-transfer()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-        @kanrisha_client.tree.command(name="transfer", description="Transfers credits from one user to another.")
-        async def transfer_credits(interaction: discord.Interaction, member:discord.Member, amount:int):
-
-            """
-
-            Transfers credits from one user to another.\n
-
-            Parameters:\n
-            self (object - slashCommandHandler) : the slashCommandHandler object.\n
-            interaction (object - discord.Interaction) : the interaction object.\n
-            member (object - discord.Member) : the member object.\n
-            amount (int) : the amount of credits to transfer.\n
-
-            Returns:\n
-            None.\n
-
-            """
-
-            is_admin = True
-
-            ## Check if the user is registered
-            if(not await kanrisha_client.check_if_registered(interaction)):
-                return
-            
-            ## admin check
-            if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
-                is_admin = False
-
-            ## get the syndicateMember objects for the sender and the transfer target     
-            sender_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_aibg_member_object(interaction, interaction.user)
-            transfer_target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_aibg_member_object(interaction, member)
-
-            if(transfer_target_member == None):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That user is not registered.", delete_after=5.0, is_ephemeral=True)
-                return
-            
-            ## Check if target and sender are the same
-            if(sender_member.member_id == transfer_target_member.member_id and not is_admin): ## type: ignore (we know it's not None)
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You can't transfer credits to yourself.", delete_after=5.0, is_ephemeral=True)
-                return
-
-            ## Check if the amount is negative, allows admins to transfer negative credits
-            if(amount < 0 and not is_admin):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You can't transfer negative credits.", delete_after=5.0, is_ephemeral=True)
-                return
-
-            ## Check if the sender has enough credits, allows admins to transfer more credits than they have
-            if(amount > sender_member.credits and not is_admin): ## type: ignore (we know it's not None)
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You don't have enough credits.", delete_after=5.0, is_ephemeral=True)
-                return
-            
-            ## deduct credits from sender and add to transfer target, admins are not deducted credits
-            if(not is_admin):
-                sender_member.credits -= amount ## type: ignore (we know it's not None)
-                
-            transfer_target_member.credits += amount
-
-            embed = discord.Embed(title="Credit Transfer", description= f"{interaction.user.mention} successfully transferred {amount} credits to {member.mention}.", color=0xC0C0C0)
-            embed.set_thumbnail(url=kanrisha_client.file_ensurer.bot_thumbnail_url)
-
-            await kanrisha_client.file_ensurer.logger.log_action("INFO", "Kanrisha", f"{interaction.user.name} transferred {amount} credits to {member.name}.") ## type: ignore (we know it's not None)
-        
-            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)
-
 ##-------------------start-of-get_card()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.tree.command(name="card", description="Displays a card.")
@@ -576,7 +510,7 @@ class slashCommandHandler:
             if(not await kanrisha_client.check_if_registered(interaction)):
                 return
             
-            if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
+            if(not await kanrisha_client.interaction_handler.admin_check(interaction, display=False)):
                 is_admin = False
 
             ## check if user is banned from editing cards
@@ -687,8 +621,8 @@ class slashCommandHandler:
 
             """
 
-            if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
-                return
+            if(not await kanrisha_client.interaction_handler.admin_check(interaction, display=False)):
+                is_admin = False
             
             if(not await kanrisha_client.check_if_registered(interaction)):
                 return
@@ -699,7 +633,7 @@ class slashCommandHandler:
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not allowed to edit cards.", delete_after=5.0, is_ephemeral=True)
             
             ## ensure user is admin if using member argument
-            if(member and interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids): ## type: ignore (we know it's not None)
+            if(member and not is_admin): ## type: ignore (we know it's not None)
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You don't have permission to modify other user's cards.", delete_after=5.0, is_ephemeral=True)
 
             ## get the syndicateMember object for the target member
@@ -751,7 +685,6 @@ class slashCommandHandler:
             help_message = (
                 "**/register** - Signs you up for AiBG.\n\n"
                 "**/profile** - Sends a member's AiBG profile.\n\n"
-                "**/transfer** - Transfers credits from one user to another.\n\n"
                 "**/starter-pack** - Lets you claim your starter pack.\n\n"
                 "**/freebie** - Lets you claim your freebie.\n\n"
                 "**/spin** - Spins the wheel to obtain a card. Costs 3k credits.\n\n"

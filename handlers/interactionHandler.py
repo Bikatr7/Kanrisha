@@ -47,7 +47,7 @@ class interactionHandler:
 
 ##-------------------start-of-admin_check()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def admin_check(self, interaction:discord.Interaction) -> bool:
+    async def admin_check(self, interaction:discord.Interaction, display:bool = True) -> bool:
 
         """
         
@@ -66,7 +66,8 @@ class interactionHandler:
             return True
 
         else:
-            await interaction.response.send_message("You do not have permission to use this command.", delete_after=5.0, ephemeral=True)
+            if(display):
+                await interaction.response.send_message("You do not have permission to use this command.", delete_after=5.0, ephemeral=True)
             return False
 
 ##-------------------start-of-whitelist_channel_check()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------

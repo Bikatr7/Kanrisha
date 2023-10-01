@@ -66,9 +66,6 @@ class gachaCommandHandler:
             if(await kanrisha_client.interaction_handler.whitelist_channel_check(interaction) == False):
                 return
             
-            if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
-                return
-
             ## get the syndicateMember object for the target member
             target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_aibg_member_object(interaction)
 
@@ -135,9 +132,6 @@ class gachaCommandHandler:
                 return
             
             if(await kanrisha_client.interaction_handler.whitelist_channel_check(interaction) == False):
-                return
-            
-            if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
                 return
 
             ## get the syndicateMember object for the target member
@@ -242,10 +236,6 @@ class gachaCommandHandler:
             if(await kanrisha_client.interaction_handler.whitelist_channel_check(interaction) == False):
                 return
             
-            ## admin check
-            if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
-                return
-
             ## get the syndicateMember object for the target member
             target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_aibg_member_object(interaction)
 
@@ -373,9 +363,6 @@ class gachaCommandHandler:
                 return
             
             if(await kanrisha_client.interaction_handler.whitelist_channel_check(interaction) == False):
-                return
-            
-            if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
                 return
             
             ## get the syndicateMember object for the target member

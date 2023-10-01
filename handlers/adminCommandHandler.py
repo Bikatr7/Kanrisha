@@ -430,6 +430,72 @@ class adminCommandHandler:
 
             await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)
 
+        ##-------------------start-of-transfer()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        @kanrisha_client.tree.command(name="transfer", description="Transfers credits from one user to another.")
+        async def transfer_credits(interaction: discord.Interaction, member:discord.Member, amount:int):
+
+            """
+
+            Transfers credits from one user to another.\n
+
+            Parameters:\n
+            self (object - slashCommandHandler) : the slashCommandHandler object.\n
+            interaction (object - discord.Interaction) : the interaction object.\n
+            member (object - discord.Member) : the member object.\n
+            amount (int) : the amount of credits to transfer.\n
+
+            Returns:\n
+            None.\n
+
+            """
+
+            is_admin = True
+
+            ## Check if the user is registered
+            if(not await kanrisha_client.check_if_registered(interaction)):
+                return
+            
+            ## admin check
+            if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
+                return 
+
+            ## get the syndicateMember objects for the sender and the transfer target     
+            sender_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_aibg_member_object(interaction, interaction.user)
+            transfer_target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_aibg_member_object(interaction, member)
+
+            if(transfer_target_member == None):
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That user is not registered.", delete_after=5.0, is_ephemeral=True)
+                return
+            
+            ## Check if target and sender are the same
+            if(sender_member.member_id == transfer_target_member.member_id and not is_admin): ## type: ignore (we know it's not None)
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You can't transfer credits to yourself.", delete_after=5.0, is_ephemeral=True)
+                return
+
+            ## Check if the amount is negative, allows admins to transfer negative credits
+            if(amount < 0 and not is_admin):
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You can't transfer negative credits.", delete_after=5.0, is_ephemeral=True)
+                return
+
+            ## Check if the sender has enough credits, allows admins to transfer more credits than they have
+            if(amount > sender_member.credits and not is_admin): ## type: ignore (we know it's not None)
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You don't have enough credits.", delete_after=5.0, is_ephemeral=True)
+                return
+            
+            ## deduct credits from sender and add to transfer target, admins are not deducted credits
+            if(not is_admin):
+                sender_member.credits -= amount ## type: ignore (we know it's not None)
+                
+            transfer_target_member.credits += amount
+
+            embed = discord.Embed(title="Credit Transfer", description= f"{interaction.user.mention} successfully transferred {amount} credits to {member.mention}.", color=0xC0C0C0)
+            embed.set_thumbnail(url=kanrisha_client.file_ensurer.bot_thumbnail_url)
+
+            await kanrisha_client.file_ensurer.logger.log_action("INFO", "Kanrisha", f"{interaction.user.name} transferred {amount} credits to {member.name}.") ## type: ignore (we know it's not None)
+        
+            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)
+
 ##-------------------start-of-help_admin()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         
         @kanrisha_client.tree.command(name="help-admin", description="Lists admin commands. (ADMIN)")
@@ -453,6 +519,7 @@ class adminCommandHandler:
             help_message = (
                 "**/trigger-early-shutdown** - Shuts down the bot. (ADMIN)\n\n"
                 "**/force-log-push** - Forces a Kanrisha log push. (ADMIN)\n\n"
+                "**/transfer** - Transfers credits from one user to another.\n\n"
                 "**/force-remote-reset** - Overrides the local database with the current instance's data. (ADMIN)\n\n"
                 "**/execute-order-66** - It is time. (ADMIN)\n\n"
                 "**/sync-roles** - Syncs the roles of all users in the server with the role persistence database. (ADMIN)\n\n"
