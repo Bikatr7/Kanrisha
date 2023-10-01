@@ -263,9 +263,9 @@ class card:
         self.rarity.determine_attributes()
         self.replica.determine_attributes()
 
-##-------------------start-of-reset_to_default()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+##-------------------start-of-reset_card_identifiers()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def reset_to_default(self):
+    async def reset_card_identifiers(self):
 
         """
         
@@ -283,3 +283,25 @@ class card:
         self.rarity.current_xp = 0
 
         await self.determine_attributes()
+
+##-------------------start-of-reset_card_customization()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    async def reset_card_customization(self):
+
+        """
+        
+        Resets the card's customization attributes to default.\n
+
+        Parameters:\n
+        self (object - card) : card object.\n
+
+        Returns:\n
+        None.\n
+
+        """
+
+        self.picture_name = "None"
+        self.picture_subtitle = "None"
+        self.picture_description = "None"
+
+        self.picture_url = "None"

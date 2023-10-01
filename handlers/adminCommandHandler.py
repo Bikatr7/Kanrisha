@@ -99,6 +99,7 @@ class adminCommandHandler:
                 kanrisha_client.send_log_file_to_log_channel.cancel()
                 kanrisha_client.refresh_remote_storage.cancel()
                 kanrisha_client.sync_role_persistence_database.cancel()
+                kanrisha_client.check_for_freebie_reset.cancel()
 
                 ## try to close gracefully
                 await kanrisha_client.close()

@@ -344,7 +344,7 @@ class eventHandler:
                     new_embed.set_footer(text=f"{new_index + 1}/{len(owned_cards)}")
 
                     ## set card to display back to the safe copy
-                    await card_to_display.reset_to_default()
+                    await card_to_display.reset_card_identifiers()
 
                     new_embed.set_image(url=f"attachment://{file.filename}")
 
@@ -387,7 +387,7 @@ class eventHandler:
                     new_embed.set_footer(text=f"{new_index + 1}/{len(owned_cards)}")
 
                     ## set card back to default
-                    await card_to_display.reset_to_default()
+                    await card_to_display.reset_card_identifiers()
 
                     new_embed.set_image(url=f"attachment://{file.filename}")
 

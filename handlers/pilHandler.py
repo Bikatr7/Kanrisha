@@ -98,13 +98,19 @@ class pilHandler():
         rarity_path = rarity_image_dict[str(card.rarity.id)]
         replica_path = replica_image_dict[str(card.replica.id)]
 
-        ## get pfp given card person identifier
-        pfp_url = user.avatar.url ## type: ignore (We know it will find a user)
-
         ## load images
         frame_image = Image.open(frame_path).convert("RGBA")
         rarity_image = Image.open(rarity_path).convert("RGBA")
         replica_image = Image.open(replica_path).convert("RGBA")
+
+        if(card.picture_url == "None"):
+
+            ## get pfp given card person identifier
+            pfp_url = user.avatar.url ## type: ignore (We know it will find a user)
+                    
+        else:
+            ## load url as pfp
+            pfp_url = card.picture_url
 
         ## async download pfp
         async with aiohttp.ClientSession() as session:
@@ -199,17 +205,27 @@ class pilHandler():
         name_font = ImageFont.truetype(self.file_ensurer.title_font_path, size=35)
         description_font = ImageFont.truetype(self.file_ensurer.subtitle_font_path, size=20)
 
-        ## get text
-        title = user.display_name
+        if(card.picture_name == "None"):
+            title = user.name
 
-        if(card.picture_description == "None"):
+        else:
+            title = card.picture_name
+
+        if(card.picture_subtitle == "None"):
             subtitle = ""
         else:
-            subtitle = card.picture_description
+            subtitle = card.picture_subtitle
+
+        if(card.picture_description == "None"):
+            description = ""
+
+        else:
+            description = card.picture_description
 
         ## Add text
         draw.text((70, 15), title, fill="white", font=name_font)
         draw.text((13, 370), subtitle, fill="black", font=description_font)
+        draw.text((13, 420), description, fill="white", font=description_font)
 
         return frame
 
@@ -238,7 +254,7 @@ class pilHandler():
 
         ## save image to byte stream
         byte_io = io.BytesIO()
-        frame.save(byte_io, format='PNG')
+        frame.save(byte_io, format='png')
 
         ## needs to sync attributes before displaying, because it's highly likely that the card was just modified.
         await card.determine_attributes()

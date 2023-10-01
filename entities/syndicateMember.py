@@ -18,7 +18,8 @@ class syndicateMember:
                  inc_spin_scores:typing.Tuple[int,int,int,int,int], 
                  inc_owned_card_ids:typing.List[str], 
                  inc_credits:int, 
-                 inc_merit_points:int) -> None:
+                 inc_merit_points:int,
+                 inc_has_freebie:int) -> None:
 
         """
 
@@ -54,3 +55,6 @@ class syndicateMember:
 
         ## merit points of the member
         self.merit_points = inc_merit_points
+
+        ## whether the member has a freebie
+        self.has_freebie = bool(inc_has_freebie)

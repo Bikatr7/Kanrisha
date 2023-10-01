@@ -1,4 +1,6 @@
 ## built-in modules
+from datetime import datetime, timedelta
+
 import os
 import typing
 
@@ -134,10 +136,16 @@ class fileEnsurer:
 
       """
 
+      ## get yesterday's date
+      time_24_hours_ago_utf = (datetime.utcnow() - timedelta(hours=24)).strftime('%Y-%m-%d %H:%M:%S')
+
       self.credentials_path = os.path.join(self.bot_details_dir, "credentials.txt")
+
+      self.last_freebie_path = os.path.join(self.bot_details_dir, "last freebie.txt")
 
       await self.file_handler.modified_create_file(self.token_path, "token")
       await self.file_handler.modified_create_file(self.user_name_path, "user_name")
+      await self.file_handler.modified_create_file(self.last_freebie_path, time_24_hours_ago_utf)
 
       await self.file_handler.standard_create_file(self.credentials_path)
       

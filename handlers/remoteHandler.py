@@ -186,7 +186,8 @@ class remoteHandler():
             member_name varchar(256) not null,
             spin_scores varchar(256) not null,
             credits int not null,
-            merit_points int not null
+            merit_points int not null,
+            has_freebie bool not null
         )
         """
 
@@ -268,18 +269,19 @@ class remoteHandler():
 
             for member in self.member_handler.members:
 
-                ## member_id, member_name, spin_scores, credits, merit_points
+                ## member_id, member_name, spin_scores, credits, merit_points, has_freebie
                 new_id = member.member_id
                 new_name = member.member_name
                 new_spin_scores = member.spin_scores
                 new_credits = member.credits
                 new_merit_points = member.merit_points
+                has_freebie = int(member.has_freebie)
 
                 ## turn spin_scores into a string
                 score_string = f'"{new_spin_scores[0]}.{new_spin_scores[1]}.{new_spin_scores[2]}.{new_spin_scores[3]}.{new_spin_scores[4]}"'
 
                 ## create a list of the member details
-                member_details = [new_id, new_name, score_string, new_credits, new_merit_points]
+                member_details = [new_id, new_name, score_string, new_credits, new_merit_points, int(has_freebie)]
 
                 table_name = "members"
                 insert_dict = {
@@ -287,7 +289,8 @@ class remoteHandler():
                     "member_name" : new_name,
                     "spin_scores" : new_spin_scores,
                     "credits" : new_credits,
-                    "merit_points" : new_merit_points
+                    "merit_points" : new_merit_points,
+                    "has_freebie" : has_freebie
                 }
 
                 await self.connection_handler.insert_into_table(table_name, insert_dict)

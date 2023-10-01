@@ -1,3 +1,6 @@
+## built-in libraries
+from datetime import datetime, timedelta
+
 ## third-party libraries
 from discord.ext import tasks
 
@@ -180,6 +183,10 @@ class Kanrisha(discord.Client):
         if(not self.sync_role_persistence_database.is_running()):
             self.sync_role_persistence_database.start()
 
+        ## starts the freebie reset task
+        if(not self.check_for_freebie_reset.is_running()):
+            self.check_for_freebie_reset.start()
+
         await self.file_ensurer.logger.log_action("INFO", "Kanrisha", "Kanrisha is ready.")
 
         await self.wait_until_ready()
@@ -245,3 +252,46 @@ class Kanrisha(discord.Client):
         """
 
         await self.interaction_handler.send_log_file(channel=self.get_channel(self.log_channel_id), is_forced = False) ## type: ignore
+
+##-------------------start-of-check_for_freebie_reset()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    @tasks.loop(minutes=5)
+    async def check_for_freebie_reset(self) -> None:
+
+        """
+
+        Checks if the freebie reset is due.\n
+
+        Parameters:\n
+        self (object - Kanrisha): The Kanrisha client.\n
+
+        Returns:\n
+        None.\n
+
+        """
+
+        with open(self.file_ensurer.last_freebie_path, 'r') as freebie_reset_file:
+            time_provided_str = freebie_reset_file.read()
+
+        time_provided = datetime.strptime(time_provided_str, '%Y-%m-%d %H:%M:%S')
+
+        ## Get the current time in UTC
+        current_time = datetime.utcnow()
+
+        ## Calculate the time difference between the current time and the time you provided
+        time_difference = current_time - time_provided
+
+        ## Check if it's been exactly or more than 24 hours
+        has_been_24_hours = time_difference >= timedelta(hours=24)
+
+        if(has_been_24_hours):
+
+            ## reset freebie
+            for member in self.remote_handler.member_handler.members:
+                member.has_freebie = True
+
+            ## write the current time to the file
+            with open(self.file_ensurer.last_freebie_path, 'w') as freebie_reset_file:
+                freebie_reset_file.write(current_time.strftime('%Y-%m-%d %H:%M:%S'))
+
+            await self.file_ensurer.logger.log_action("INFO", "Kanrisha", "Freebie reset.")
