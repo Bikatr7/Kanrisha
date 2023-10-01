@@ -316,19 +316,28 @@ class remoteHandler():
 
                 card_details = [new_id, new_replica_id, new_xp_id, new_name, new_rarity, new_picture_url, new_picture_name, new_picture_subtitle, new_picture_description, new_person_id]
 
-                insert_dict = {
-                    "card_id" : new_id,
-                    "card_replica_id" : new_replica_id,
-                    "card_xp_id" : new_xp_id,
-                    "card_name" : new_name,
-                    "card_rarity" : new_rarity,
-                    "card_picture_url" : new_picture_url,
-                    "card_picture_name" : new_picture_name,
-                    "card_picture_subtitle" : new_picture_subtitle,
-                    "card_picture_description" : new_picture_description,
-                    "person_id" : new_person_id
-                }
+                ## escape single and double quotes as well as backslashes
+                to_escape = [new_picture_name, new_picture_subtitle, new_picture_description]
 
+                new_picture_name, new_picture_subtitle, new_picture_description = [
+                    string.replace("\\", "\\\\").replace("'", "\\'").replace('"', '\\"')
+                    for string in to_escape
+                ]
+
+                # Update the insert_dict
+                insert_dict = {
+                    "card_id": new_id,
+                    "card_replica_id": new_replica_id,
+                    "card_xp_id": new_xp_id,
+                    "card_name": new_name,
+                    "card_rarity": new_rarity,
+                    "card_picture_url": new_picture_url,
+                    "card_picture_name": new_picture_name,
+                    "card_picture_subtitle": new_picture_subtitle,
+                    "card_picture_description": new_picture_description,
+                    "person_id": new_person_id
+                }
+                
                 await self.connection_handler.insert_into_table(table_name, insert_dict)
 
                 await self.file_ensurer.file_handler.write_sei_line(self.file_ensurer.card_path, card_details)

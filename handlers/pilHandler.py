@@ -127,6 +127,31 @@ class pilHandler():
 
         return [frame_image, rarity_image, replica_image, pfp_image]
 
+##--------------------start-of-test_pfp_validity()-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    async def test_pfp_validity(self, url:str) -> bool:
+
+        """
+        
+        Tests if a pfp is valid.\n
+
+        Parameters:\n
+        self (object - pilHandler) : The pilHandler object.\n
+        url (str) : The url of the pfp.\n
+
+        Returns:\n
+        bool : Whether the pfp is valid or not.\n
+
+        """
+
+        ## async download pfp
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as resp:
+                if(resp.status == 200):
+                    return True
+                else:
+                    return False
+
 ##--------------------start-of-get_built_frame()-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     async def get_built_frame(self, card:card, user:discord.User) -> Image.Image:

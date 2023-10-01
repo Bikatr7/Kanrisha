@@ -505,6 +505,9 @@ class slashCommandHandler:
 
             """
 
+            async def has_non_ascii(text: str) -> bool:
+                return any(ord(char) >= 128 for char in text)
+
             is_admin = True
 
             if(not await kanrisha_client.check_if_registered(interaction)):
@@ -520,7 +523,7 @@ class slashCommandHandler:
                 return
             
             ## ensure user is admin if using member argument
-            if(member and is_admin == False): ## type: ignore (we know it's not None)
+            if(member and is_admin == False and interaction.user.id != member.id): ## type: ignore (we know it's not None)
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You don't have permission to modify other user's cards.", delete_after=5.0, is_ephemeral=True)
                 return
 
@@ -541,18 +544,32 @@ class slashCommandHandler:
             card = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.person_id == target_member.member_id][0] ## type: ignore (we know it's not None)
 
             ## modify card object to match provided parameters
+            banned_characters = ["\n", "\t", ","]
+
+
 
             ## if card_picture_url is provided, ensure it is a valid i.imgur url link.
             if(card_picture_url):
 
-                required_string = "https://i.imgur.com/"
+                required_start = "https://i.imgur.com/"
 
-                if("," in card_picture_url):
-                    await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "Card picture url cannot contain commas.", is_ephemeral=True)
+                require_ends = [".png", ".jpg", ".jpeg"]
+        
+                if(not card_picture_url.startswith(required_start)):
+                    await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That is not a valid i.imgur url. Please note that only i.imgur urls are supported.", is_ephemeral=True)
+                    return
+                
+                if(not any([card_picture_url.endswith(require_end) for require_end in require_ends])):
+                    await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "Link must end with .png, .jpg, or .jpeg.", is_ephemeral=True)
+                    return
+                
+                if("gallery" in card_picture_url):
+                    await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You cannot use gallery links.", is_ephemeral=True)
                     return
 
-                if(not card_picture_url.startswith(required_string)):
-                    await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That is not a valid i.imgur url. Please note that only i.imgur urls are supported.", is_ephemeral=True)
+                ## download the image to ensure validity
+                if (not await self.pil_handler.test_pfp_validity(card_picture_url)):
+                    await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That is not a valid image.", is_ephemeral=True)
                     return
 
                 ## set card picture url
@@ -561,12 +578,20 @@ class slashCommandHandler:
             ## if card_picture_name is provided, ensure it is a valid string
             if(card_picture_name):
 
-                if("," in card_picture_name):
-                    await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "Card name cannot contain commas.", is_ephemeral=True)
+                if(any([banned_character in card_picture_name for banned_character in banned_characters])):
+                        
+                    ## get the banned character in the name
+                    banned_character = [banned_character for banned_character in banned_characters if banned_character in card_picture_name][0]
+
+                    await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, f"Card name cannot contain {banned_character}.", is_ephemeral=True)
                     return
                     
-                if(len(card_picture_name) > 35):
-                    await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That name is too long. Please limit it to 35 characters.", is_ephemeral=True)
+                if(len(card_picture_name) > 27):
+                    await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That name is too long. Please limit it to 27 characters.", is_ephemeral=True)
+                    return
+                
+                if(await has_non_ascii(card_picture_name)):
+                    await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "Card name cannot contain non-ascii characters.", is_ephemeral=True)
                     return
 
                 ## set card picture name
@@ -575,12 +600,19 @@ class slashCommandHandler:
             ## if card_picture_subtitle is provided, ensure it is a valid string
             if(card_picture_subtitle):
 
-                if("," in card_picture_subtitle):
-                    await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "Card subtitle cannot contain commas.", is_ephemeral=True)
+                if(any([banned_character in card_picture_subtitle for banned_character in banned_characters])):
+
+                    ## get the banned character in the subtitle
+                    banned_character = [banned_character for banned_character in banned_characters if banned_character in card_picture_subtitle][0]
+
+                    await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, f"Card subtitle cannot contain {banned_character}.", is_ephemeral=True)
+            
+                if(len(card_picture_subtitle) > 34):
+                    await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That subtitle is too long. Please limit it to 34 characters.", is_ephemeral=True)
                     return
-                    
-                if(len(card_picture_subtitle) > 35):
-                    await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That subtitle is too long. Please limit it to 35 characters.", is_ephemeral=True)
+                
+                if(await has_non_ascii(card_picture_subtitle)):
+                    await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "Card name cannot contain non-ascii characters.", is_ephemeral=True)
                     return
 
                 ## set card picture subtitle
@@ -589,12 +621,20 @@ class slashCommandHandler:
             ## if card_picture_description is provided, ensure it is a valid string
             if(card_picture_description):
 
-                if("," in card_picture_description):
-                    await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "Card description cannot contain commas.", is_ephemeral=True)
+                if(any([banned_character in card_picture_description for banned_character in banned_characters])):
+                            
+                    ## get the banned character in the description
+                    banned_character = [banned_character for banned_character in banned_characters if banned_character in card_picture_description][0]
+
+                    await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, f"Card description cannot contain {banned_character}.", is_ephemeral=True)
                     return
-                        
-                if(len(card_picture_description) > 35):
-                    await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That description is too long. Please limit it to 35 characters.", is_ephemeral=True)
+                
+                if(await has_non_ascii(card_picture_description)):
+                    await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "Card name cannot contain non-ascii characters.", is_ephemeral=True)
+                    return
+                
+                if(len(card_picture_description) > 34):
+                    await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That description is too long. Please limit it to 34 characters.", is_ephemeral=True)
                     return
 
                 ## set card picture description
@@ -635,10 +675,12 @@ class slashCommandHandler:
             no_card_edit_perms_role = kanrisha_client.get_guild(interaction.guild_id).get_role(no_card_edit_perms_role_id) ## type: ignore (we know it's not None)
             if(no_card_edit_perms_role in interaction.user.roles): ## type: ignore (we know it's not None)
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not allowed to edit cards.", delete_after=5.0, is_ephemeral=True)
+                return
             
             ## ensure user is admin if using member argument
             if(member and not is_admin): ## type: ignore (we know it's not None)
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You don't have permission to modify other user's cards.", delete_after=5.0, is_ephemeral=True)
+                return
 
             ## get the syndicateMember object for the target member
             target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_aibg_member_object(interaction, member)

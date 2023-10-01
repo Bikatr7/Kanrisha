@@ -146,6 +146,9 @@ class gachaCommandHandler:
             if(target_member.credits < 3000 and interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids): ## type: ignore (we know it's not None
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have enough credits. (3000)", delete_after=3.0, is_ephemeral=True)
                 return
+            
+            ## decrement credits
+            target_member.credits -= 3000 ## type: ignore (we know it's not None)
 
             ## defer response
             await kanrisha_client.interaction_handler.defer_interaction(interaction)
@@ -211,9 +214,6 @@ class gachaCommandHandler:
             ## reset card to default values if it was altered
             await card.reset_card_identifiers()
 
-            ## decrement credits
-            target_member.credits -= 3000 ## type: ignore (we know it's not None)
-
             await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, embed=embed, file=file)
 
 ##-------------------start-of-multispin()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -254,6 +254,9 @@ class gachaCommandHandler:
             
             ## defer response
             await kanrisha_client.interaction_handler.defer_interaction(interaction)
+
+            ## decrement credits
+            target_member.credits -= 27000 ## type: ignore (we know it's not None)
 
             ## build embed message
             display_message = "You have been awarded the following cards:\n"
@@ -338,9 +341,6 @@ class gachaCommandHandler:
                 footer += f"\nYou have been awarded {total_credits_added} credits for maxed cards."
 
             embed.set_footer(text=footer)
-
-            ## decrement credits
-            target_member.credits -= 27000 ## type: ignore (we know it's not None)
 
             await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, embed=embed)
 
