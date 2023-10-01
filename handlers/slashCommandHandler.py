@@ -517,10 +517,12 @@ class slashCommandHandler:
             no_card_edit_perms_role = kanrisha_client.get_guild(interaction.guild_id).get_role(no_card_edit_perms_role_id) ## type: ignore (we know it's not None)
             if(no_card_edit_perms_role in interaction.user.roles): ## type: ignore (we know it's not None)
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not allowed to edit cards.", delete_after=5.0, is_ephemeral=True)
+                return
             
             ## ensure user is admin if using member argument
             if(member and is_admin == False): ## type: ignore (we know it's not None)
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You don't have permission to modify other user's cards.", delete_after=5.0, is_ephemeral=True)
+                return
 
             ## get the syndicateMember object for the target member
             target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_aibg_member_object(interaction, member)
@@ -620,6 +622,8 @@ class slashCommandHandler:
             member (object - discord.Member | None) : the member object.\n
 
             """
+
+            is_admin = True
 
             if(not await kanrisha_client.interaction_handler.admin_check(interaction, display=False)):
                 is_admin = False

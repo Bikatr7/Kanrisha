@@ -92,7 +92,7 @@ class leaderboardHandler:
 
                 total_spins = sum(member.spin_scores)
                 if(total_spins > 0):
-                    score = round((member.spin_scores[0] * 20 + member.spin_scores[1] * 8.33 + member.spin_scores[2] * 1.20) / total_spins, 3)
+                    score = round((member.spin_scores[0] * 1.818 + member.spin_scores[1] * 3.333 + member.spin_scores[2] * 9.091 + member.spin_scores[3] * 33.333 + member.spin_scores[4] * 100) / total_spins, 3)
                     scores_with_members.append((score, member.member_name))
 
             ## Sort the list based on the scores in descending order and then take only the top 10
@@ -121,7 +121,7 @@ class leaderboardHandler:
             annotation = "At the end of each month, top 5 users will receive a credit bonus based on their rank.\n"
             
             if(user_rank is not None):
-                luck_leaderboard.set_footer(text=f"Your rank is #{user_rank}. {annotation}")
+                luck_leaderboard.set_footer(text=f"Your rank is #{user_rank}/{len(scores_with_members)}. {annotation}")
             elif(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):  # Check if the user is not an admin
                 luck_leaderboard.set_footer(text=f"Your rank is #{no_spin_rank} (haven't spun yet). {annotation}")
 

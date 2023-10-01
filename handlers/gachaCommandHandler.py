@@ -133,7 +133,7 @@ class gachaCommandHandler:
             
             if(await kanrisha_client.interaction_handler.whitelist_channel_check(interaction) == False):
                 return
-
+            
             ## get the syndicateMember object for the target member
             target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_aibg_member_object(interaction)
 
@@ -143,9 +143,12 @@ class gachaCommandHandler:
                 return
             
             ## if user does not have enough credits, return
-            if(target_member.credits < 27000 and interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids): ## type: ignore (we know it's not None
+            if(target_member.credits < 3000 and interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids): ## type: ignore (we know it's not None
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have enough credits. (3000)", delete_after=3.0, is_ephemeral=True)
                 return
+
+            ## defer response
+            await kanrisha_client.interaction_handler.defer_interaction(interaction)
 
             ## get card
             card = await kanrisha_client.remote_handler.gacha_handler.spin_gacha()
@@ -211,7 +214,7 @@ class gachaCommandHandler:
             ## decrement credits
             target_member.credits -= 3000 ## type: ignore (we know it's not None)
 
-            await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, embed=embed, file=file)
+            await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, embed=embed, file=file)
 
 ##-------------------start-of-multispin()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

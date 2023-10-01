@@ -223,7 +223,7 @@ class pilHandler():
             description = card.picture_description
 
         ## Add text
-        draw.text((70, 15), title, fill="white", font=name_font)
+        draw.text((75, 15), title, fill="white", font=name_font)
         draw.text((13, 370), subtitle, fill="black", font=description_font)
         draw.text((13, 420), description, fill="white", font=description_font)
 
