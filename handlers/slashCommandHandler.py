@@ -12,6 +12,7 @@ from handlers.eventHandler import eventHandler
 from handlers.adminCommandHandler import adminCommandHandler
 from handlers.pilHandler import pilHandler
 from handlers.leaderboardHandler import leaderboardHandler
+from handlers.gachaCommandHandler import gachaCommandHandler
 
 from entities.card import card
 
@@ -53,233 +54,15 @@ class slashCommandHandler:
 
         self.event_handler = eventHandler(kanrisha_client, self.pil_handler)
 
+        self.gachaCommandHandler = gachaCommandHandler(kanrisha_client, self.pil_handler)
+
         self.admin_command_handler = adminCommandHandler(kanrisha_client)
 
         self.leaderboard_handler = leaderboardHandler(kanrisha_client)
 
-##-------------------start-of-starter_pack()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-        @kanrisha_client.tree.command(name="starter-pack", description="Gives you a starter pack.")
-        async def starter_pack(interaction:discord.Interaction) -> None:
-
-            """
-
-            Gives the user a starter pack.\n
-
-            Parameters:\n
-            member (object - discord.Member) : the member object.\n
-
-            Returns:\n
-            None.\n
-
-            """
-
-            if(await kanrisha_client.check_if_registered(interaction) == False):
-                return
-            
-            ## admin check
-            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
-                return
-
-            ## get the syndicateMember object for the target member
-            target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction)
-
-            ## manually check if user has already claimed their starter pack
-            if(target_member.owned_card_ids != []): ## type: ignore (we know it's not None)
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You have already claimed your starter pack.", delete_after=3.0, is_ephemeral=True)
-                return
-            
-            ## keep spinning until the user has 5 cards, all cards are Standard and unique
-            starter_cards = []
-            while(len(starter_cards) < 5):
-
-                ## spin the gacha
-                card:card = await kanrisha_client.remote_handler.gacha_handler.spin_gacha()
-
-                ## if the card is not common, skip it
-                if(card.rarity.name != "Standard"):
-                    continue
-
-                ## if the card is already in the starter pack, skip it
-                if(card in starter_cards):
-                    continue
-
-                starter_cards.append(card)
-
-            ## give the user the cards
-            for card in starter_cards:
-                
-                ## remember that the owned_card_ids list holds a full sequence id, so we need to get the id from the card object and add 2 0's to the end to get the full sequence id (6 digits)
-                target_member.owned_card_ids.append(f"{card.id}00") ## type: ignore (we know it's not None)
-
-            ## award the user 15000 credits
-            target_member.credits += 15000 ## type: ignore (we know it's not None)
-
-            ## build embed
-            display_message = "You have been awarded 15000 credits and the following cards:\n"
-
-            for card in starter_cards:
-                display_message += f"{card.rarity.emoji} {card.name}\n"
-
-            embed = discord.Embed(title="Starter Pack", description=display_message, color=0xC0C0C0)
-
-            ## send response
-            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)
-        ##-------------------start-of-gacha_spin()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-        @kanrisha_client.tree.command(name="spin", description="Spins the wheel to obtain a card.")
-        async def gacha_spin(interaction: discord.Interaction) -> None:
-
-            """
-
-            Spins the gacha wheel.\n
-
-            Parameters:\n
-            interaction (object - discord.Interaction) : the interaction object.\n
-
-            Returns:\n
-            None.\n
-
-            """
-
-            if(await kanrisha_client.check_if_registered(interaction) == False):
-                return
-
-            ## get the syndicateMember object for the target member
-            target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction)
-
-            ## make sure user has claimed their starter pack
-            if(target_member.owned_card_ids == []): ## type: ignore (we know it's not None)
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You must claim your starter pack before spinning. (/starter-pack)", delete_after=3.0, is_ephemeral=True)
-                return
-
-            ## admin check
-            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
-                return
-            
-            ## if user does not have enough credits, return
-            if(target_member.credits < 3000): ## type: ignore (we know it's not None
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have enough credits. (3000)", delete_after=3.0, is_ephemeral=True)
-                return
-
-            ## get card
-            card = await kanrisha_client.remote_handler.gacha_handler.spin_gacha()
-
-            ## update spin scores (id - 1 because the spin scores are stored in a list and the rarity id starts at 1)
-            await kanrisha_client.remote_handler.member_handler.update_spin_value(target_member.member_id, 1, card.rarity.id - 1) ## type: ignore (we know it's not None)
-
-            ## get first 4 digits of card id for all member owned cards, because this is what is used to determine cards
-            owned_card_ids = [card_id[0:4] for card_id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
-
-            ## if the member doesn't own the card, add it to their owned_card_ids list, use a blank 0 for rarity and xp ids
-            if(card.id not in owned_card_ids): ## type: ignore (we know it's not None)
-
-                ## remember that the owned_card_ids list holds a full sequence id, so we need to get the id from the card object and add 2 0's to the end to get the full sequence id (6 digits)
-                target_member.owned_card_ids.append(f"{card.id}00") ## type: ignore (we know it's not None)
-
-                embed, file = await self.pil_handler.assemble_embed(card)
-
-            else:
-                
-                ## the whole idea of this is that the member doesn't actually have any "card" objects, they just have the id sequence of the card
-                ## gacha_handler has the "Base" card objects, and the member's owned_card_ids list is just how the card should be altered
-                ## card needs to be reset after display due to objects being passed by reference
-
-                ## if card is owned get the id sequence from the member's owned cards
-                full_user_sequence = target_member.owned_card_ids[owned_card_ids.index(card.id)] ## type: ignore (we know it's not None)
-
-                ## modify card object to match user's id sequence
-                card.replica.id = int(str(full_user_sequence)[4])
-                card.rarity.current_xp = int(str(full_user_sequence)[5])
-
-                ## if the card's replica is not maxed, increase the xp and id
-                if(card.replica.id != 6):
-                    card.rarity.current_xp += 1
-
-                    ## if the card's xp is maxed, reset the xp and increase the id
-                    if(card.rarity.current_xp >= card.rarity.max_xp):
-                        card.rarity.current_xp = 0
-                        card.replica.id += 1
-
-                    ## get new sequence id for user's card
-                    new_id_sequence = card.id + f"{card.replica.id}{card.rarity.current_xp}"
-
-                    ## replace in array 
-                    target_member.owned_card_ids[owned_card_ids.index(card.id)] = new_id_sequence ## type: ignore (we know it's not None)
-
-                    ## user card for embed
-                    embed, file = await self.pil_handler.assemble_embed(card)
-
-                ## add credits to the member's balance based on the card's rarity if the card's replica is maxed
-                else:
-
-                    credits_to_add = kanrisha_client.remote_handler.gacha_handler.rarity_to_credits.get(card.rarity.name, 0) 
-                    target_member.credits += credits_to_add ## type: ignore (we know it's not None)
-
-                    embed, file = await self.pil_handler.assemble_embed(card)
-
-                    embed.set_footer(text=f"You have this card maxed out. You have been awarded {credits_to_add} credits.")
-
-            ## reset card to default values if it was altered
-            await card.reset_card_identifiers()
-
-            ## decrement credits
-            target_member.credits -= 3000 ## type: ignore (we know it's not None)
-
-            await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, embed=embed, file=file)
-
-##-------------------start-of-freebie()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-        @kanrisha_client.tree.command(name="freebie", description="Lets you claim your freebie.")
-        async def freebie(interaction:discord.Interaction) -> None:
-
-            """
-            
-            Lets you claim your freebie.\n
-
-            Parameters:\n
-            interaction (object - discord.Interaction) : the interaction object.\n
-
-            Returns:\n
-            None.\n
-
-            """
-
-            ## check if user is registered
-            if(await kanrisha_client.check_if_registered(interaction) == False):
-                return
-            
-            ## get the syndicateMember object for the target member
-            target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction)
-            
-            ## make sure user has claimed their starter pack
-            if(target_member.owned_card_ids == []): ## type: ignore (we know it's not None)
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You must claim your starter pack before spinning. (/starter-pack)", delete_after=3.0, is_ephemeral=True)
-                return
-            
-            ## ensure user is admin
-            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
-                return
-            
-            ## check if user has freebie
-            if(target_member.has_freebie == False): ## type: ignore (we know it's not None)
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You have already claimed your freebie.", delete_after=3.0, is_ephemeral=True)
-                return
-
-            ## award freebie
-            else:
-                target_member.credits += 1000 ## type: ignore (we know it's not None)
-                target_member.has_freebie = False ## type: ignore (we know it's not None)
-
-            ## send response
-            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, f"You have been awarded 1000 credits. You now have {target_member.credits} credits.", is_ephemeral=True) ## type: ignore (we know it's not None)
-
         ##-------------------start-of-register()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        @kanrisha_client.tree.command(name="register", description="Signs you up for the Syndicates System.")
+        @kanrisha_client.tree.command(name="register", description="Signs you up for the AiBG System.")
         async def register(interaction:discord.Interaction) -> None:
 
             """
@@ -295,6 +78,9 @@ class slashCommandHandler:
 
             """
 
+            if(await kanrisha_client.interaction_handler.whitelist_channel_check(interaction) == False):
+                return
+
             register_message = """
             By clicking this button you acknowledge and agree to the following:\n
             - You will be using the bot during its testing phase, and any and all data may be wiped/lost at any time.\n
@@ -306,13 +92,13 @@ class slashCommandHandler:
                 error_message = "You are already registered."
 
                 ## get syndicate role
-                syndicate_role = kanrisha_client.get_guild(interaction.guild_id).get_role(self.event_handler.syndicate_role_id) ## type: ignore (we know it's not None)
+                aibg_role = kanrisha_client.get_guild(interaction.guild_id).get_role(self.event_handler.syndicate_role_id) ## type: ignore (we know it's not None)
 
                 ## check if the member has the syndicate role
-                if(syndicate_role not in interaction.user.roles): ## type: ignore (we know it's not None)
-                    error_message += "But are missing the Syndicate role. You have been given the Syndicate role."
+                if(aibg_role not in interaction.user.roles): ## type: ignore (we know it's not None)
+                    error_message += "But are missing the AiBG role. You have been given the Syndicate role."
 
-                    await interaction.user.add_roles(syndicate_role) ## type: ignore (we know it's not None)
+                    await interaction.user.add_roles(aibg_role) ## type: ignore (we know it's not None)
 
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, response=error_message, delete_after=5.0, is_ephemeral=True)
 
@@ -325,7 +111,7 @@ class slashCommandHandler:
             ## Store the user's ID as a custom attribute of the button
             view = discord.ui.View().add_item(discord.ui.Button(style=discord.ButtonStyle.green, custom_id=f"register_{interaction.user.id}", label="Register"))
 
-            await kanrisha_client.interaction_handler.send_response_filter_channel(interaction, embed=embed, view=view, delete_after=60.0)
+            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed, view=view, delete_after=60.0)
 
          ##-------------------start-of-snipe()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -376,7 +162,7 @@ class slashCommandHandler:
 
         ##-------------------start-of-profile()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        @kanrisha_client.tree.command(name="profile", description="Sends a members Syndicate profile.")
+        @kanrisha_client.tree.command(name="profile", description="Sends a member's AiBG profile.")
         async def profile(interaction: discord.Interaction, member:typing.Union[discord.Member , None]):
 
             """
@@ -392,10 +178,10 @@ class slashCommandHandler:
 
             """
 
-            if(await kanrisha_client.check_if_registered(interaction) == False):
+            if(not await kanrisha_client.check_if_registered(interaction)):
                 return
 
-            target_member, _, image_url, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, member)
+            target_member, _, image_url, _ = await kanrisha_client.remote_handler.member_handler.get_aibg_member_object(interaction, member)
 
             if(target_member == None):
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That user is not registered.", delete_after=5.0, is_ephemeral=True)
@@ -414,7 +200,7 @@ class slashCommandHandler:
             embed = discord.Embed(title="Profile", description=profile_message, color=0xC0C0C0)
             embed.set_thumbnail(url=image_url)
 
-            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)
+            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed, is_ephemeral=True)
 
         ##-------------------start-of-transfer()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -436,19 +222,19 @@ class slashCommandHandler:
 
             """
 
-            is_admin = False
+            is_admin = True
 
             ## Check if the user is registered
-            if(await kanrisha_client.check_if_registered(interaction) == False):
+            if(not await kanrisha_client.check_if_registered(interaction)):
                 return
             
-            ## Check if the user is an admin
-            if(interaction.user.id in kanrisha_client.interaction_handler.admin_user_ids):
-                is_admin = True
+            ## admin check
+            if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
+                is_admin = False
 
             ## get the syndicateMember objects for the sender and the transfer target     
-            sender_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, interaction.user)
-            transfer_target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, member)
+            sender_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_aibg_member_object(interaction, interaction.user)
+            transfer_target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_aibg_member_object(interaction, member)
 
             if(transfer_target_member == None):
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That user is not registered.", delete_after=5.0, is_ephemeral=True)
@@ -501,11 +287,14 @@ class slashCommandHandler:
             """
 
             ## Check if the user is registered
-            if(await kanrisha_client.check_if_registered(interaction) == False):
+            if(not await kanrisha_client.check_if_registered(interaction)):
                 return
             
+            if(await kanrisha_client.interaction_handler.whitelist_channel_check(interaction) == False):
+                return
+
             ## get the syndicateMember object for the target member
-            target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction)
+            target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_aibg_member_object(interaction)
             
             ## get first 4 digits of card id for all member owned cards
             owned_card_ids = [card_id[0:4] for card_id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
@@ -567,8 +356,11 @@ class slashCommandHandler:
             if(not await kanrisha_client.check_if_registered(interaction)):
                 return
             
+            if(await kanrisha_client.interaction_handler.whitelist_channel_check(interaction) == False):
+                return
+            
             ## get the syndicateMember object for the target member
-            target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, member)
+            target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_aibg_member_object(interaction, member)
 
             ## ensure user owns cards
             if(target_member.owned_card_ids == []): ## type: ignore (we know it's not None)
@@ -642,8 +434,11 @@ class slashCommandHandler:
             if(not await kanrisha_client.check_if_registered(interaction)):
                 return
             
+            if(await kanrisha_client.interaction_handler.whitelist_channel_check(interaction) == False):
+                return
+            
             ## get the syndicateMember object for the target member
-            target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, member)
+            target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_aibg_member_object(interaction, member)
 
             ## ensure user owns cards
             if(target_member.owned_card_ids == []): ## type: ignore (we know it's not None)
@@ -689,7 +484,7 @@ class slashCommandHandler:
                 await card.determine_attributes() ## type: ignore (we know it's not going to be a string)
 
                 ## add card to embed
-                card_list += f"{i + 1}. {card.rarity.emoji} {card.name} {card.replica.emoji}\n" ## type: ignore (we know it's not going to be a string)
+                card_list += f"{i + 1}. {card.rarity.emoji} {card.name} {card.replica.emoji} ({card.rarity.current_xp}/{card.rarity.max_xp})\n" ## type: ignore (we know it's not going to be a string)
 
                 ## reset card to default values if it was altered
                 await card.reset_card_identifiers() ## type: ignore (we know it's not going to be a string)
@@ -721,9 +516,12 @@ class slashCommandHandler:
             if(not await kanrisha_client.check_if_registered(interaction)):
                 return
 
+            if(await kanrisha_client.interaction_handler.whitelist_channel_check(interaction) == False):
+                return
+
             kanrisha_member = await kanrisha_client.fetch_user(kanrisha_client.interaction_handler.admin_user_ids[-1])
 
-            kanrisha_syndicate_object, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, kanrisha_member) ## type: ignore (we know it's not None)
+            kanrisha_syndicate_object, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_aibg_member_object(interaction, kanrisha_member) ## type: ignore (we know it's not None)
 
             ## get first 4 digits of card id for all member owned cards
             owned_card_ids = [card_id[0:4] for card_id in kanrisha_syndicate_object.owned_card_ids] ## type: ignore (we know it's not None)
@@ -773,26 +571,25 @@ class slashCommandHandler:
 
             """
 
-            ## admin check
-            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You don't have permission to use this command.", delete_after=5.0, is_ephemeral=True)
+            is_admin = True
+
+            if(not await kanrisha_client.check_if_registered(interaction)):
                 return
+            
+            if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
+                is_admin = False
 
             ## check if user is banned from editing cards
             no_card_edit_perms_role = kanrisha_client.get_guild(interaction.guild_id).get_role(no_card_edit_perms_role_id) ## type: ignore (we know it's not None)
             if(no_card_edit_perms_role in interaction.user.roles): ## type: ignore (we know it's not None)
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not allowed to edit cards.", delete_after=5.0, is_ephemeral=True)
-
-            ## Check if the user is registered
-            if(not await kanrisha_client.check_if_registered(interaction)):
-                return
             
             ## ensure user is admin if using member argument
-            if(member and interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids): ## type: ignore (we know it's not None)
+            if(member and is_admin == False): ## type: ignore (we know it's not None)
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You don't have permission to modify other user's cards.", delete_after=5.0, is_ephemeral=True)
 
             ## get the syndicateMember object for the target member
-            target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, member)
+            target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_aibg_member_object(interaction, member)
 
             ## check if the user is a card
             card_person_id = [card.person_id for card in kanrisha_client.remote_handler.gacha_handler.cards]
@@ -890,26 +687,23 @@ class slashCommandHandler:
 
             """
 
-            ## admin check
-            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You don't have permission to use this command.", delete_after=5.0, is_ephemeral=True)
+            if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
                 return
             
+            if(not await kanrisha_client.check_if_registered(interaction)):
+                return
+
             ## check if user is banned from editing cards
             no_card_edit_perms_role = kanrisha_client.get_guild(interaction.guild_id).get_role(no_card_edit_perms_role_id) ## type: ignore (we know it's not None)
             if(no_card_edit_perms_role in interaction.user.roles): ## type: ignore (we know it's not None)
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not allowed to edit cards.", delete_after=5.0, is_ephemeral=True)
-
-            ## Check if the user is registered
-            if(not await kanrisha_client.check_if_registered(interaction)):
-                return
             
             ## ensure user is admin if using member argument
             if(member and interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids): ## type: ignore (we know it's not None)
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You don't have permission to modify other user's cards.", delete_after=5.0, is_ephemeral=True)
 
             ## get the syndicateMember object for the target member
-            target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, member)
+            target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_aibg_member_object(interaction, member)
 
             ## check if the user is a card
             card_person_id = [card.person_id for card in kanrisha_client.remote_handler.gacha_handler.cards]
@@ -948,17 +742,24 @@ class slashCommandHandler:
 
             """
 
+            if(not await kanrisha_client.check_if_registered(interaction)):
+                return
+
+            if(await kanrisha_client.interaction_handler.whitelist_channel_check(interaction) == False):
+                return
+
             help_message = (
-                "**/register** - Signs you up for the Syndicates System.\n\n"
-                "**/profile** - Sends a member's Syndicate profile.\n\n"
+                "**/register** - Signs you up for AiBG.\n\n"
+                "**/profile** - Sends a member's AiBG profile.\n\n"
                 "**/transfer** - Transfers credits from one user to another.\n\n"
                 "**/starter-pack** - Lets you claim your starter pack.\n\n"
                 "**/freebie** - Lets you claim your freebie.\n\n"
-                "**/spin** - Spins the gacha wheel.\n\n"
+                "**/spin** - Spins the wheel to obtain a card. Costs 3k credits.\n\n"
+                "**/multi-spin** - Spins the wheel multiple times to obtain 10 cards. Costs 27k credits.\n\n"
                 "**/card** - Displays a card.\n\n"
                 "**/deck** - Displays the user's deck.\n\n"
-                "**/summary** - Show all cards and their ranks in a user's deck in a list format.\n\n"
-                "**/catalog** - Shows all cards.\n\n"
+                "**/summary** - Show all cards in a user's deck in a list format.\n\n"
+                "**/catalog** - Shows all cards in existence.\n\n"
                 "**/customize-card** - Customizes a card.\n\n"
                 "**/reset-card-customization** - Resets a card's customization.\n\n"
                 "**/leaderboard** - Sends the leaderboards.\n\n"

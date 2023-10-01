@@ -41,32 +41,8 @@ class adminCommandHandler:
 
         kanrisha_client = inc_kanrisha_client
 
-        ##-------------------start-of-check_if_admin()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        async def check_if_admin(interaction:discord.Interaction) -> bool:
-
-            """
-            
-            Checks if the user is an admin.\n
-
-            Parameters:\n
-            interaction (object - discord.Interaction) : the interaction object.\n
-
-            Returns:\n
-            is_admin (bool) : whether or not the user is an admin.\n
-
-            """
-
-            is_admin = True
-
-            ## admin check
-            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
-                is_admin = False
-            
-            return is_admin
-
-        ##-------------------start-of-trigger_early-shutdown()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+##-------------------start-of-trigger_early-shutdown()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         async def trigger_early_shutdown_logic(interaction:discord.Interaction) -> None:
 
@@ -82,8 +58,7 @@ class adminCommandHandler:
 
             """
 
-            ## admin check
-            if(await check_if_admin(interaction) == False):
+            if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
                 return
 
             await interaction.response.send_message("Shutting down...", delete_after=3.0, ephemeral=True)
@@ -127,14 +102,13 @@ class adminCommandHandler:
 
             """
 
-            ## admin check
-            if(await check_if_admin(interaction) == False):
+            if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
                 return
-
+            
             await kanrisha_client.interaction_handler.send_log_file(kanrisha_client.get_channel(kanrisha_client.log_channel_id), is_forced=True,  forced_by=interaction.user.name) ## type: ignore
 
             if(not is_shutdown_protocol):
-                await interaction.response.send_message("Log files has been pushed.", delete_after=3.0, ephemeral=True) 
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "Log files has been pushed.", delete_after=3.0, is_ephemeral=True)
 
         ##-------------------start-of-force-remote-reset()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -153,14 +127,13 @@ class adminCommandHandler:
 
             """
 
-            ## admin check
-            if(await check_if_admin(interaction) == False):
+            if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
                 return
 
             await kanrisha_client.remote_handler.reset_remote_storage(is_forced=True, forced_by=interaction.user.name)
 
             if(not is_shutdown_protocol):
-                await interaction.response.send_message("Remote storage has been reset.", delete_after=3.0, ephemeral=True)
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "Remote storage has been reset.", delete_after=3.0, is_ephemeral=True)
             
         ##-------------------start-of-execute_order_66()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -181,15 +154,14 @@ class adminCommandHandler:
 
             """
 
-            ## admin check
-            if(await check_if_admin(interaction) == False):
+            if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
                 return
 
             ## marked ids
             marked_for_death_role_id = 1146651136363855982
             mark_of_silence_role_id = 1147336187888021524
 
-            ## server announcements role
+            ## order 66 spectator role
             role_to_ping = kanrisha_client.get_guild(interaction.guild_id).get_role(1147346384178131034) ## type: ignore (we know it's not None)
             role_ping = role_to_ping.mention ## type: ignore (we know it's not None)
 
@@ -251,7 +223,7 @@ class adminCommandHandler:
             for member in marked_for_death:
                 
                 try:
-                    await member.send(f"You have been banned from Psychology Game for the following reason:\n{ban_reason}\n\nNote: {ban_message}")
+                    await member.send(f"You have been banned from Pig Game for the following reason:\n{ban_reason}\n\nNote: {ban_message}")
                 
                 except:
                     pass
@@ -290,15 +262,14 @@ class adminCommandHandler:
 
             """
             
-            ## admin check
-            if(await check_if_admin(interaction) == False):
+            if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
                 return
             
             members = [member for member in interaction.guild.members] ## type: ignore (we know it's not None)
 
             await kanrisha_client.interaction_handler.sync_roles_logic(members, is_forced=True, forced_by=interaction.user.name)
 
-            await interaction.response.send_message("Roles synced.", delete_after=3.0, ephemeral=True)
+            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "Roles synced.", delete_after=3.0, is_ephemeral=True)
 
 ##-------------------start-of-get-running-config-directory()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -318,8 +289,7 @@ class adminCommandHandler:
 
             """
 
-            ## admin check
-            if(await check_if_admin(interaction) == False):
+            if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
                 return
                     
             member_requesting = interaction.user
@@ -396,8 +366,7 @@ class adminCommandHandler:
 
             """
 
-            ## admin check
-            if(await check_if_admin(interaction) == False):
+            if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
                 return
             
             await kanrisha_client.interaction_handler.defer_interaction(interaction, is_ephemeral=True, is_thinking=True)
@@ -424,9 +393,7 @@ class adminCommandHandler:
 
             """
             
-
-            ## admin check
-            if(await check_if_admin(interaction) == False):
+            if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
                 return
             
             if("drop" in query.lower()):
@@ -480,8 +447,7 @@ class adminCommandHandler:
 
             """
 
-            ## admin check
-            if(await check_if_admin(interaction) == False):
+            if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
                 return
 
             help_message = (
@@ -493,7 +459,7 @@ class adminCommandHandler:
                 "**/get-running-config-directory** - Gets the running config directory. (ADMIN)\n\n"
                 "**/load-local-storage** - (DO NOT USE THIS WITH A LOADED INSTANCE) Loads from the local file. (ADMIN))\n\n"
                 "**/send-query** - Sends an sql query to the local database. (ADMIN)\n\n"
-                "**/help-admin** - Sends this message.\n\n"
+                "**/help-admin** - Sends this message (ADMIN).\n\n"
             )
 
             embed = discord.Embed(title="Help", description=help_message, color=0xC0C0C0)

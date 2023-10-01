@@ -1,13 +1,11 @@
 ## built-in libraries
 import typing
 
-class syndicateMember:
+class aibgMember():
 
     """
     
     Represents users of the Kanrisha bot.\n
-
-    Name subject to change.\n
 
     """
 

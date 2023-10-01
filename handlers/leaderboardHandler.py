@@ -52,9 +52,7 @@ class leaderboardHandler:
 
             """
 
-            ## Check if the user is registered
             if(not await kanrisha_client.check_if_registered(interaction)):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are not registered.", delete_after=5.0, is_ephemeral=True)
                 return
 
             luck_leaderboard = await get_luck_leaderboard(interaction)

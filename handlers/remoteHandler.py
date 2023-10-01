@@ -1,6 +1,3 @@
-## built-in modules
-import os
-
 ## custom modules
 from modules.toolkit import toolkit
 from modules.fileEnsurer import fileEnsurer

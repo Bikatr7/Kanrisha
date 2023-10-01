@@ -37,7 +37,7 @@ class interactionHandler:
         self.file_ensurer = inc_file_ensurer
         self.toolkit = inc_toolkit
 
-        self.whitelisted_channel_names = ["#general-bot", "#bot-testing", "#syndicate-bot"]
+        self.whitelisted_channel_names = ["#general-bot", "#bot-testing", "#aibg-bot"]
         self.whitelisted_channel_ids = [1144136660691460126, 1146174110548901979, 1146922710698557560]  
 
         self.admin_user_ids = [957451091748986972, 277933921315061761, 125751325760684033, 1146646164838555699, 1144166968979628072]
@@ -45,6 +45,54 @@ class interactionHandler:
 
         self.owner_id = 957451091748986972
 
+##-------------------start-of-admin_check()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    async def admin_check(self, interaction:discord.Interaction) -> bool:
+
+        """
+        
+        Checks if the user is an admin.\n
+
+        Parameters:\n
+        self (object - interactionHandler) : the interactionHandler object.\n
+        interaction (object - discord.Interaction) : the interaction object.\n
+
+        Returns:\n
+        bool.\n
+
+        """
+
+        if(interaction.user.id in self.admin_user_ids):
+            return True
+
+        else:
+            await interaction.response.send_message("You do not have permission to use this command.", delete_after=5.0, ephemeral=True)
+            return False
+
+##-------------------start-of-whitelist_channel_check()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    async def whitelist_channel_check(self, interaction:discord.Interaction) -> bool:
+
+        """
+        
+        Checks if the channel is whitelisted.\n
+
+        Parameters:\n
+        self (object - interactionHandler) : the interactionHandler object.\n
+
+        Returns:\n
+        bool.\n
+
+        """
+
+        if(interaction.channel_id in self.whitelisted_channel_ids or interaction.user.id in self.admin_user_ids):
+            return True
+
+        else:
+
+            await interaction.response.send_message(f"Please use {str(self.whitelisted_channel_names)} for this command.", delete_after=5.0, ephemeral=True)
+
+            return False
 ##-------------------start-of-send_response_filter_channel()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     async def send_response_filter_channel(self, 

@@ -7,7 +7,7 @@ import discord
 ## custom modules
 from handlers.connectionHandler import connectionHandler
 
-from entities.syndicateMember import syndicateMember
+from entities.aibgMember import aibgMember
 
 from modules.fileEnsurer import fileEnsurer
 from modules.toolkit import toolkit
@@ -43,7 +43,7 @@ class memberHandler:
         self.toolkit = inc_toolkit
         self.connection_handler = connection_handler
 
-        self.members: typing.List[syndicateMember] = [] 
+        self.members: typing.List[aibgMember] = [] 
 
 ##-------------------start-of-load_members_from_remote()---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -76,7 +76,7 @@ class memberHandler:
             ## take the card ids and merge them into a single string for each card owned by the member
             owned_id_list = [f"{owned_card_id_list[ii]}{replica_id_list[ii]}{xp_id_list[ii]}" for ii in range(len(owned_card_id_list))]
 
-            new_member = syndicateMember(int(id_list[i]), name_list[i], spin_scores, owned_id_list, int(credits_list[i]), int(merit_point_list[i]), int(has_freebie_list[i]))
+            new_member = aibgMember(int(id_list[i]), name_list[i], spin_scores, owned_id_list, int(credits_list[i]), int(merit_point_list[i]), int(has_freebie_list[i]))
             self.members.append(new_member)
 
         await self.file_ensurer.logger.log_action("INFO", "memberHandler", "Loaded members from remote.")
@@ -126,7 +126,7 @@ class memberHandler:
                 ## explicit type hinting to avoid pylance warning below
                 spin_scores = (spin_scores[0], spin_scores[1], spin_scores[2], spin_scores[3], spin_scores[4])
 
-                self.members.append(syndicateMember(int(values[0]), values[1], spin_scores, card_ids, int(values[3]), int(values[4]), int(values[5])))
+                self.members.append(aibgMember(int(values[0]), values[1], spin_scores, card_ids, int(values[3]), int(values[4]), int(values[5])))
 
         await self.file_ensurer.logger.log_action("INFO", "memberHandler", "Loaded members from local.") 
 
@@ -156,7 +156,7 @@ class memberHandler:
         await self.file_ensurer.file_handler.write_sei_line(self.file_ensurer.member_path, member_details)
 
         ## adds new member to current instance of bot
-        new_member = syndicateMember(inc_member_id, inc_member_name, inc_spin_scores, inc_owned_card_ids=[], inc_credits=50000, inc_merit_points=0, inc_has_freebie=1)
+        new_member = aibgMember(inc_member_id, inc_member_name, inc_spin_scores, inc_owned_card_ids=[], inc_credits=50000, inc_merit_points=0, inc_has_freebie=1)
 
         ## logs action
         await self.file_ensurer.logger.log_action("INFO", "memberHandler", f"Added new member: {inc_member_name}.")
@@ -192,9 +192,9 @@ class memberHandler:
                 
                 break
 
-##-------------------start-of-get_syndicate_member()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+##-------------------start-of-get_aibg_member_object()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def get_syndicate_member(self, interaction:discord.Interaction, member:discord.Member | discord.User | None = None) -> typing.Tuple[syndicateMember | None, int, str, bool]:
+    async def get_aibg_member_object(self, interaction:discord.Interaction, member:discord.Member | discord.User | None = None) -> typing.Tuple[aibgMember | None, int, str, bool]:
 
         """
         
@@ -207,7 +207,7 @@ class memberHandler:
         member (object - discord.Member | discord.User | None) : the member object.\n
 
         Returns:\n
-        target_member (object - syndicateMember | None) : the syndicateMember object.\n
+        target_member (object - aibgMember | None) : the aibgMember object.\n
         target_member_id (int) : the member id.\n
         image_url (str) : the image url.\n
         is_self_request (bool) : whether or not the request is for the user's own profile.\n

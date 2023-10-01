@@ -272,7 +272,7 @@ class eventHandler:
 
                     await interaction.followup.send("You have been registered.", ephemeral=True)
 
-                    await kanrisha_client.file_ensurer.logger.log_action("INFO", "slashCommandHandler", f"{interaction.user.name} has been registered.") ## type: ignore (we know it's not None)
+                    await kanrisha_client.file_ensurer.logger.log_action("INFO", "eventHandler", f"{interaction.user.name} has been registered.") ## type: ignore (we know it's not None)
 
                     await interaction.user.add_roles(syndicate_role) ## type: ignore (we know it's not None)
 
@@ -289,7 +289,7 @@ class eventHandler:
                 current_index = int(interaction.message.embeds[0].footer.text.split("/")[0]) - 1 ## type: ignore (we know it's not None)
 
                 ## get the target member's syndicateMember object
-                target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction, deck_owner) 
+                target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_aibg_member_object(interaction, deck_owner) 
 
                 ## get first 4 digits of card id for all member owned cards
                 owned_card_ids = [card_id[0:4] for card_id in target_member.owned_card_ids] ## type: ignore (we know it's not None)
