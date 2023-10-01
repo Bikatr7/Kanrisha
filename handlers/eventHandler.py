@@ -311,12 +311,18 @@ class eventHandler:
 
             ##----------------------------------------------/
 
-            async def check_left_deck_button(interaction: discord.Interaction, custom_id:str) -> None:
+            async def check_left_deck_button(interaction:discord.Interaction, custom_id:str) -> None:
 
                 target_id_portion = f"deck_left_{interaction.user.id}."
 
                 ## if left deck button was pressed by the correct user
                 if(target_id_portion in custom_id):
+
+                    ## get the view from the bot object and delete it once retrieved
+                    original_view = kanrisha_client.view_dict.get(interaction.user.id)
+                    kanrisha_client.view_dict.pop(interaction.message.id, None) ## type: ignore (we know it's not None)
+
+                    await kanrisha_client.interaction_handler.defer_interaction(interaction)
 
                     ## get deck owner member object
                     member_id = int(custom_id.replace(target_id_portion, ""))
@@ -348,7 +354,7 @@ class eventHandler:
 
                     new_embed.set_image(url=f"attachment://{file.filename}")
 
-                    await interaction.response.edit_message(embed=new_embed,attachments=[file])
+                    await interaction.edit_original_response(embed=new_embed, attachments=[file], view=original_view) 
 
                 ## if left deck button was pressed by the wrong user
                 elif(custom_id and custom_id.startswith("deck_left_")):
@@ -364,6 +370,12 @@ class eventHandler:
                 ## if right deck button was pressed by the correct user
 
                 if(target_id_portion in custom_id):
+
+                    ## get the view from the bot object and delete it once retrieved
+                    original_view = kanrisha_client.view_dict.get(interaction.user.id)
+                    kanrisha_client.view_dict.pop(interaction.message.id, None) ## type: ignore (we know it's not None)
+
+                    await kanrisha_client.interaction_handler.defer_interaction(interaction)
 
                     ## get deck owner member object
                     member_id = int(custom_id.replace(target_id_portion, ""))
@@ -391,7 +403,7 @@ class eventHandler:
 
                     new_embed.set_image(url=f"attachment://{file.filename}")
 
-                    await interaction.response.edit_message(embed=new_embed, attachments=[file])
+                    await interaction.edit_original_response(embed=new_embed, attachments=[file], view=original_view) 
 
                 ## if right deck button was pressed by the wrong user
                 elif(custom_id and custom_id.startswith("deck_right_")):

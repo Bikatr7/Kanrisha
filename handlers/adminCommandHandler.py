@@ -61,13 +61,15 @@ class adminCommandHandler:
             if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
                 return
 
-            await interaction.response.send_message("Shutting down...", delete_after=3.0, ephemeral=True)
+            await kanrisha_client.interaction_handler.defer_interaction(interaction, is_ephemeral=True, is_thinking=True)
 
             await force_remote_reset_logic(interaction, is_shutdown_protocol=True) 
 
             await force_log_push_logic(interaction, is_shutdown_protocol=True)
 
             await kanrisha_client.file_ensurer.logger.log_action("WARNING", "adminCommandHandler", f"Early shutdown triggered by {interaction.user.name}.")
+
+            await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, "Shutting Down.", is_ephemeral=True)
 
             try:
                 ## cancel all tasks
@@ -105,10 +107,13 @@ class adminCommandHandler:
             if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
                 return
             
+            if(not is_shutdown_protocol):
+                await kanrisha_client.interaction_handler.defer_interaction(interaction, is_ephemeral=True, is_thinking=True)
+
             await kanrisha_client.interaction_handler.send_log_file(kanrisha_client.get_channel(kanrisha_client.log_channel_id), is_forced=True,  forced_by=interaction.user.name) ## type: ignore
 
             if(not is_shutdown_protocol):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "Log files has been pushed.", delete_after=3.0, is_ephemeral=True)
+                await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, "Log pushed.", is_ephemeral=True)
 
         ##-------------------start-of-force-remote-reset()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -129,11 +134,14 @@ class adminCommandHandler:
 
             if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
                 return
+            
+            if(not is_shutdown_protocol):
+                await kanrisha_client.interaction_handler.defer_interaction(interaction, is_ephemeral=True, is_thinking=True)
 
             await kanrisha_client.remote_handler.reset_remote_storage(is_forced=True, forced_by=interaction.user.name)
 
             if(not is_shutdown_protocol):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "Remote storage has been reset.", delete_after=3.0, is_ephemeral=True)
+                await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, "Remote reset.", is_ephemeral=True)
             
         ##-------------------start-of-execute_order_66()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

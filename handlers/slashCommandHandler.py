@@ -226,6 +226,8 @@ class slashCommandHandler:
             
             if(await kanrisha_client.interaction_handler.whitelist_channel_check(interaction) == False):
                 return
+            
+            await kanrisha_client.interaction_handler.defer_interaction(interaction)
 
             ## get the syndicateMember object for the target member
             target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_aibg_member_object(interaction)
@@ -266,7 +268,7 @@ class slashCommandHandler:
             ## reset card to default values if it was altered
             await card.reset_card_identifiers()
 
-            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed, file=file)
+            await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, embed=embed, file=file)
 
 ##-------------------start-of-get_deck()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -292,6 +294,8 @@ class slashCommandHandler:
             
             if(await kanrisha_client.interaction_handler.whitelist_channel_check(interaction) == False):
                 return
+            
+            await kanrisha_client.interaction_handler.defer_interaction(interaction)
             
             ## get the syndicateMember object for the target member
             target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_aibg_member_object(interaction, member)
@@ -341,10 +345,12 @@ class slashCommandHandler:
             view.add_item(left_button)
             view.add_item(right_button)
 
+            kanrisha_client.view_dict[interaction.user.id] = view
+
             ## reset card to default values if it was altered
             await base_card.reset_card_identifiers() ## type: ignore (we know it's not None)
 
-            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed, file=file, view=view)
+            await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, embed=embed, file=file, view=view)
 
 ##-------------------start-of-summary()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -371,12 +377,14 @@ class slashCommandHandler:
             if(await kanrisha_client.interaction_handler.whitelist_channel_check(interaction) == False):
                 return
             
+            await kanrisha_client.interaction_handler.defer_interaction(interaction)
+            
             ## get the syndicateMember object for the target member
             target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_aibg_member_object(interaction, member)
 
             ## ensure user owns cards
             if(target_member.owned_card_ids == []): ## type: ignore (we know it's not None)
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That deck doesn't have any cards.", delete_after=5.0, is_ephemeral=True)
+                await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, "That deck doesn't have any cards.", is_ephemeral=True)
                 return
             
             ## get first 4 digits of card id for all member owned cards
@@ -425,7 +433,7 @@ class slashCommandHandler:
 
             embed = discord.Embed(title= f"{target_member.member_name}'s Deck", description=card_list) ## type: ignore (we know it's not None)
 
-            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)
+            await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, embed=embed)
 
 ##-------------------start-of-catalog()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -446,12 +454,13 @@ class slashCommandHandler:
 
             """
 
-            ## Check if the user is registered
             if(not await kanrisha_client.check_if_registered(interaction)):
                 return
 
             if(await kanrisha_client.interaction_handler.whitelist_channel_check(interaction) == False):
                 return
+            
+            await kanrisha_client.interaction_handler.defer_interaction(interaction)
 
             kanrisha_member = await kanrisha_client.fetch_user(kanrisha_client.interaction_handler.admin_user_ids[-1])
 
@@ -482,7 +491,7 @@ class slashCommandHandler:
             view.add_item(left_button)
             view.add_item(right_button)
 
-            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed, file=file, view=view)
+            await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, embed=embed, file=file, view=view)
 
 ##-------------------start-of-customize_card()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -545,8 +554,6 @@ class slashCommandHandler:
 
             ## modify card object to match provided parameters
             banned_characters = ["\n", "\t", ","]
-
-
 
             ## if card_picture_url is provided, ensure it is a valid i.imgur url link.
             if(card_picture_url):

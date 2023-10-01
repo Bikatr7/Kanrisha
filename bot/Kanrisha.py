@@ -64,6 +64,8 @@ class Kanrisha(discord.Client):
         ## KANRISHA LOG CHANNEL ID
         self.log_channel_id = 1149433554170810459
 
+        self.view_dict = {}
+
         #------------------------------------------------------
 
         self.file_ensurer = fileEnsurer()
