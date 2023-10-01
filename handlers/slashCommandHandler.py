@@ -13,6 +13,8 @@ from handlers.adminCommandHandler import adminCommandHandler
 from handlers.pilHandler import pilHandler
 from handlers.leaderboardHandler import leaderboardHandler
 
+from entities.card import card
+
 if(typing.TYPE_CHECKING): ## used for cheating the circular import issue that occurs when i need to type check some things
     from bot.Kanrisha import Kanrisha
 
@@ -54,7 +56,76 @@ class slashCommandHandler:
         self.admin_command_handler = adminCommandHandler(kanrisha_client)
 
         self.leaderboard_handler = leaderboardHandler(kanrisha_client)
-    
+
+##-------------------start-of-starter_pack()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        @kanrisha_client.tree.command(name="starter-pack", description="Gives you a starter pack.")
+        async def starter_pack(interaction:discord.Interaction) -> None:
+
+            """
+
+            Gives the user a starter pack.\n
+
+            Parameters:\n
+            member (object - discord.Member) : the member object.\n
+
+            Returns:\n
+            None.\n
+
+            """
+
+            if(await kanrisha_client.check_if_registered(interaction) == False):
+                return
+            
+            ## admin check
+            if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
+                return
+
+            ## get the syndicateMember object for the target member
+            target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction)
+
+            ## manually check if user has already claimed their starter pack
+            if(target_member.owned_card_ids != []): ## type: ignore (we know it's not None)
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You have already claimed your starter pack.", delete_after=3.0, is_ephemeral=True)
+                return
+            
+            ## keep spinning until the user has 5 cards, all cards are Standard and unique
+            starter_cards = []
+            while(len(starter_cards) < 5):
+
+                ## spin the gacha
+                card:card = await kanrisha_client.remote_handler.gacha_handler.spin_gacha()
+
+                ## if the card is not common, skip it
+                if(card.rarity.name != "Standard"):
+                    continue
+
+                ## if the card is already in the starter pack, skip it
+                if(card in starter_cards):
+                    continue
+
+                starter_cards.append(card)
+
+            ## give the user the cards
+            for card in starter_cards:
+                
+                ## remember that the owned_card_ids list holds a full sequence id, so we need to get the id from the card object and add 2 0's to the end to get the full sequence id (6 digits)
+                target_member.owned_card_ids.append(f"{card.id}00") ## type: ignore (we know it's not None)
+
+            ## award the user 15000 credits
+            target_member.credits += 15000 ## type: ignore (we know it's not None)
+
+            ## build embed
+            display_message = "You have been awarded 15000 credits and the following cards:\n"
+
+            for card in starter_cards:
+                display_message += f"{card.rarity.emoji} {card.name}\n"
+
+            embed = discord.Embed(title="Starter Pack", description=display_message, color=0xC0C0C0)
+
+            ## send response
+            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)
         ##-------------------start-of-gacha_spin()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.tree.command(name="spin", description="Spins the wheel to obtain a card.")
@@ -75,14 +146,19 @@ class slashCommandHandler:
             if(await kanrisha_client.check_if_registered(interaction) == False):
                 return
 
+            ## get the syndicateMember object for the target member
+            target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction)
+
+            ## make sure user has claimed their starter pack
+            if(target_member.owned_card_ids == []): ## type: ignore (we know it's not None)
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You must claim your starter pack before spinning. (/starter-pack)", delete_after=3.0, is_ephemeral=True)
+                return
+
             ## admin check
             if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
                 return
             
-            ## get the syndicateMember object for the target member
-            target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction)
-
             ## if user does not have enough credits, return
             if(target_member.credits < 3000): ## type: ignore (we know it's not None
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have enough credits. (3000)", delete_after=3.0, is_ephemeral=True)
@@ -136,7 +212,6 @@ class slashCommandHandler:
                     ## user card for embed
                     embed, file = await self.pil_handler.assemble_embed(card)
 
-
                 ## add credits to the member's balance based on the card's rarity if the card's replica is maxed
                 else:
 
@@ -176,14 +251,19 @@ class slashCommandHandler:
             if(await kanrisha_client.check_if_registered(interaction) == False):
                 return
             
+            ## get the syndicateMember object for the target member
+            target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction)
+            
+            ## make sure user has claimed their starter pack
+            if(target_member.owned_card_ids == []): ## type: ignore (we know it's not None)
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You must claim your starter pack before spinning. (/starter-pack)", delete_after=3.0, is_ephemeral=True)
+                return
+            
             ## ensure user is admin
             if(interaction.user.id not in kanrisha_client.interaction_handler.admin_user_ids):
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You do not have permission to use this command.", delete_after=3.0, is_ephemeral=True)
                 return
             
-            ## get the syndicateMember object for the target member
-            target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_syndicate_member(interaction)
-
             ## check if user has freebie
             if(target_member.has_freebie == False): ## type: ignore (we know it's not None)
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You have already claimed your freebie.", delete_after=3.0, is_ephemeral=True)
