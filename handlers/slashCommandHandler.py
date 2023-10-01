@@ -491,6 +491,8 @@ class slashCommandHandler:
             view.add_item(left_button)
             view.add_item(right_button)
 
+            kanrisha_client.view_dict[interaction.user.id] = view
+
             await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, embed=embed, file=file, view=view)
 
 ##-------------------start-of-customize_card()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
