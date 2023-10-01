@@ -950,10 +950,11 @@ class slashCommandHandler:
 
             help_message = (
                 "**/register** - Signs you up for the Syndicates System.\n\n"
-                "**/profile** - Sends a members Syndicate profile.\n\n"
-                "**/spin** - Spins the gacha wheel.\n\n"
+                "**/profile** - Sends a member's Syndicate profile.\n\n"
                 "**/transfer** - Transfers credits from one user to another.\n\n"
+                "**/starter-pack** - Lets you claim your starter pack.\n\n"
                 "**/freebie** - Lets you claim your freebie.\n\n"
+                "**/spin** - Spins the gacha wheel.\n\n"
                 "**/card** - Displays a card.\n\n"
                 "**/deck** - Displays the user's deck.\n\n"
                 "**/summary** - Show all cards and their ranks in a user's deck in a list format.\n\n"
