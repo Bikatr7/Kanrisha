@@ -54,6 +54,11 @@ class leaderboardHandler:
 
             if(not await kanrisha_client.check_if_registered(interaction)):
                 return
+            
+            if(not await kanrisha_client.interaction_handler.whitelist_channel_check(interaction)):
+                return
+            
+            await kanrisha_client.interaction_handler.defer_interaction(interaction, is_thinking=True)
 
             luck_leaderboard = await get_luck_leaderboard(interaction)
 
@@ -61,12 +66,12 @@ class leaderboardHandler:
 
             merit_leaderboard = await get_merit_leaderboard(interaction)
 
-            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=luck_leaderboard)
+            await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, embed=luck_leaderboard)
 
-            await interaction.followup.send(embed=balance_leaderboard)
+            await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, embed=balance_leaderboard)
 
-            await interaction.followup.send(embed=merit_leaderboard)
-
+            await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, embed=merit_leaderboard)
+            
 ##-------------------start-of-get_luck_leaderboard()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         async def get_luck_leaderboard(interaction: discord.Interaction) -> discord.Embed:
