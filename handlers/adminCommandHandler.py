@@ -504,6 +504,13 @@ class adminCommandHandler:
             embed = discord.Embed(title="Credit Transfer", description= f'{interaction.user.mention} successfully transferred {amount:,} credits to {member.mention}.', color=0xC0C0C0)
             embed.set_thumbnail(url=kanrisha_client.file_ensurer.bot_thumbnail_url)
 
+            ## ensure that credits are not too large
+            if(sender_member.credits > 9000000000000000000 or sender_member.credits < -9000000000000000000): ## type: ignore (we know it's not None)
+                sender_member.credits = 0 ## type: ignore (we know it's not None)
+
+            if(transfer_target_member.credits > -9000000000000000000 or transfer_target_member.credits < -9000000000000000000):
+                transfer_target_member.credits = 0
+
             await kanrisha_client.file_ensurer.logger.log_action("INFO", "Kanrisha", f"{interaction.user.name} transferred {amount} credits to {member.name}.") ## type: ignore (we know it's not None)
         
             await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, embed=embed)

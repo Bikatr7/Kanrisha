@@ -182,7 +182,7 @@ class remoteHandler():
             member_id bigint primary key,
             member_name varchar(256) not null,
             spin_scores varchar(256) not null,
-            credits int not null,
+            credits bigint not null,
             merit_points int not null,
             has_freebie bool not null
         )
