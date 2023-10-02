@@ -501,7 +501,7 @@ class adminCommandHandler:
                 
             transfer_target_member.credits += amount
 
-            embed = discord.Embed(title="Credit Transfer", description= f"{interaction.user.mention} successfully transferred {amount} credits to {member.mention}.", color=0xC0C0C0)
+            embed = discord.Embed(title="Credit Transfer", description= f'{interaction.user.mention} successfully transferred {amount:,} credits to {member.mention}.', color=0xC0C0C0)
             embed.set_thumbnail(url=kanrisha_client.file_ensurer.bot_thumbnail_url)
 
             await kanrisha_client.file_ensurer.logger.log_action("INFO", "Kanrisha", f"{interaction.user.name} transferred {amount} credits to {member.name}.") ## type: ignore (we know it's not None)

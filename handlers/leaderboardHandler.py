@@ -171,7 +171,7 @@ class leaderboardHandler:
             ## Construct the leaderboard message
             leaderboard_message = ""
             for member in top_10_members:
-                leaderboard_message += f"**{member.member_name}** - {member.credits}\n"
+                leaderboard_message += f'**{member.member_name}** - {member.credits:,}\n'
             
             balance_leaderboard = discord.Embed(
                 title="Balance Leaderboard",

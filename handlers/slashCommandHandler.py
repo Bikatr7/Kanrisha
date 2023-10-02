@@ -191,7 +191,7 @@ class slashCommandHandler:
             
             profile_message = (
                 f"**Name:** {target_member.member_name}\n"
-                f"**Credits:** {target_member.credits}\n"
+                f'**Credits:** {target_member.credits:,}\n'
                 f"**Standard Spins:** {target_member.spin_scores[0]}\n"
                 f"**Notable Spins:** {target_member.spin_scores[1]}\n"
                 f"**Distinguished Spins:** {target_member.spin_scores[2]}\n"
@@ -229,6 +229,8 @@ class slashCommandHandler:
             if(await kanrisha_client.interaction_handler.whitelist_channel_check(interaction) == False):
                 return
             
+            not_owned = False
+            
             await kanrisha_client.interaction_handler.defer_interaction(interaction)
 
             ## get the syndicateMember object for the target member
@@ -264,8 +266,10 @@ class slashCommandHandler:
 
                 ## get card object from all cards
                 card = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.id == card_id][0]
+
+                not_owned = True
     
-            embed, file = await self.pil_handler.assemble_embed(card)
+            embed, file = await self.pil_handler.assemble_embed(card, not_owned=not_owned)
 
             ## reset card to default values if it was altered
             await card.reset_card_identifiers()

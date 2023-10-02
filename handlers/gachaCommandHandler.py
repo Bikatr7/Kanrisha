@@ -329,7 +329,7 @@ class gachaCommandHandler:
                         if(footer == ""):
                             footer = f"You have the following cards maxed out."
                         
-                        footer += f"{card.rarity.emoji} {card.name}\n"
+                        footer += f"{card.name}\n"
                         
 
                     ## reset card to default values if it was altered

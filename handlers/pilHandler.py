@@ -90,7 +90,8 @@ class pilHandler():
             "2": self.file_ensurer.R2_replica_path,
             "3": self.file_ensurer.R3_replica_path,
             "4": self.file_ensurer.R4_replica_path,
-            "5": self.file_ensurer.R5_replica_path,      
+            "5": self.file_ensurer.R5_replica_path,
+            "6": self.file_ensurer.R6_replica_path,      
         }
 
         ## get images given card attributes
@@ -154,7 +155,7 @@ class pilHandler():
 
 ##--------------------start-of-get_built_frame()-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def get_built_frame(self, card:card, user:discord.User) -> Image.Image:
+    async def get_built_frame(self, card:card, user:discord.User, omit_replica:bool = False) -> Image.Image:
 
         """
         
@@ -197,7 +198,8 @@ class pilHandler():
         frame.paste(pfp, (14, 60), mask=pfp)
 
         ## Add Replica icon
-        frame.paste(replica, (350, 285), mask=replica)
+        if(omit_replica == False):
+            frame.paste(replica, (350, 285), mask=replica)
 
         ## Add rarity icon
         frame.paste(rarity, (-10, -10), mask=rarity)
@@ -256,7 +258,7 @@ class pilHandler():
 
 ##--------------------start-of-assemble_embed()-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def assemble_embed(self, card:card) -> typing.Tuple[discord.Embed,discord.File]:
+    async def assemble_embed(self, card:card, not_owned:bool = False) -> typing.Tuple[discord.Embed,discord.File]:
 
         """
 
@@ -274,7 +276,7 @@ class pilHandler():
 
         user = await self.kanrisha_client.fetch_user(int(card.person_id))
 
-        frame = await self.get_built_frame(card,user)
+        frame = await self.get_built_frame(card,user, omit_replica=not_owned)
         frame = await self.add_text_to_frame(frame, card, user)
 
         ## save image to byte stream
@@ -285,7 +287,14 @@ class pilHandler():
         await card.determine_attributes()
 
         ## build embed
-        embed = discord.Embed(title= f"{card.rarity.emoji}{card.name} {card.replica.emoji} ({card.rarity.current_xp}/{card.rarity.max_xp})", description=f"{card.rarity.name}", color = card.rarity.color)
+
+        if(not_owned == False):
+            title = f"{card.rarity.emoji}{card.name} {card.replica.emoji} ({card.rarity.current_xp}/{card.rarity.max_xp})"
+        else:
+            title = f"{card.rarity.emoji}{card.name} (Not Owned)"
+
+
+        embed = discord.Embed(title=title, description=f"{card.rarity.name}", color = card.rarity.color)
 
         ## get image from byte stream
         byte_io.seek(0)
