@@ -1,6 +1,8 @@
 ## built-in libraries
 from datetime import datetime, timedelta
 
+import asyncio
+
 ## third-party libraries
 from discord.ext import tasks
 
@@ -189,6 +191,10 @@ class Kanrisha(discord.Client):
         if(not self.check_for_freebie_reset.is_running()):
             self.check_for_freebie_reset.start()
 
+        ## starts the aibgMember name sync task
+        if(not self.sync_aibgMember_names.is_running()):
+            self.sync_aibgMember_names.start()
+
         await self.file_ensurer.logger.log_action("INFO", "Kanrisha", "Kanrisha is ready.")
 
         await self.wait_until_ready()
@@ -254,6 +260,32 @@ class Kanrisha(discord.Client):
         """
 
         await self.interaction_handler.send_log_file(channel=self.get_channel(self.log_channel_id), is_forced = False) ## type: ignore
+
+##-------------------start-of-sync_aibgMember_names()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    @tasks.loop(minutes=10)
+    async def sync_aibgMember_names(self):
+
+        """
+        
+        Syncs the names of the members in the aibgMember list.\n
+
+        Parameters:\n
+        self (object - Kanrisha): The Kanrisha client.\n
+
+        Returns:\n
+        None.\n
+
+        """
+
+        await self.file_ensurer.logger.log_action("INFO", "Kanrisha", "Syncing aibgMember names...")
+
+        for member in self.remote_handler.member_handler.members:
+            user = await self.fetch_user(member.member_id)
+            member.member_name = user.name
+            await asyncio.sleep(3)
+
+        await self.file_ensurer.logger.log_action("INFO", "Kanrisha", "aibgMember names synced.")
 
 ##-------------------start-of-check_for_freebie_reset()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

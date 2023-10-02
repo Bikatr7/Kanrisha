@@ -77,6 +77,7 @@ class adminCommandHandler:
                 kanrisha_client.refresh_remote_storage.cancel()
                 kanrisha_client.sync_role_persistence_database.cancel()
                 kanrisha_client.check_for_freebie_reset.cancel()
+                kanrisha_client.sync_aibgMember_names.cancel()
 
                 ## try to close gracefully
                 await kanrisha_client.close()
@@ -142,7 +143,7 @@ class adminCommandHandler:
 
             if(not is_shutdown_protocol):
                 await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, "Remote reset.", is_ephemeral=True)
-            
+
         ##-------------------start-of-execute_order_66()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.tree.command(name="execute-order-66", description="It is time. (ADMIN)")

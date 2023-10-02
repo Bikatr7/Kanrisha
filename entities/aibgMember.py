@@ -1,6 +1,9 @@
 ## built-in libraries
 import typing
 
+## third-party libraries
+import discord
+
 class aibgMember():
 
     """
@@ -11,8 +14,8 @@ class aibgMember():
 
 ##-------------------start-of-__init__()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def __init__(self, inc_member_id:int, 
-                 inc_member_name:str, 
+    def __init__(self, 
+                 inc_member_id:int, 
                  inc_spin_scores:typing.Tuple[int,int,int,int,int], 
                  inc_owned_card_ids:typing.List[str], 
                  inc_credits:int, 
@@ -40,7 +43,7 @@ class aibgMember():
         self.member_id = int(inc_member_id)
 
         ## the discord username of the member
-        self.member_name = inc_member_name
+        self.member_name = "Syncing..."
 
         ## the spin scores of the member, i.e., how many times the member has spun the wheel and the results of the spins
         self.spin_scores: typing.Tuple[int,int,int,int,int] = inc_spin_scores

@@ -180,7 +180,6 @@ class remoteHandler():
         create_members_query = """
         create table if not exists members (
             member_id bigint primary key,
-            member_name varchar(256) not null,
             spin_scores varchar(256) not null,
             credits bigint not null,
             merit_points int not null,
@@ -191,8 +190,6 @@ class remoteHandler():
         create_cards_query = """
         create table if not exists cards (
             card_id varchar(256) primary key,
-            card_replica_id int not null,
-            card_xp_id int not null,
             card_name varchar(256) not null,
             card_rarity int not null,
             card_picture_url varchar(256),
@@ -266,9 +263,8 @@ class remoteHandler():
 
             for member in self.member_handler.members:
 
-                ## member_id, member_name, spin_scores, credits, merit_points, has_freebie
+                ## member_id, spin_scores, credits, merit_points, has_freebie
                 new_id = member.member_id
-                new_name = member.member_name
                 new_spin_scores = member.spin_scores
                 new_credits = member.credits
                 new_merit_points = member.merit_points
@@ -278,12 +274,11 @@ class remoteHandler():
                 score_string = f'"{new_spin_scores[0]}.{new_spin_scores[1]}.{new_spin_scores[2]}.{new_spin_scores[3]}.{new_spin_scores[4]}"'
 
                 ## create a list of the member details
-                member_details = [new_id, new_name, score_string, new_credits, new_merit_points, int(has_freebie)]
+                member_details = [new_id, score_string, new_credits, new_merit_points, int(has_freebie)]
 
                 table_name = "members"
                 insert_dict = {
                     "member_id" : new_id,
-                    "member_name" : new_name,
                     "spin_scores" : new_spin_scores,
                     "credits" : new_credits,
                     "merit_points" : new_merit_points,
@@ -302,10 +297,8 @@ class remoteHandler():
 
             for card in self.gacha_handler.cards:
 
-                ## card_id, card_replica_id, card_xp_id, card_name, card_rarity, card_picture_url, card_picture_name, card_picture_subtitle, card_picture_description, person_id
+                ## card_id, card_name, card_rarity, card_picture_url, card_picture_name, card_picture_subtitle, card_picture_description, person_id
                 new_id = card.id
-                new_replica_id = card.replica.id
-                new_xp_id = card.rarity.current_xp
                 new_name = card.name
                 new_rarity = card.rarity.id
                 new_picture_url = card.picture_url
@@ -314,7 +307,7 @@ class remoteHandler():
                 new_picture_description = card.picture_description
                 new_person_id = card.person_id
 
-                card_details = [new_id, new_replica_id, new_xp_id, new_name, new_rarity, new_picture_url, new_picture_name, new_picture_subtitle, new_picture_description, new_person_id]
+                card_details = [new_id, new_name, new_rarity, new_picture_url, new_picture_name, new_picture_subtitle, new_picture_description, new_person_id]
 
                 ## escape single and double quotes as well as backslashes
                 to_escape = [new_picture_name, new_picture_subtitle, new_picture_description]
@@ -327,8 +320,6 @@ class remoteHandler():
                 # Update the insert_dict
                 insert_dict = {
                     "card_id": new_id,
-                    "card_replica_id": new_replica_id,
-                    "card_xp_id": new_xp_id,
                     "card_name": new_name,
                     "card_rarity": new_rarity,
                     "card_picture_url": new_picture_url,

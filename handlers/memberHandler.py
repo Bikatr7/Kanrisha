@@ -63,7 +63,7 @@ class memberHandler:
 
         self.members.clear()
 
-        id_list, name_list, spin_scores_list, credits_list, merit_point_list, has_freebie_list = await self.connection_handler.read_multi_column_query("select member_id, member_name, spin_scores, credits, merit_points, has_freebie from members")
+        id_list, spin_scores_list, credits_list, merit_point_list, has_freebie_list = await self.connection_handler.read_multi_column_query("select member_id, spin_scores, credits, merit_points, has_freebie from members")
 
         for i in range(len(id_list)):
 
@@ -76,7 +76,7 @@ class memberHandler:
             ## take the card ids and merge them into a single string for each card owned by the member
             owned_id_list = [f"{owned_card_id_list[ii]}{replica_id_list[ii]}{xp_id_list[ii]}" for ii in range(len(owned_card_id_list))]
 
-            new_member = aibgMember(int(id_list[i]), name_list[i], spin_scores, owned_id_list, int(credits_list[i]), int(merit_point_list[i]), int(has_freebie_list[i]))
+            new_member = aibgMember(int(id_list[i]), spin_scores, owned_id_list, int(credits_list[i]), int(merit_point_list[i]), int(has_freebie_list[i]))
             self.members.append(new_member)
 
         await self.file_ensurer.logger.log_action("INFO", "memberHandler", "Loaded members from remote.")
@@ -119,14 +119,14 @@ class memberHandler:
 
                 values = line.strip().split(',')
 
-                spin_scores = tuple([int(score) for score in values[2].strip('"').split('.')[:5]]) 
+                spin_scores = tuple([int(score) for score in values[1].strip('"').split('.')[:5]]) 
 
                 card_ids = card_ids_dict.get(values[0], [])
 
                 ## explicit type hinting to avoid pylance warning below
                 spin_scores = (spin_scores[0], spin_scores[1], spin_scores[2], spin_scores[3], spin_scores[4])
 
-                self.members.append(aibgMember(int(values[0]), values[1], spin_scores, card_ids, int(values[3]), int(values[4]), int(values[5])))
+                self.members.append(aibgMember(int(values[0]), spin_scores, card_ids, int(values[2]), int(values[3]), int(values[4])))
 
         await self.file_ensurer.logger.log_action("INFO", "memberHandler", "Loaded members from local.") 
 
@@ -156,7 +156,7 @@ class memberHandler:
         await self.file_ensurer.file_handler.write_sei_line(self.file_ensurer.member_path, member_details)
 
         ## adds new member to current instance of bot
-        new_member = aibgMember(inc_member_id, inc_member_name, inc_spin_scores, inc_owned_card_ids=[], inc_credits=50000, inc_merit_points=0, inc_has_freebie=1)
+        new_member = aibgMember(inc_member_id, inc_spin_scores, inc_owned_card_ids=[], inc_credits=50000, inc_merit_points=0, inc_has_freebie=1)
 
         ## logs action
         await self.file_ensurer.logger.log_action("INFO", "memberHandler", f"Added new member: {inc_member_name}.")

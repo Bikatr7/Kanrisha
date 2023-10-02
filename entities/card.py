@@ -187,8 +187,6 @@ class card:
 
     def __init__(self, 
                 inc_card_id:str,
-                inc_replica_id:int,
-                inc_rarity_id:int,
                 inc_name:str, 
                 inc_rarity_identifier:int, 
                 inc_picture_url:str,
@@ -224,10 +222,10 @@ class card:
         self.name = inc_name
 
         ## rarity of the card
-        self.rarity = rarity(inc_rarity_identifier, inc_xp=inc_rarity_id)
+        self.rarity = rarity(inc_rarity_identifier, inc_xp=0)
         
         ## replica of the card
-        self.replica = replica(inc_replica_id)
+        self.replica = replica(inc_identifier=0)
 
         ## url to the card's picture
         self.picture_url = inc_picture_url
