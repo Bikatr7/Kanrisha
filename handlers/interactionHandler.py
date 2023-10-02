@@ -76,7 +76,7 @@ class interactionHandler:
 
         """
         
-        Checks if the channel is whitelisted.\n
+        Checks if the channel/parent channel is whitelisted.\n
 
         Parameters:\n
         self (object - interactionHandler) : the interactionHandler object.\n
@@ -86,14 +86,21 @@ class interactionHandler:
 
         """
 
-        if(interaction.channel_id in self.whitelisted_channel_ids or interaction.user.id in self.admin_user_ids):
-            return True
+        channel = interaction.channel
+
+        if(isinstance(channel, discord.Thread)):
+            parent_channel_id = channel.parent_id
 
         else:
+            parent_channel_id = interaction.channel_id
 
+        if(parent_channel_id in self.whitelisted_channel_ids or interaction.user.id in self.admin_user_ids):
+            return True
+        
+        else:
             await interaction.response.send_message(f"Please use {str(self.whitelisted_channel_names)} for this command.", delete_after=5.0, ephemeral=True)
-
             return False
+    
 ##-------------------start-of-send_response_filter_channel()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     async def send_response_filter_channel(self, 
