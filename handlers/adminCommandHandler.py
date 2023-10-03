@@ -480,37 +480,11 @@ class adminCommandHandler:
             if(transfer_target_member == None):
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "That user is not registered.", delete_after=5.0, is_ephemeral=True)
                 return
-            
-            ## Check if target and sender are the same
-            if(sender_member.member_id == transfer_target_member.member_id and not is_admin): ## type: ignore (we know it's not None)
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You can't transfer credits to yourself.", delete_after=5.0, is_ephemeral=True)
-                return
-
-            ## Check if the amount is negative, allows admins to transfer negative credits
-            if(amount < 0 and not is_admin):
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You can't transfer negative credits.", delete_after=5.0, is_ephemeral=True)
-                return
-
-            ## Check if the sender has enough credits, allows admins to transfer more credits than they have
-            if(amount > sender_member.credits and not is_admin): ## type: ignore (we know it's not None)
-                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You don't have enough credits.", delete_after=5.0, is_ephemeral=True)
-                return
-            
-            ## deduct credits from sender and add to transfer target, admins are not deducted credits
-            if(not is_admin):
-                sender_member.credits -= amount ## type: ignore (we know it's not None)
                 
             transfer_target_member.credits += amount
 
             embed = discord.Embed(title="Credit Transfer", description= f'{interaction.user.mention} successfully transferred {amount:,} credits to {member.mention}.', color=0xC0C0C0)
             embed.set_thumbnail(url=kanrisha_client.file_ensurer.bot_thumbnail_url)
-
-            ## ensure that credits are not too large
-            if(sender_member.credits > 9000000000000000000 or sender_member.credits < -9000000000000000000): ## type: ignore (we know it's not None)
-                sender_member.credits = 0 ## type: ignore (we know it's not None)
-
-            if(transfer_target_member.credits > -9000000000000000000 or transfer_target_member.credits < -9000000000000000000):
-                transfer_target_member.credits = 0
 
             await kanrisha_client.file_ensurer.logger.log_action("INFO", "Kanrisha", f"{interaction.user.name} transferred {amount} credits to {member.name}.") ## type: ignore (we know it's not None)
         

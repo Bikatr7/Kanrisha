@@ -2,11 +2,11 @@
 from __future__ import annotations ## used for cheating the circular import issue that occurs when i need to type check some things
 
 import typing
+import asyncio
+import json
 
 ## third-party libraries
 import discord
-import json
-import copy
 
 ## custom libraries
 if(typing.TYPE_CHECKING): ## used for cheating the circular import issue that occurs when i need to type check some things
@@ -157,7 +157,11 @@ class eventHandler:
             Returns:\n
             None.\n
 
+
             """
+
+            ## try to relax the ratelimit
+            await asyncio.sleep(0.75)
 
             member = message.author
 

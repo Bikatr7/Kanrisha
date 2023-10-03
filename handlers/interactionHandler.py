@@ -38,7 +38,10 @@ class interactionHandler:
         self.toolkit = inc_toolkit
 
         self.whitelisted_channel_names = ["#general-bot", "#bot-testing", "#aibg-bot"]
-        self.whitelisted_channel_ids = [1144136660691460126, 1146174110548901979, 1146922710698557560]  
+        self.whitelisted_channel_ids = [1144136660691460126, 1146174110548901979, 1146922710698557560]
+
+        self.allowed_thread_channel_names = ["diamonds", "spades", "hearts", "clubs"]
+        self.allowed_thread_channel_ids = [1158283680242995242, 1158283988201373758, 1158284223900299345, 1158284387490725978]
 
         self.admin_user_ids = [957451091748986972, 277933921315061761, 125751325760684033, 1146646164838555699, 1144166968979628072]
         self.admin_usernames = ["seinu", "tommy.3", "lombardia","dairinyn", "kanrisha"]
@@ -88,17 +91,37 @@ class interactionHandler:
 
         channel = interaction.channel
 
+        error_message ="""
+        This command can only be used in the following channels:
+        <#1144136660691460126>
+        <#1146174110548901979>
+        <#1146922710698557560>
+
+        or in a thread under the following channels:
+        <#1158283680242995242>
+        <#1158283988201373758>
+        <#1158284223900299345>
+        <#1158284387490725978>
+        """
+
+        ## get the parent channel if the channel is a thread
         if(isinstance(channel, discord.Thread)):
-            parent_channel_id = channel.parent_id
+            channel = channel.parent
 
-        else:
-            parent_channel_id = interaction.channel_id
+        ## then get id
+        channel_id = channel.id ## type: ignore (we know it's not None)
 
-        if(parent_channel_id in self.whitelisted_channel_ids or interaction.user.id in self.admin_user_ids):
+        ## if channel is whitelisted, return true
+        if(channel_id in self.whitelisted_channel_ids):
+            return True
+        
+        ## if channel is a thread, check if the parent channel is whitelisted
+        elif(channel_id in self.allowed_thread_channel_ids):
             return True
         
         else:
-            await interaction.response.send_message(f"Please use {str(self.whitelisted_channel_names)} for this command.", delete_after=5.0, ephemeral=True)
+            await interaction.response.send_message(error_message, delete_after=5.0, ephemeral=True)
+
             return False
     
 ##-------------------start-of-send_response_filter_channel()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
