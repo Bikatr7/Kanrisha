@@ -160,24 +160,25 @@ class eventHandler:
 
             """
 
-            ## try to relax the ratelimit
-            await asyncio.sleep(0.75)
-
             member = message.author
 
-            guild = await kanrisha_client.fetch_guild(kanrisha_client.pg)
-
-            try:
-                member = await guild.fetch_member(member.id)
-            except:
-                pass
-
-            channel = kanrisha_client.get_channel(message.channel.id) 
-
-            seinu = await kanrisha_client.fetch_user(kanrisha_client.interaction_handler.owner_id)
+            ## don't check the bot's own messages for banned messages
+            if member == kanrisha_client.user:
+                return
 
             for banned_message in self.banned_messages:
                 if(banned_message in message.content):
+                    ## only make these HTTP requests if the message actually is a banned message
+                    guild = await kanrisha_client.fetch_guild(kanrisha_client.pg)
+
+                    try:
+                        member = await guild.fetch_member(member.id)
+                    except:
+                        pass
+
+                    channel = kanrisha_client.get_channel(message.channel.id) 
+
+                    seinu = await kanrisha_client.fetch_user(kanrisha_client.interaction_handler.owner_id)
 
                     try:
                         await message.delete()
@@ -189,8 +190,12 @@ class eventHandler:
 
                         await kanrisha_client.file_ensurer.logger.log_action("ALERT", "eventHandler", f"{member.name} sent a banned message in {channel.name}. See {banned_message} for details.") ## type: ignore (we know it's not None)
 
+                        ## to prevent kanrisha from trying to delete a message twice
+                        break
+
                     except:
                         pass
+
 
         ##-------------------start-of-on_raw_message_delete()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
