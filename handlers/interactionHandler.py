@@ -104,6 +104,10 @@ class interactionHandler:
         <#1158284387490725978>
         """
 
+        ## if admin, return true
+        if(interaction.user.id in self.admin_user_ids):
+            return True
+
         ## get the parent channel if the channel is a thread
         if(isinstance(channel, discord.Thread)):
             channel = channel.parent
