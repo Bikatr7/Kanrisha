@@ -194,13 +194,9 @@ class fileEnsurer:
 
       self.banned_links_path = os.path.join(self.moderation_dir, "banned links.txt")
 
-      self.role_persistence_path = os.path.join(self.moderation_dir, "role persistence.json")
-
       await self.file_handler.standard_create_directory(self.moderation_dir)
 
       await self.file_handler.standard_create_file(self.banned_links_path)
-
-      await self.file_handler.standard_create_file(self.role_persistence_path)
 
 ##--------------------start-of-ensure_image_files()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

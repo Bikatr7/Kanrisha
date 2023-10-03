@@ -183,10 +183,6 @@ class Kanrisha(discord.Client):
         if(not self.send_log_file_to_log_channel.is_running()):
             self.send_log_file_to_log_channel.start()
 
-        ## starts the role persistence database sync task
-        if(not self.sync_role_persistence_database.is_running()):
-            self.sync_role_persistence_database.start()
-
         ## starts the freebie reset task
         if(not self.check_for_freebie_reset.is_running()):
             self.check_for_freebie_reset.start()
@@ -218,28 +214,6 @@ class Kanrisha(discord.Client):
         """
 
         await self.remote_handler.reset_remote_storage(is_forced = False)
-
-##-------------------start-of-sync_role_persistence_database()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    @tasks.loop(minutes=5)
-    async def sync_role_persistence_database(self):
-
-        """
-
-        Syncs the role persistence database.\n
-        Runs every 5 minutes.\n
-
-        Parameters:\n
-        self (object - Kanrisha): The Kanrisha client.\n
-
-        Returns:\n
-        None.\n
-
-        """
-
-        members = [member for member in self.get_all_members()]
-
-        await self.interaction_handler.sync_roles_logic(members, is_forced = False)
 
 ##-------------------start-of-send_log_file_to_log_channel()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

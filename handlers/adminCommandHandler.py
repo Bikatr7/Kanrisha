@@ -60,24 +60,24 @@ class adminCommandHandler:
 
             if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
                 return
-
+            
             await kanrisha_client.interaction_handler.defer_interaction(interaction, is_ephemeral=True, is_thinking=True)
+
+            await kanrisha_client.file_ensurer.logger.log_action("WARNING", "adminCommandHandler", f"Early shutdown triggered by {interaction.user.name}.")
+
+            ## cancel all tasks
+            kanrisha_client.send_log_file_to_log_channel.cancel()
+            kanrisha_client.refresh_remote_storage.cancel()
+            kanrisha_client.check_for_freebie_reset.cancel()
+            kanrisha_client.sync_aibgMember_names.cancel()
 
             await force_remote_reset_logic(interaction, is_shutdown_protocol=True) 
 
             await force_log_push_logic(interaction, is_shutdown_protocol=True)
 
-            await kanrisha_client.file_ensurer.logger.log_action("WARNING", "adminCommandHandler", f"Early shutdown triggered by {interaction.user.name}.")
-
             await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, "Shutting Down.", is_ephemeral=True)
 
             try:
-                ## cancel all tasks
-                kanrisha_client.send_log_file_to_log_channel.cancel()
-                kanrisha_client.refresh_remote_storage.cancel()
-                kanrisha_client.sync_role_persistence_database.cancel()
-                kanrisha_client.check_for_freebie_reset.cancel()
-                kanrisha_client.sync_aibgMember_names.cancel()
 
                 ## try to close gracefully
                 await kanrisha_client.close()
@@ -253,32 +253,6 @@ class adminCommandHandler:
             embed.set_footer(text="Thank you for your cooperation...")
 
             await interaction.followup.send(embed=embed)
-
-##-------------------start-of-sync-roles()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-        @kanrisha_client.tree.command(name="sync-roles", description="Syncs the roles of all users in the server with the role persistence database. (ADMIN)")
-        async def sync_roles(interaction:discord.Interaction) -> None:
-
-            """
-            
-            Syncs the roles of all users in the server with the role persistence database.\n
-
-            Parameters:\n
-            interaction (object - discord.Interaction) : the interaction object.\n
-
-            Returns:\n
-            None.\n
-
-            """
-            
-            if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
-                return
-            
-            members = [member for member in interaction.guild.members] ## type: ignore (we know it's not None)
-
-            await kanrisha_client.interaction_handler.sync_roles_logic(members, is_forced=True, forced_by=interaction.user.name)
-
-            await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "Roles synced.", delete_after=3.0, is_ephemeral=True)
 
 ##-------------------start-of-get-running-config-directory()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -516,7 +490,6 @@ class adminCommandHandler:
                 "**/transfer** - Transfers credits from one user to another.\n\n"
                 "**/force-remote-reset** - Overrides the local database with the current instance's data. (ADMIN)\n\n"
                 "**/execute-order-66** - It is time. (ADMIN)\n\n"
-                "**/sync-roles** - Syncs the roles of all users in the server with the role persistence database. (ADMIN)\n\n"
                 "**/get-running-config-directory** - Gets the running config directory. (ADMIN)\n\n"
                 "**/load-local-storage** - (DO NOT USE THIS WITH A LOADED INSTANCE) Loads from the local file. (ADMIN))\n\n"
                 "**/send-query** - Sends an sql query to the local database. (ADMIN)\n\n"

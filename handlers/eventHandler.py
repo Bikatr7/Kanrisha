@@ -51,81 +51,11 @@ class eventHandler:
         self.banned_messages = []
 
         self.pil_handler = inc_pil_handler
-
-        ##-------------------start-of-on_member_remove()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-        @kanrisha_client.event
-        async def on_member_remove(member:discord.Member) -> None:
-
-            """
-
-            Handles members leaving.\n
-
-            Parameters:\n
-            member (object - discord.Member | discord.User) : the member object.\n
-
-            Returns:\n
-            None.\n
-
-            """
-
-            roles = [role.id for role in member.roles] 
-
-            ## loads the data from the file, adds the roles to the json object.
-            with open(self.file_ensurer.role_persistence_path, 'r') as file:
-                data = json.load(file)
-                data[str(member.id)] = roles
-
-            ## saves the data back to the file
-            with open(self.file_ensurer.role_persistence_path, 'w') as file:
-                json.dump(data, file)
-
-        ##-------------------start-of-on_member_join()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-        @kanrisha_client.event
-        async def on_member_join(member:discord.Member) -> None:
-
-            """
-
-            Handles members joining.\n
-
-            Parameters:\n
-            member (object - discord.Member | discord.User) : the member object.\n
-
-            Returns:\n
-            None.\n
-
-            """
-
-            ## loads the data from the file.
-            with open(self.file_ensurer.role_persistence_path, 'r') as file:
-                try:
-                    data = json.load(file)
-
-                except json.JSONDecodeError:
-                    data = {}
-                    
-                ## checks if the member is in the json object, if they are, adds the roles to the member.
-                roles = data.get(str(member.id))
-
-                if(roles):
-                    role_objects = [discord.utils.get(member.guild.roles, id=role_id) for role_id in roles if discord.utils.get(member.guild.roles, id=role_id) is not None]
-
-                    if(role_objects):
-                        try:
-                            await member.add_roles(*[role for role in role_objects if role is not None])
-                        except:
-                            pass
-
-                    del data[str(member.id)]
-                    
-            with open(self.file_ensurer.role_persistence_path, 'w') as file:
-                json.dump(data, file)
     
         ##-------------------start-of-on_message()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.event
-        async def on_message(message: discord.Message) -> None:
+        async def on_message(message:discord.Message) -> None:
 
             """
 
@@ -200,7 +130,7 @@ class eventHandler:
         ##-------------------start-of-on_raw_message_delete()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.event
-        async def on_raw_message_delete(payload: discord.RawMessageDeleteEvent) -> None:
+        async def on_raw_message_delete(payload:discord.RawMessageDeleteEvent) -> None:
 
             """
 
