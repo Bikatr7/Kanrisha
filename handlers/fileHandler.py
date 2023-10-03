@@ -1,6 +1,7 @@
 ## built-in libaries
 import os
 import typing
+import aiofiles
 
 ## custom modules
 from modules.logger import logger
@@ -117,8 +118,8 @@ class fileHandler():
 
         line = ",".join(str(item) for item in items_to_write)
         
-        with open(sei_file_path, "a+", encoding="utf-8") as file:
-            file.write(line + ",\n")
+        async with aiofiles.open(sei_file_path, mode='a+', encoding='utf-8') as file:
+            await file.write(line + ",\n")
 
 ##-------------------start-of-read_sei_file()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -140,8 +141,8 @@ class fileHandler():
 
         """
 
-        with open(file_path, "r+", encoding="utf8") as f:
-            lines = f.readlines()
+        async with aiofiles.open(file_path, mode='r+', encoding='utf8') as f:
+            lines = await f.readlines()
 
         line = lines[target_line - 1]
         items = line.split(",")
@@ -152,8 +153,8 @@ class fileHandler():
 
         lines[target_line - 1] = new_line
 
-        with open(file_path, "w", encoding="utf8") as file:
-            file.writelines(lines)
+        async with aiofiles.open(file_path, mode='w', encoding='utf8') as file:
+            await file.writelines(lines)
 
 ##-------------------start-of-read_sei_file()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
