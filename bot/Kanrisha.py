@@ -153,6 +153,8 @@ class Kanrisha(discord.Client):
 
         ## setups moderation tasks
         await self.slash_command_handler.event_handler.setup_moderation()
+
+        self.guild = await self.fetch_guild(self.pg)
     
 ##-------------------start-of-on_ready()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -237,7 +239,7 @@ class Kanrisha(discord.Client):
 
 ##-------------------start-of-sync_aibgMember_names()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    @tasks.loop(minutes=10)
+    @tasks.loop(minutes=15)
     async def sync_aibgMember_names(self):
 
         """

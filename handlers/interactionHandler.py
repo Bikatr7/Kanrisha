@@ -43,8 +43,8 @@ class interactionHandler:
         self.allowed_thread_channel_names = ["diamonds", "spades", "hearts", "clubs"]
         self.allowed_thread_channel_ids = [1158283680242995242, 1158283988201373758, 1158284223900299345, 1158284387490725978]
 
-        self.admin_user_ids = [957451091748986972, 277933921315061761, 125751325760684033, 1146646164838555699, 1144166968979628072]
-        self.admin_usernames = ["seinu", "tommy.3", "lombardia","dairinyn", "kanrisha"]
+        self.admin_user_ids = [957451091748986972, 277933921315061761, 125751325760684033, 1146646164838555699, 1144166968979628072, 791893551684255764]
+        self.admin_usernames = ["seinu", "tommy.3", "lombardia","dairinyn", "kanrisha", "1kozo"]
 
         self.owner_id = 957451091748986972
 
@@ -159,7 +159,7 @@ class interactionHandler:
         """
 
         ## if not correct channel and not admin, send response
-        if(interaction.channel_id not in self.whitelisted_channel_ids and interaction.user.id not in self.admin_user_ids):
+        if(not await self.whitelist_channel_check(interaction) and not await self.admin_check(interaction, display=False)):
             await interaction.response.send_message(f"Please use {str(self.whitelisted_channel_names)} for this command.", delete_after=5.0, ephemeral=True)
             return
         
