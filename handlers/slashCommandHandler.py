@@ -566,9 +566,6 @@ class slashCommandHandler:
 
             """
 
-            if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
-                return
-
             if(not await kanrisha_client.check_if_registered(interaction)):
                 return
             

@@ -69,6 +69,8 @@ class Kanrisha(discord.Client):
         ## dict for managing deck related views across files
         self.view_dict = {}
 
+        self.is_setup = False
+
         #------------------------------------------------------
 
         self.file_ensurer = fileEnsurer()
@@ -85,7 +87,31 @@ class Kanrisha(discord.Client):
         ## All handlers that require an instance of Kanrisha should be under the slash command handler
         self.slash_command_handler = slashCommandHandler(self)
 
-    ##-------------------start-of-check_if_registered()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+##-------------------start-of-check_if_ready()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    async def check_if_ready(self, interaction:discord.Interaction) -> bool:
+
+        """
+
+        Checks if the bot is ready.\n
+
+        Parameters:\n
+        interaction (object - discord.Interaction) : the interaction object.\n
+
+        Returns:\n
+        None.\n
+
+        """
+
+        if(not self.is_setup):
+            await self.interaction_handler.send_response_no_filter_channel(interaction, response="Kanrisha is not ready yet. Please wait a few seconds.", delete_after=5.0, is_ephemeral=True)
+            return False
+
+        else:
+            return True
+
+
+##-------------------start-of-check_if_registered()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     async def check_if_registered(self, interaction:discord.Interaction, register_check:bool = False):
 
@@ -103,6 +129,9 @@ class Kanrisha(discord.Client):
         None.\n
 
         """
+
+        if(not self.check_if_ready(interaction)):
+            return False
 
         registered_member_ids = [member.member_id for member in self.remote_handler.member_handler.members]
 
@@ -133,6 +162,8 @@ class Kanrisha(discord.Client):
         None.\n
 
         """
+
+        self.is_setup = False
 
         try:
 
@@ -192,6 +223,8 @@ class Kanrisha(discord.Client):
         await self.file_ensurer.logger.log_action("INFO", "Kanrisha", "Kanrisha is ready.")
 
         await self.wait_until_ready()
+
+        self.is_setup = True
 
 ##-------------------start-of-refresh_remote_storage()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
