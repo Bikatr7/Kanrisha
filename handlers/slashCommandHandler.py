@@ -2,7 +2,7 @@
 from __future__ import annotations ## used for cheating the circular import issue that occurs when i need to type check some things
 
 import typing
-import copy
+
 
 ## third-party libraries
 import discord
@@ -160,7 +160,7 @@ class slashCommandHandler:
 
                 await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, error_message, delete_after=3.0, is_ephemeral=True) ## type: ignore (we know it's not unbound)
 
-        ##-------------------start-of-profile()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+##-------------------start-of-profile()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         @kanrisha_client.tree.command(name="profile", description="Sends a member's AiBG profile.")
         async def profile(interaction: discord.Interaction, member:typing.Union[discord.Member , None]):
@@ -188,19 +188,69 @@ class slashCommandHandler:
             if(target_member == None):
                 await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, "That user is not registered.", is_ephemeral=True)
                 return
-            
+                        
+            spin_message = f"<:Exclusive:1155897960014553139>{target_member.spin_scores[4]}<:Prime:1155897948455059536>{target_member.spin_scores[3]}<:Distinguished:1155897936274792540>{target_member.spin_scores[2]}<:Notable:1155897923243098112>{target_member.spin_scores[1]}<:Standard:1155897909380907181>{target_member.spin_scores[0]}"
+
+            member_suit = [suit.suit_name for suit in kanrisha_client.remote_handler.suit_handler.suits if suit.suit_id == target_member.suit_id][0] 
+
             profile_message = (
                 f"**Name:** {target_member.member_name}\n"
                 f'**Credits:** {target_member.credits:,}\n'
-                f"**Standard Spins:** {target_member.spin_scores[0]}\n"
-                f"**Notable Spins:** {target_member.spin_scores[1]}\n"
-                f"**Distinguished Spins:** {target_member.spin_scores[2]}\n"
-                f"**Prime Spins:** {target_member.spin_scores[3]}\n"
-                f"**Exclusive Spins:** {target_member.spin_scores[4]}"
+                f"**Suit:** {member_suit}\n"
+                f"**Spin Scores:** {spin_message}\n"
             )
 
             embed = discord.Embed(title="Profile", description=profile_message, color=0xC0C0C0)
             embed.set_thumbnail(url=image_url)
+
+            await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, embed=embed)
+
+##-------------------start-of-suit_info()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        @kanrisha_client.tree.command(name="suitinfo", description="Sends a suit's info.")
+        @discord.app_commands.choices(choice=[
+        discord.app_commands.Choice(name="Clubs", value=1),
+        discord.app_commands.Choice(name="Diamonds", value=2),
+        discord.app_commands.Choice(name="Hearts", value=3),
+        discord.app_commands.Choice(name="Spades", value=4),
+        ])
+
+        async def suit_info(interaction:discord.Interaction, choice:discord.app_commands.Choice[int]) -> None:
+
+            """
+            
+            Sends a suit's info.\n
+
+            Parameters:\n
+            interaction (object - discord.Interaction) : the interaction object.\n
+            choice (object - discord.app_commands.Choice[str]) : the choice object.\n
+
+            Returns:\n
+            None.\n
+
+            """
+
+            if(not await kanrisha_client.check_if_registered(interaction)):
+                return
+            
+            await kanrisha_client.interaction_handler.defer_interaction(interaction)
+
+            id = choice.value
+
+            suit = [suit for suit in kanrisha_client.remote_handler.suit_handler.suits if suit.suit_id == id][0]
+
+            king = await kanrisha_client.fetch_user(suit.king_id)
+            queen = await kanrisha_client.fetch_user(suit.queen_id)
+            jack = await kanrisha_client.fetch_user(suit.jack_id)
+
+            description = (
+                f"**Name:** {suit.suit_name}\n"
+                f"**King:** {king.name}\n"
+                f"**Queen:** {queen.name}\n"
+                f"**Jack:** {jack.name}\n"
+            )
+
+            embed = discord.Embed(title=f"{suit.suit_name} Suit", description=description, color=0xC0C0C0)
 
             await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, embed=embed)
 
@@ -400,16 +450,14 @@ class slashCommandHandler:
             owned_cards = [card for card in kanrisha_client.remote_handler.gacha_handler.cards if card.id in owned_card_ids]
             sequence_ids = [target_member.owned_card_ids[owned_card_ids.index(card.id)] for card in owned_cards] ## type: ignore (we know it's not None)
 
-            ## Clone the original cards before modifying them
-            owned_cards_clone = copy.deepcopy(owned_cards)
 
             ## Modify the cards based on sequence_ids
-            for card, sequence_id in zip(owned_cards_clone, sequence_ids):
+            for card, sequence_id in zip(owned_cards, sequence_ids):
                 card.replica.id = int(str(sequence_id)[4])  # Adjust index based on your actual sequence_id format
                 card.rarity.current_xp = int(str(sequence_id)[5])  # Adjust index based on your actual sequence_id format
 
             ## Create pairs of (owned_card, sequence_id)
-            paired_list = list(zip(owned_cards_clone, sequence_ids))
+            paired_list = list(zip(owned_cards, sequence_ids))
 
             ## First, sort the pairs based on the replica.id of the owned_card in descending order
             paired_list.sort(key=lambda x: x[0].replica.id, reverse=True)
@@ -500,6 +548,79 @@ class slashCommandHandler:
             kanrisha_client.view_dict[interaction.user.id] = view
 
             await kanrisha_client.interaction_handler.send_followup_to_interaction(interaction, embed=embed, file=file, view=view)
+
+##-------------------start-of-join-suit()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        @kanrisha_client.tree.command(name="join-suit", description="Joins a suit.")
+        async def join_suit(interaction: discord.Interaction) -> None:
+            """
+            Joins a suit.
+
+            Parameters:
+            interaction (object - discord.Interaction) : the interaction object.
+
+            Returns:
+            None.
+            """
+
+            if not await kanrisha_client.interaction_handler.admin_check(interaction):
+                return
+
+            if not await kanrisha_client.check_if_registered(interaction):
+                return
+
+            class PreferenceModal(discord.ui.Modal):
+                def __init__(self):
+                    super().__init__(title="Rank Your Suit Preferences")
+
+
+                    self.first_choice = discord.ui.TextInput(label='First Choice Suit', style= discord.TextStyle.short, required = True, placeholder='Spades')
+                    self.second_choice = discord.ui.TextInput(label='Second Choice Suit', style= discord.TextStyle.short, required = True, placeholder='Clubs')
+                    self.third_choice = discord.ui.TextInput(label='Third Choice Suit', style= discord.TextStyle.short, required = True, placeholder='Diamonds')
+                    self.fourth_choice = discord.ui.TextInput(label='Fourth Choice Suit', style= discord.TextStyle.short, required = True, placeholder='Hearts')
+
+                    # Add the text inputs to the modal
+                    self.add_item(self.first_choice)
+                    self.add_item(self.second_choice)
+                    self.add_item(self.third_choice)
+                    self.add_item(self.fourth_choice)
+
+                async def on_submit(self, modal_interaction: discord.Interaction):
+
+                    await kanrisha_client.interaction_handler.defer_interaction(modal_interaction)
+
+                    preference_dict = {
+                    "Clubs": 1,
+                    "Diamonds": 2,
+                    "Hearts": 3,
+                    "Spades": 4,
+                    }
+                    
+                    preferences = [preference_dict[self.first_choice.value], preference_dict[self.second_choice.value], preference_dict[self.third_choice.value], preference_dict[self.fourth_choice.value]]
+
+                    member_counts = [suit.number_of_members for suit in kanrisha_client.remote_handler.suit_handler.suits if suit.suit_id != 5]
+                    percentage_threshold = 10
+
+                    for pref in preferences:
+                        projected_count = member_counts[pref - 1] + 1
+                        if all(projected_count <= count * (1 + percentage_threshold / 100) for count in member_counts):
+                            member_counts[pref - 1] += 1
+                            selected_suit = pref
+                            break
+                    else:
+                        # If we reach here, all preferences would violate the percentage threshold.
+                        sorted_indices = sorted(range(len(member_counts)), key=lambda k: member_counts[k])
+                        member_counts[sorted_indices[0]] += 1
+                        selected_suit = sorted_indices[0] + 1
+
+                    # Respond to the user with the result
+                    await interaction.followup.send(f"You have been added to Suit {selected_suit}.", ephemeral=True)
+                    
+
+            # Create an instance of the modal and send it to the user
+            modal = PreferenceModal()
+
+            await interaction.response.send_modal(modal)
 
 ##-------------------start-of-customize_card()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

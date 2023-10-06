@@ -418,8 +418,8 @@ class adminCommandHandler:
 
         ##-------------------start-of-transfer()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        @kanrisha_client.tree.command(name="transfer", description="Transfers credits from one user to another.")
-        async def transfer_credits(interaction: discord.Interaction, member:discord.Member, amount:int):
+        @kanrisha_client.tree.command(name="inject", description="Injects credits into a user. (ADMIN)")
+        async def inject_credits(interaction: discord.Interaction, member:discord.Member, amount:int):
 
             """
 
@@ -482,7 +482,7 @@ class adminCommandHandler:
             help_message = (
                 "**/trigger-early-shutdown** - Shuts down the bot. (ADMIN)\n\n"
                 "**/force-log-push** - Forces a Kanrisha log push. (ADMIN)\n\n"
-                "**/transfer** - Transfers credits from one user to another.\n\n"
+                "**/inject** - Injects credits into a user. (ADMIN)\n\n"
                 "**/force-remote-reset** - Overrides the local database with the current instance's data. (ADMIN)\n\n"
                 "**/execute-order-66** - It is time. (ADMIN)\n\n"
                 "**/get-running-config-directory** - Gets the running config directory. (ADMIN)\n\n"

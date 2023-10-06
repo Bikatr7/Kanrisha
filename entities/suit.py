@@ -51,3 +51,21 @@ class suit():
 
         ## the ID of the jack of the suit
         self.jack_id = int(inc_jack_id)
+
+##-------------------start-of-determine_attributes()--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    async def determine_attributes(self):
+
+        """
+        
+        Determines the attributes of the suit based of id.\n
+        
+        Parameters:\n
+        None.\n
+
+        Returns:\n
+        None.\n
+
+        """
+
+        pass
