@@ -52,20 +52,19 @@ class suit():
         ## the ID of the jack of the suit
         self.jack_id = int(inc_jack_id)
 
-##-------------------start-of-determine_attributes()--------------------------------------------------------------------------------------------------------------------------------------------------------
+        ## the ID of the suit role
+        self.suit_role_id = -1
 
-    async def determine_attributes(self):
+        ##-------------------/
 
-        """
-        
-        Determines the attributes of the suit based of id.\n
-        
-        Parameters:\n
-        None.\n
+        if(self.suit_id == 1):
+            self.suit_role_id = 1158281919553875978
 
-        Returns:\n
-        None.\n
+        elif(self.suit_id == 2):
+            self.suit_role_id = 1158282031181086732
 
-        """
+        elif(self.suit_id == 3):
+            self.suit_role_id = 1158282076366323802
 
-        pass
+        elif(self.suit_id == 4):
+            self.suit_role_id = 1158281982405517322

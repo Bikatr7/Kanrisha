@@ -135,16 +135,16 @@ class toolkit():
 
 ##--------------------start-of-get_intended_answer()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def get_intended_card(self, user_requested_string:str, card_names:typing.List[str]) -> str:
+    async def get_intended_answer(self, user_string:str, possible_answers:typing.List[str]) -> str:
 
         """
         
-        When a typo has been previously encountered, we need to determine what they were trying to type and return that instead.\n
+        Gets the intended answer from a list of possible answers.\n
 
         Parameters:\n
-        self (object - scoreRate) : The scoreRate class object.\n
-        typo (str) : the typo the user made.\n
-        correct_answers (list - str) : list of correct answers the typo could match.\n
+        self (object - toolkit) : the toolkit object.\n
+        user_string (str) : the string the user was trying to type.\n
+        possible_answers (list) : a list of possible answers.\n
 
         Returns:\n
         closest_string (str) : the string the user was trying to type.\n
@@ -154,10 +154,10 @@ class toolkit():
         closest_distance = float('inf')
         closest_string = ""
 
-        for string in card_names:
-            distance = await self.levenshtein(user_requested_string, string)
+        for string in possible_answers:
+            distance = await self.levenshtein(user_string, string)
             if(distance < closest_distance):
                 closest_distance = distance
                 closest_string = string
 
-        return closest_string.lower()
+        return closest_string

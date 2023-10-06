@@ -229,13 +229,15 @@ class memberHandler:
 
 ##-------------------start-of-get_aibg_member_object()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def get_aibg_member_object(self, interaction:discord.Interaction, member:discord.Member | discord.User | None = None) -> typing.Tuple[aibgMember | None, int, str, bool]:
+    async def get_aibg_member_object(self, interaction:discord.Interaction, member:discord.Member | discord.User | None = None) -> typing.Tuple[aibgMember, int, str, bool]:
 
         """
         
         Gets the aibg member object from the member id. Also returns the member id and image url. Also returns whether or not the request is for the user's own profile.\n
 
         Will grab aibg object from {member} if provided, otherwise will grab from {interaction}.\n
+
+        Raises an exception if the member is not found.\n
         
         Parameters:\n
         interaction (object - discord.Interaction) : the interaction object.\n
@@ -269,5 +271,8 @@ class memberHandler:
                 
                 if(target_member_id == syndicate_member.member_id):
                     target_member = syndicate_member
+
+        if(target_member == None):
+            raise Exception(f"Member not found. ID = {target_member_id}")
 
         return target_member, target_member_id, image_url, is_self_request

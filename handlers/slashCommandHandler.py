@@ -293,7 +293,7 @@ class slashCommandHandler:
             all_card_names = [card.name.lower() for card in kanrisha_client.remote_handler.gacha_handler.cards]
 
             ## run the name through the card name filter
-            card_name = await kanrisha_client.toolkit.get_intended_card(card_name.lower(), all_card_names)
+            card_name = await kanrisha_client.toolkit.get_intended_answer(card_name.lower(), all_card_names)
 
             ## get the card id for the given card name
             card_id = [card.id for card in kanrisha_client.remote_handler.gacha_handler.cards if card.name.lower() == card_name.lower()][0] ## type: ignore (we know it's not None)
@@ -553,23 +553,35 @@ class slashCommandHandler:
 
         @kanrisha_client.tree.command(name="join-suit", description="Joins a suit.")
         async def join_suit(interaction: discord.Interaction) -> None:
-            """
-            Joins a suit.
 
-            Parameters:
-            interaction (object - discord.Interaction) : the interaction object.
-
-            Returns:
-            None.
             """
 
-            if not await kanrisha_client.interaction_handler.admin_check(interaction):
+            Joins a suit.\n
+
+            Parameters:\n
+            interaction (object - discord.Interaction) : the interaction object.\n
+
+            Returns:\n
+            None.\n
+
+            """
+
+            if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
                 return
 
-            if not await kanrisha_client.check_if_registered(interaction):
+            if(not await kanrisha_client.check_if_registered(interaction)):
                 return
+            
+            aibg_member_object, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_aibg_member_object(interaction)
+
+            if(aibg_member_object.suit_id != 5):
+                await kanrisha_client.interaction_handler.send_response_no_filter_channel(interaction, "You are already in a suit.", is_ephemeral=True)
+                return
+
+            ##-----------------------------------------------------------------------------/
 
             class PreferenceModal(discord.ui.Modal):
+
                 def __init__(self):
                     super().__init__(title="Rank Your Suit Preferences")
 
@@ -585,39 +597,70 @@ class slashCommandHandler:
                     self.add_item(self.third_choice)
                     self.add_item(self.fourth_choice)
 
+                ##-----------------------------------------------------------------------------/
+
                 async def on_submit(self, modal_interaction: discord.Interaction):
 
                     await kanrisha_client.interaction_handler.defer_interaction(modal_interaction)
 
+                    i = 0
+
                     preference_dict = {
-                    "Clubs": 1,
-                    "Diamonds": 2,
-                    "Hearts": 3,
-                    "Spades": 4,
+                        "Clubs": 1,
+                        "Diamonds": 2,
+                        "Hearts": 3,
+                        "Spades": 4,
                     }
-                    
-                    preferences = [preference_dict[self.first_choice.value], preference_dict[self.second_choice.value], preference_dict[self.third_choice.value], preference_dict[self.fourth_choice.value]]
+
+                    ## get the user's preferences
+                    possible_answers = list(preference_dict.keys())
+                    self.first_choice = await kanrisha_client.toolkit.get_intended_answer(self.first_choice.value, possible_answers) ## type: ignore (we know it's not None)
+                    self.second_choice = await kanrisha_client.toolkit.get_intended_answer(self.second_choice.value, possible_answers) ## type: ignore (we know it's not None)
+                    self.third_choice = await kanrisha_client.toolkit.get_intended_answer(self.third_choice.value, possible_answers) ## type: ignore (we know it's not None)
+                    self.fourth_choice = await kanrisha_client.toolkit.get_intended_answer(self.fourth_choice.value, possible_answers) ## type: ignore (we know it's not None)
+
+                    ## Eliminate duplicates while preserving order
+                    preferences = []
+                    for choice in [self.first_choice, self.second_choice, self.third_choice, self.fourth_choice]:
+                        if(choice not in preferences):
+                            preferences.append(choice)
+
+                    for suit in possible_answers:
+                        if(suit not in preferences):
+                            preferences.append(suit)
+
+                    preferences = [preference_dict[suit_name] for suit_name in preferences]
 
                     member_counts = [suit.number_of_members for suit in kanrisha_client.remote_handler.suit_handler.suits if suit.suit_id != 5]
                     percentage_threshold = 10
 
                     for pref in preferences:
                         projected_count = member_counts[pref - 1] + 1
-                        if all(projected_count <= count * (1 + percentage_threshold / 100) for count in member_counts):
+                        if all(projected_count <= count * (1 + percentage_threshold / 100) for index, count in enumerate(member_counts) if index != pref - 1):
                             member_counts[pref - 1] += 1
                             selected_suit = pref
                             break
                     else:
-                        # If we reach here, all preferences would violate the percentage threshold.
+                        ## If we reach here, all preferences would violate the percentage threshold.
                         sorted_indices = sorted(range(len(member_counts)), key=lambda k: member_counts[k])
                         member_counts[sorted_indices[0]] += 1
                         selected_suit = sorted_indices[0] + 1
 
-                    # Respond to the user with the result
-                    await interaction.followup.send(f"You have been added to Suit {selected_suit}.", ephemeral=True)
-                    
+                    ## add the user to the suit
+                    suit = [suit for suit in kanrisha_client.remote_handler.suit_handler.suits if suit.suit_id == selected_suit][0] 
 
-            # Create an instance of the modal and send it to the user
+                    suit.number_of_members += 1
+
+                    suit_role = kanrisha_client.guild.get_role(suit.suit_role_id)
+
+                    await interaction.user.add_roles(suit_role) ## type: ignore (we know it's not None)
+
+                    aibg_member_object.suit_id = suit.suit_id
+
+                    await kanrisha_client.interaction_handler.send_followup_to_interaction(modal_interaction, f"You have been added to the {suit.suit_name} suit.")
+            
+            ##-----------------------------------------------------------------------------/
+
             modal = PreferenceModal()
 
             await interaction.response.send_modal(modal)
