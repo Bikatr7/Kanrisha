@@ -60,12 +60,6 @@ class Kanrisha(discord.Client):
         ## sets the activity currently "Watching you all."
         self.activity = discord.Activity(name='you all.', type=discord.ActivityType.watching)
 
-        ## PIG GUILD ID
-        self.pg = 1143635379262607441
-
-        ## KANRISHA LOG CHANNEL ID
-        self.log_channel_id = 1149433554170810459
-
         ## dict for managing deck related views across files
         self.view_dict = {}
 
@@ -185,6 +179,29 @@ class Kanrisha(discord.Client):
             await self.file_ensurer.logger.log_action("WARNING", "Kanrisha", "Remote storage reset with local storage.")
 
         await self.slash_command_handler.event_handler.setup_moderation()
+
+        if(self.user.id == 1144166968979628072): ## gamemaster bot id
+            ## PIG GUILD ID
+            self.pg = 1143635379262607441
+
+            ## KANRISHA LOG CHANNEL ID
+            self.log_channel_id = 1149433554170810459
+
+        elif(self.user.id == 1146086016147538051): ## python bot id (what tommy uses to test)
+            ## tommy3's server GUILD ID
+            self.pg = 723974461988143135
+
+            ## gamemaster testing CHANNEL ID
+            self.log_channel_id = 1049144043008950322
+        
+        else:
+            print(f"This client's ID is ${self.user.id}. ")
+
+            ## PIG GUILD ID
+            self.pg = 1143635379262607441
+
+            ## KANRISHA LOG CHANNEL ID
+            self.log_channel_id = 1149433554170810459
 
         self.guild = await self.fetch_guild(self.pg)
     
