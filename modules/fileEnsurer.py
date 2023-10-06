@@ -223,10 +223,10 @@ class fileEnsurer:
       self.gacha_images_dir = os.path.join(self.images_dir, "gacha_images")
 
       ## gacha subdirectories
-      self.fonts_dir = os.path.join(self.gacha_images_dir, "Fonts")
-      self.frames_dir = os.path.join(self.gacha_images_dir, "Frames")
-      self.rarity_dir = os.path.join(self.gacha_images_dir, "Rarity_Images")
-      self.replica_dir = os.path.join(self.gacha_images_dir, "Replica_Images")
+      self.fonts_dir = os.path.join(self.gacha_images_dir, "fonts")
+      self.frames_dir = os.path.join(self.gacha_images_dir, "frames")
+      self.rarity_dir = os.path.join(self.gacha_images_dir, "rarity_Images")
+      self.replica_dir = os.path.join(self.gacha_images_dir, "replica_Images")
 
       ## font paths
       self.title_font_path = os.path.join(self.fonts_dir, "impact.ttf")
