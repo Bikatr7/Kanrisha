@@ -55,6 +55,7 @@ class fileEnsurer:
 
       self.token_path = os.path.join(self.bot_details_dir, "token.txt")
       self.user_name_path = os.path.join(self.bot_details_dir, "user_name.txt")
+      self.host_name_path = os.path.join(self.bot_details_dir, "host_name.txt")
 
       self.bot_thumbnail_url = "https://cdn.discordapp.com/app-icons/1144166968979628072/7f4e6d14a104149d59624d5cc2897b94.png?size=256"
 
@@ -145,6 +146,7 @@ class fileEnsurer:
 
       await self.file_handler.modified_create_file(self.token_path, "token")
       await self.file_handler.modified_create_file(self.user_name_path, "user_name")
+      await self.file_handler.modified_create_file(self.host_name_path, "host_name")
       await self.file_handler.modified_create_file(self.last_freebie_path, time_24_hours_ago_utf)
 
       await self.file_handler.standard_create_file(self.credentials_path)
@@ -316,22 +318,36 @@ class fileEnsurer:
       host_name = ""
       user_name = ""
 
-      host_name = input("Please enter the host name of 'The Gamemaster's Database : ")
-
       try:
           
-         with open(self.user_name_path, 'r', encoding='utf-8') as file: 
-            user_name = file.read()
+         with open(self.host_name_path, 'r', encoding='utf-8') as file: 
+            host_name = file.read()
+         
+         assert host_name != "" and host_name != "host_name"
+         
+      except Exception as e: ## else try to get host name manually
 
-         assert user_name != "" and user_name != "user_name"
+         host_name = input("Please enter the host name of 'The Gamemaster's Database : ")
 
-      except Exception as e: ## else try to get user name manually
-          
-         user_name = input("Please enter your username : ")
-
-         with open(self.user_name_path, 'w+', encoding='utf-8') as file: 
-            file.write(user_name)
+         with open(self.host_name_path, 'w+', encoding='utf-8') as file: 
+            file.write(host_name)
 
       finally:
-         
-         return host_name, user_name
+
+         try:
+            
+            with open(self.user_name_path, 'r', encoding='utf-8') as file: 
+               user_name = file.read()
+
+            assert user_name != "" and user_name != "user_name"
+
+         except Exception as e: ## else try to get user name manually
+            
+            user_name = input("Please enter your username : ")
+
+            with open(self.user_name_path, 'w+', encoding='utf-8') as file: 
+               file.write(user_name)
+
+         finally:
+            
+            return host_name, user_name

@@ -289,7 +289,7 @@ class adminCommandHandler:
             else:  ## Linux
                 dest = os.path.join(os.path.expanduser("~"), "KanrishaConfig-Copy")
 
-            excluded_files = [kanrisha_client.file_ensurer.credentials_path, kanrisha_client.file_ensurer.user_name_path, kanrisha_client.file_ensurer.token_path]
+            excluded_files = [kanrisha_client.file_ensurer.credentials_path, kanrisha_client.file_ensurer.user_name_path,  kanrisha_client.file_ensurer.host_name_path, kanrisha_client.file_ensurer.token_path]
 
             with tempfile.TemporaryDirectory() as tmpdirname:
                 ## Prepare the temp directory path with the outer directory name
