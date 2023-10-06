@@ -1,9 +1,9 @@
-## built-in modules
+## built-in libraries
 import time
 import typing
 import base64
 
-## third party modules
+## third party libraries
 from mysql.connector import pooling
 from mysql.connector import cursor
 

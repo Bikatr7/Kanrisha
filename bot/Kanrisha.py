@@ -46,9 +46,9 @@ class Kanrisha(discord.Client):
         """
 
         intents = discord.Intents.default()
-        intents.members = True  ## to receive member related events
-        intents.guild_messages = True  ## to receive guild message related events
-        intents.message_content = True  ## to receive message content related events
+        intents.members = True
+        intents.guild_messages = True
+        intents.message_content = True
 
         super().__init__(intents=intents)
 
@@ -66,6 +66,7 @@ class Kanrisha(discord.Client):
         ## KANRISHA LOG CHANNEL ID
         self.log_channel_id = 1149433554170810459
 
+        ## dict for managing deck related views across files
         self.view_dict = {}
 
         #------------------------------------------------------
@@ -81,6 +82,7 @@ class Kanrisha(discord.Client):
         self.remote_handler = remoteHandler(self.file_ensurer, self.toolkit)
 
         ## Kanrisha and the slash command handler are coupled, as the slash command handler needs an instance of Kanrisha for it's function decorators to work
+        ## All handlers that require an instance of Kanrisha should be under the slash command handler
         self.slash_command_handler = slashCommandHandler(self)
 
     ##-------------------start-of-check_if_registered()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -122,7 +124,7 @@ class Kanrisha(discord.Client):
 
         """
         
-        Runs the post initialization tasks. Tasks that need to be done after the object and it's handlers are created, but before the object can be used.\n
+        Runs the post initialization tasks. Tasks that need to be done after the object and it's handlers are created, but before the client can be used.\n
 
         Parameters:\n
         self (object - Kanrisha): The Kanrisha client.\n
@@ -137,7 +139,7 @@ class Kanrisha(discord.Client):
             ## loads the remote storage
             await self.remote_handler.load_remote_storage()
 
-        ## if it breaks, reset remote but do not fill it, load backup from local, and refresh remote
+        ## if it breaks, reset remote but do not fill it with broken instance, instead load backup from local, and refresh remote
         except:
 
             await self.file_ensurer.logger.log_action("ERROR", "Kanrisha", "Failed to load remote storage. Resetting remote storage.")
@@ -151,7 +153,6 @@ class Kanrisha(discord.Client):
 
             await self.file_ensurer.logger.log_action("WARNING", "Kanrisha", "Remote storage reset with local storage.")
 
-        ## setups moderation tasks
         await self.slash_command_handler.event_handler.setup_moderation()
 
         self.guild = await self.fetch_guild(self.pg)
@@ -174,22 +175,17 @@ class Kanrisha(discord.Client):
 
         await self.run_post_init_tasks()
 
-        ## syncs the command tree
         await self.tree.sync()
 
-        ## starts the remote storage refresh task
         if(not self.refresh_remote_storage.is_running()):
             self.refresh_remote_storage.start()
 
-        ## starts the log file sending task
         if(not self.send_log_file_to_log_channel.is_running()):
             self.send_log_file_to_log_channel.start()
 
-        ## starts the freebie reset task
         if(not self.check_for_freebie_reset.is_running()):
             self.check_for_freebie_reset.start()
 
-        ## starts the aibgMember name sync task
         if(not self.sync_aibgMember_names.is_running()):
             self.sync_aibgMember_names.start()
 
@@ -245,6 +241,7 @@ class Kanrisha(discord.Client):
         """
         
         Syncs the names of the members in the aibgMember list.\n
+        Runs every 15 minutes.\n
 
         Parameters:\n
         self (object - Kanrisha): The Kanrisha client.\n
@@ -259,7 +256,7 @@ class Kanrisha(discord.Client):
         for member in self.remote_handler.member_handler.members:
             user = await self.fetch_user(member.member_id)
             member.member_name = user.name
-            await asyncio.sleep(5)
+            await asyncio.sleep(3)
 
         await self.file_ensurer.logger.log_action("INFO", "Kanrisha", "aibgMember names synced.")
 
@@ -288,10 +285,8 @@ class Kanrisha(discord.Client):
         ## Get the current time in UTC
         current_time = datetime.utcnow()
 
-        ## Calculate the time difference between the current time and the time you provided
         time_difference = current_time - time_provided
 
-        ## Check if it's been exactly or more than 24 hours
         has_been_24_hours = time_difference >= timedelta(hours=24)
 
         if(has_been_24_hours):

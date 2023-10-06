@@ -1,3 +1,6 @@
+## third party libraries
+import aiofiles
+
 ## custom modules
 from modules.toolkit import toolkit
 from modules.fileEnsurer import fileEnsurer
@@ -5,6 +8,7 @@ from handlers.connectionHandler import connectionHandler
 
 from handlers.gachaHandler import gachaHandler
 from handlers.memberHandler import memberHandler
+from handlers.suitHandler import suitHandler
 
 class remoteHandler():
 
@@ -42,6 +46,8 @@ class remoteHandler():
 
         self.gacha_handler = gachaHandler(self.file_ensurer, self.toolkit, self.connection_handler)
 
+        self.suit_handler = suitHandler(self.file_ensurer, self.toolkit, self.connection_handler)
+
 
         ##----------------------------------------------------------------dir----------------------------------------------------------------
 
@@ -72,6 +78,7 @@ class remoteHandler():
 
         await self.member_handler.load_members_from_remote()
         await self.gacha_handler.load_cards_from_remote()
+        await self.suit_handler.load_suits_from_remote()
 
 ##--------------------start-of-load_local_storage()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -91,6 +98,7 @@ class remoteHandler():
         
         await self.member_handler.load_members_from_local()
         await self.gacha_handler.load_cards_from_local()
+        await self.suit_handler.load_suits_from_local()
 
 ##--------------------start-of-reset_remote_storage()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -150,10 +158,15 @@ class remoteHandler():
         drop table if exists member_cards
         """
 
+        delete_suits_query = """
+        drop table if exists suits
+        """
+
         ##----------------------------------------------------------------calls----------------------------------------------------------------
 
-        ## drop member_cards first because of foreign key constraints
+        ## drop member_cards and suits first because of foreign key constraints
         await self.connection_handler.execute_query(delete_member_cards_query)
+        await self.connection_handler.execute_query(delete_suits_query)
 
         await self.connection_handler.execute_query(delete_members_query)
         await self.connection_handler.execute_query(delete_cards_query)
@@ -180,10 +193,16 @@ class remoteHandler():
         create_members_query = """
         create table if not exists members (
             member_id bigint primary key,
-            spin_scores varchar(256) not null,
+            number_of_standard_spins int not null,
+            number_of_notable_spins int not null,
+            number_of_distinguished_spins int not null,
+            number_of_prime_spins int not null,
+            number_of_exclusive_spins int not null,
+            number_of_ace_cards int not null,
             credits bigint not null,
             merit_points int not null,
-            has_freebie bool not null
+            has_freebie bool not null,
+            suit_id int not null
         )
         """
 
@@ -212,11 +231,26 @@ class remoteHandler():
         )
         """
 
+        create_suits_query = """
+        create table if not exists suits (
+            suit_id int primary key,
+            suit_name varchar(256) not null,
+            number_of_members int not null,
+            king_id bigint not null,
+            queen_id bigint not null,
+            jack_id bigint not null,
+            foreign key (king_id) references members(member_id),
+            foreign key (queen_id) references members(member_id),
+            foreign key (jack_id) references members(member_id)
+        )
+        """
+
         ##----------------------------------------------------------------calls----------------------------------------------------------------
 
         await self.connection_handler.execute_query(create_members_query)
         await self.connection_handler.execute_query(create_cards_query)
         await self.connection_handler.execute_query(create_member_cards_query)
+        await self.connection_handler.execute_query(create_suits_query)
 
 ##--------------------start-of-fill_remote_storage()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -241,19 +275,24 @@ class remoteHandler():
         ##----------------------------------------------------------------clears----------------------------------------------------------------
         
         async def clear_members() -> None:
-    
-            with open(self.file_ensurer.member_path, "w+") as member_file:
-                member_file.truncate(0)
+
+            async with aiofiles.open(self.file_ensurer.member_path, "w+") as member_file:
+                await member_file.truncate(0)
 
         async def clear_cards() -> None:
 
-            with open(self.file_ensurer.card_path, "w+") as card_file:
-                card_file.truncate(0)
+            async with aiofiles.open(self.file_ensurer.card_path, "w+") as card_file:
+                await card_file.truncate(0)
 
         async def clear_member_cards() -> None:
 
-            with open(self.file_ensurer.member_card_path, "w+") as member_card_file:
-                member_card_file.truncate(0)
+            async with aiofiles.open(self.file_ensurer.member_card_path, "w+") as member_card_file:
+                await member_card_file.truncate(0)
+
+        async def clear_suits() -> None:
+
+            async with aiofiles.open(self.file_ensurer.suit_path, "w+") as suit_file:
+                await suit_file.truncate(0)
 
         ##----------------------------------------------------------------members----------------------------------------------------------------
 
@@ -263,26 +302,44 @@ class remoteHandler():
 
             for member in self.member_handler.members:
 
-                ## member_id, spin_scores, credits, merit_points, has_freebie
+                ## member_id, number_of_standard_spins, number_of_notable_spins, number_of_distinguished_spins, number_of_prime_spins, number_of_exclusive_spins, number_of_ace_cards, credits, merit_points, has_freebie, suit_id
                 new_id = member.member_id
-                new_spin_scores = member.spin_scores
+                new_number_of_standard_spins = member.spin_scores[0]
+                new_number_of_notable_spins = member.spin_scores[1]
+                new_number_of_distinguished_spins = member.spin_scores[2]
+                new_number_of_prime_spins = member.spin_scores[3]
+                new_number_of_exclusive_spins = member.spin_scores[4]
+                new_number_of_ace_cards = member.num_ace_cards
                 new_credits = member.credits
                 new_merit_points = member.merit_points
-                has_freebie = int(member.has_freebie)
-
-                ## turn spin_scores into a string
-                score_string = f'"{new_spin_scores[0]}.{new_spin_scores[1]}.{new_spin_scores[2]}.{new_spin_scores[3]}.{new_spin_scores[4]}"'
+                new_has_freebie = int(member.has_freebie)
+                new_suit_id = member.suit_id
 
                 ## create a list of the member details
-                member_details = [new_id, score_string, new_credits, new_merit_points, int(has_freebie)]
+                member_details = [new_id, 
+                                new_number_of_standard_spins, 
+                                new_number_of_notable_spins, 
+                                new_number_of_distinguished_spins, 
+                                new_number_of_prime_spins, 
+                                new_number_of_exclusive_spins, 
+                                new_number_of_ace_cards, 
+                                new_credits, 
+                                new_merit_points, 
+                                new_has_freebie, new_suit_id]
 
                 table_name = "members"
                 insert_dict = {
-                    "member_id" : new_id,
-                    "spin_scores" : new_spin_scores,
-                    "credits" : new_credits,
-                    "merit_points" : new_merit_points,
-                    "has_freebie" : has_freebie
+                    "member_id": new_id,
+                    "number_of_standard_spins": new_number_of_standard_spins,
+                    "number_of_notable_spins": new_number_of_notable_spins,
+                    "number_of_distinguished_spins": new_number_of_distinguished_spins,
+                    "number_of_prime_spins": new_number_of_prime_spins,
+                    "number_of_exclusive_spins": new_number_of_exclusive_spins,
+                    "number_of_ace_cards": new_number_of_ace_cards,
+                    "credits": new_credits,
+                    "merit_points": new_merit_points,
+                    "has_freebie": new_has_freebie,
+                    "suit_id": new_suit_id
                 }
 
                 await self.connection_handler.insert_into_table(table_name, insert_dict)
@@ -366,12 +423,45 @@ class remoteHandler():
 
                     await self.file_ensurer.file_handler.write_sei_line(self.file_ensurer.member_card_path, member_card_details)
 
+        ##----------------------------------------------------------------suits----------------------------------------------------------------
+
+        async def fill_suits() -> None:
+
+            table_name = "suits"
+
+            for suit in self.suit_handler.suits:
+
+                ## suit_id, suit_name, number_of_members, king_id, queen_id, jack_id
+                new_id = suit.suit_id
+                new_name = suit.suit_name
+                new_number_of_members = suit.number_of_members
+                new_king_id = suit.king_id
+                new_queen_id = suit.queen_id
+                new_jack_id = suit.jack_id
+
+                suit_details = [new_id, new_name, new_number_of_members, new_king_id, new_queen_id, new_jack_id]
+
+                insert_dict = {
+                    "suit_id" : new_id,
+                    "suit_name" : new_name,
+                    "number_of_members" : new_number_of_members,
+                    "king_id" : new_king_id,
+                    "queen_id" : new_queen_id,
+                    "jack_id" : new_jack_id
+                }
+
+                await self.connection_handler.insert_into_table(table_name, insert_dict)
+
+                await self.file_ensurer.file_handler.write_sei_line(self.file_ensurer.suit_path, suit_details)
+
         ##----------------------------------------------------------------calls----------------------------------------------------------------
 
         await clear_members()
         await clear_cards()
         await clear_member_cards()
+        await clear_suits()
 
         await fill_members()
         await fill_cards()
         await fill_member_cards()
+        await fill_suits()

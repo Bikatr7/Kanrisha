@@ -8,6 +8,7 @@ import discord
 from handlers.connectionHandler import connectionHandler
 
 from entities.aibgMember import aibgMember
+from entities.suit import suit
 
 from modules.fileEnsurer import fileEnsurer
 from modules.toolkit import toolkit
@@ -43,7 +44,7 @@ class memberHandler:
         self.toolkit = inc_toolkit
         self.connection_handler = connection_handler
 
-        self.members: typing.List[aibgMember] = [] 
+        self.members: typing.List[aibgMember] = []
 
 ##-------------------start-of-load_members_from_remote()---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -63,20 +64,19 @@ class memberHandler:
 
         self.members.clear()
 
-        id_list, spin_scores_list, credits_list, merit_point_list, has_freebie_list = await self.connection_handler.read_multi_column_query("select member_id, spin_scores, credits, merit_points, has_freebie from members")
+        id_list, standard_spin_list, notable_spin_list, distinguished_spin_list, prime_spin_list, exclusive_spin_list, ace_card_list, credits_list, merit_point_list, has_freebie_list, suit_id_list = await self.connection_handler.read_multi_column_query("select member_id, number_of_standard_spins, number_of_notable_spins, number_of_distinguished_spins, number_of_prime_spins, number_of_exclusive_spins, number_of_ace_cards, credits, merit_points, has_freebie, suit_id from members")
 
         for i in range(len(id_list)):
 
-            spin_scores = spin_scores_list[i].strip("(").strip(")").split(",")
+            ## build spins into a tuple
+            spin_scores = (int(standard_spin_list[i]), int(notable_spin_list[i]), int(distinguished_spin_list[i]), int(prime_spin_list[i]), int(exclusive_spin_list[i]))
 
             owned_card_id_list, replica_id_list, xp_id_list = await self.connection_handler.read_multi_column_query(f"select card_id, card_replica_id, card_xp_id from member_cards where member_id = {id_list[i]}")
-
-            spin_scores = (int(spin_scores[0]), int(spin_scores[1]), int(spin_scores[2]), int(spin_scores[3]), int(spin_scores[4]))
 
             ## take the card ids and merge them into a single string for each card owned by the member
             owned_id_list = [f"{owned_card_id_list[ii]}{replica_id_list[ii]}{xp_id_list[ii]}" for ii in range(len(owned_card_id_list))]
 
-            new_member = aibgMember(int(id_list[i]), spin_scores, owned_id_list, int(credits_list[i]), int(merit_point_list[i]), int(has_freebie_list[i]))
+            new_member = aibgMember(int(id_list[i]), spin_scores, int(ace_card_list[i]), owned_id_list, int(credits_list[i]), int(merit_point_list[i]), int(has_freebie_list[i]), int(suit_id_list[i]))
             self.members.append(new_member)
 
         await self.file_ensurer.logger.log_action("INFO", "memberHandler", "Loaded members from remote.")
@@ -99,7 +99,7 @@ class memberHandler:
 
         self.members.clear()
 
-        # Read card IDs once and store in a dictionary
+        ## Read card IDs once and store in a dictionary
         card_ids_dict = {}
         with open(self.file_ensurer.member_card_path, "r", encoding="utf-8") as member_cards_file:
 
@@ -119,21 +119,31 @@ class memberHandler:
 
                 values = line.strip().split(',')
 
-                spin_scores = tuple([int(score) for score in values[1].strip('"').split('.')[:5]]) 
+                new_member_id = int(values[0])
+                new_standard_spins = int(values[1])
+                new_notable_spins = int(values[2])
+                new_distinguished_spins = int(values[3])
+                new_prime_spins = int(values[4])
+                new_exclusive_spins = int(values[5])
+                new_ace_cards = int(values[6])
+                new_credits = int(values[7])
+                new_merit_points = int(values[8])
+                new_has_freebie = int(values[9])
+                new_suit_id = int(values[10])
 
-                card_ids = card_ids_dict.get(values[0], [])
+                ## get the card ids for the member
+                new_owned_card_ids = card_ids_dict.get(values[0], [])
 
-                ## explicit type hinting to avoid pylance warning below
-                spin_scores = (spin_scores[0], spin_scores[1], spin_scores[2], spin_scores[3], spin_scores[4])
+                ## build spins into a tuple
+                spin_scores = (new_standard_spins, new_notable_spins, new_distinguished_spins, new_prime_spins, new_exclusive_spins)
 
-                self.members.append(aibgMember(int(values[0]), spin_scores, card_ids, int(values[2]), int(values[3]), int(values[4])))
-
+                self.members.append(aibgMember(new_member_id, spin_scores, new_ace_cards, new_owned_card_ids, new_credits, new_merit_points, new_has_freebie, new_suit_id))
+                
         await self.file_ensurer.logger.log_action("INFO", "memberHandler", "Loaded members from local.") 
-
                
 ##-------------------start-of-add_new_member()---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    async def add_new_member(self, inc_member_id:int, inc_member_name:str, inc_spin_scores:typing.Tuple[int,int,int,int,int]) -> None:
+    async def add_new_member(self, inc_member_id:int) -> None:
 
         """
         
@@ -147,19 +157,44 @@ class memberHandler:
 
         """
 
-        score_string = f'"{inc_spin_scores[0]}.{inc_spin_scores[1]}.{inc_spin_scores[2]}.{inc_spin_scores[3]}.{inc_spin_scores[4]}"'
+        new_standard_spins = 0
+        new_notable_spins = 0
+        new_distinguished_spins = 0
+        new_prime_spins = 0
+        new_exclusive_spins = 0
+        new_credits = 50000
+        new_merit_points = 0
+        new_has_freebie = 1
+        new_suit_id = 5
 
-        card_id_string = ""
-
-        member_details = [inc_member_id, inc_member_name, score_string, card_id_string, 0, 0]
+        ## create a list of the member details
+        member_details = [inc_member_id, 
+                        new_standard_spins,
+                        new_notable_spins,
+                        new_distinguished_spins,
+                        new_prime_spins,
+                        new_exclusive_spins,
+                        new_credits, 
+                        new_merit_points, 
+                        new_has_freebie, 
+                        new_suit_id]
 
         await self.file_ensurer.file_handler.write_sei_line(self.file_ensurer.member_path, member_details)
 
+        spin_scores = (new_standard_spins, new_notable_spins, new_distinguished_spins, new_prime_spins, new_exclusive_spins)
+
         ## adds new member to current instance of bot
-        new_member = aibgMember(inc_member_id, inc_spin_scores, inc_owned_card_ids=[], inc_credits=50000, inc_merit_points=0, inc_has_freebie=1)
+        new_member = aibgMember(inc_member_id, 
+                                inc_spin_scores=spin_scores, 
+                                inc_num_ace_cards=0, 
+                                inc_owned_card_ids=[], 
+                                inc_credits=new_credits, 
+                                inc_merit_points=new_merit_points, 
+                                inc_has_freebie=new_has_freebie, 
+                                inc_suit_id=new_suit_id)
 
         ## logs action
-        await self.file_ensurer.logger.log_action("INFO", "memberHandler", f"Added new member: {inc_member_name}.")
+        await self.file_ensurer.logger.log_action("INFO", "memberHandler", f"Added new member: {inc_member_id}.")
 
         self.members.append(new_member)
 
@@ -198,9 +233,9 @@ class memberHandler:
 
         """
         
-        Gets the syndicate member object from the member id. Also returns the member id and image url. Also returns whether or not the request is for the user's own profile.\n
+        Gets the aibg member object from the member id. Also returns the member id and image url. Also returns whether or not the request is for the user's own profile.\n
 
-        Will grab syndicate object from {member} if provided, otherwise will grab from {interaction}.\n
+        Will grab aibg object from {member} if provided, otherwise will grab from {interaction}.\n
         
         Parameters:\n
         interaction (object - discord.Interaction) : the interaction object.\n

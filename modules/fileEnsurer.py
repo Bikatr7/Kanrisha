@@ -169,10 +169,12 @@ class fileEnsurer:
       self.member_path = os.path.join(self.members_dir, "members.txt")
       self.card_path = os.path.join(self.members_dir, "cards.txt")
       self.member_card_path = os.path.join(self.members_dir, "member cards.txt")
+      self.suit_path = os.path.join(self.members_dir, "suits.txt")
 
       await self.file_handler.standard_create_file(self.member_path)
       await self.file_handler.standard_create_file(self.card_path)
       await self.file_handler.standard_create_file(self.member_card_path)
+      await self.file_handler.standard_create_file(self.suit_path)
        
 ##--------------------start-of-ensure_lib_files()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

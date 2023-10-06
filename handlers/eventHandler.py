@@ -93,7 +93,7 @@ class eventHandler:
             member = message.author
 
             ## don't check the bot's own messages for banned messages
-            if member == kanrisha_client.user:
+            if(member == kanrisha_client.user):
                 return
 
             for banned_message in self.banned_messages:
@@ -207,7 +207,7 @@ class eventHandler:
                     ## delete the register message
                     await interaction.message.delete() ## type: ignore (we know it's not None)
 
-                    await kanrisha_client.remote_handler.member_handler.add_new_member(interaction.user.id, interaction.user.name, tuple([0,0,0,0,0])) ## type: ignore (we know it's not None)
+                    await kanrisha_client.remote_handler.member_handler.add_new_member(interaction.user.id)
 
                     await interaction.followup.send("You have been registered.", ephemeral=True)
 

@@ -1,6 +1,9 @@
 ## built-in libaries
 import os
 import typing
+import asyncio
+
+## third-party libraries
 import aiofiles
 
 ## custom modules
@@ -50,8 +53,10 @@ class fileHandler():
 
         """
 
-        if(os.path.isdir(directory_path) == False):
-            os.mkdir(directory_path)
+        if(await self.async_isdir(directory_path) == False):
+
+            await asyncio.to_thread(os.mkdir, directory_path)
+
             await self.logger.log_action("INFO", "fileHandler", directory_path + " was created due to lack of the directory")
 
 ##--------------------start-of-standard_create_file()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -71,9 +76,11 @@ class fileHandler():
 
         """
 
-        if(os.path.exists(file_path) == False):
-            with open(file_path, "w+", encoding="utf-8") as file:
-                file.truncate()
+        if(await self.async_exists(file_path) == False):
+
+            async with aiofiles.open(file_path, "w+", encoding="utf-8") as file:
+                await file.truncate()
+
             await self.logger.log_action("INFO", "fileHandler", file_path + " was created due to lack of the file")
 
 ##--------------------start-of-modified_create_file()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -94,10 +101,13 @@ class fileHandler():
 
         """
 
-        if(os.path.exists(file_path) == False or os.path.getsize(file_path) == 0):
-            with open(file_path, "w+", encoding="utf-8") as file:
-                file.write(content_to_write)
+        if(await self.async_exists(file_path) == False or await self.async_getsize(file_path) == 0):
+
+            async with aiofiles.open(file_path, "w+", encoding="utf-8") as file:
+                await file.write(content_to_write)
+
             await self.logger.log_action("INFO", "fileHandler", file_path + " was created due to lack of the file or the file was empty")
+
 ##--------------------start-of-write_sei_line()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     async def write_sei_line(self, sei_file_path:str, items_to_write:typing.List[typing.Any]) -> None:
@@ -121,7 +131,7 @@ class fileHandler():
         async with aiofiles.open(sei_file_path, mode='a+', encoding='utf-8') as file:
             await file.write(line + ",\n")
 
-##-------------------start-of-read_sei_file()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+##-------------------start-of-edit_sei_file()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     async def edit_sei_line(self, file_path:str, target_line:int, column_number:int, value_to_replace_to:str) -> None:
         
@@ -179,8 +189,8 @@ class fileHandler():
         build_string = ""
         file_details = []
 
-        with open(sei_file_path, "r", encoding="utf-8") as file:
-            sei_file = file.readlines()
+        async with aiofiles.open(sei_file_path, "r", encoding="utf-8") as file:
+            sei_file = await file.readlines()
 
         sei_line = sei_file[target_line - 1]
 
@@ -215,13 +225,13 @@ class fileHandler():
 
         """
 
-        with open(sei_file_path, "r", encoding="utf-8") as file:
-            lines = file.readlines()
+        async with aiofiles.open(sei_file_path, "r", encoding="utf-8") as file:
+            lines = await file.readlines()
 
-        with open(sei_file_path, "w", encoding="utf-8") as file:
+        async with aiofiles.open(sei_file_path, "w", encoding="utf-8") as file:
             for i, line in enumerate(lines, 1):
                 if i != target_line:
-                    file.write(line)
+                    await file.write(line)
 
 ##--------------------start-of-delete_all_occurrences_of_id()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -244,8 +254,8 @@ class fileHandler():
 
         i = 0
 
-        with open(file_path, 'r') as file:
-            lines = file.readlines()
+        async with aiofiles.open(file_path, 'r') as file:
+            lines = await file.readlines()
 
         line_count = len(lines)
 
@@ -284,8 +294,8 @@ class fileHandler():
 
         i = 0
 
-        with open(target_path, 'r') as file:
-            lines = file.readlines()
+        async with aiofiles.open(target_path, 'r') as file:
+            lines = await file.readlines()
 
         line_count = len(lines)
 
@@ -334,3 +344,63 @@ class fileHandler():
                 return new_id
             
         return new_id
+    
+##--------------------start-of-async_isdir()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    
+    async def async_isdir(self, path:str) -> bool:
+
+        """
+
+        Checks if the given path is a directory.\n
+
+        Parameters:\n
+        path (str) : the path to check.\n
+
+        Returns:\n
+        await loop.run_in_executor(None, os.path.isdir, path) (bool) : True if the given path is a directory, False if it is not.\n
+
+        """
+
+        loop = asyncio.get_event_loop()
+        
+        return await loop.run_in_executor(None, os.path.isdir, path)
+    
+##--------------------start-of-async_exists()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    
+    async def async_exists(self, path:str) -> bool:
+
+        """
+
+        Checks if the given path exists.\n
+
+        Parameters:\n
+        path (str) : the path to check.\n
+
+        Returns:\n
+        await loop.run_in_executor(None, os.path.exists, path) (bool) : True if the given path exists, False if it does not.\n
+
+        """
+
+        loop = asyncio.get_event_loop()
+
+        return await loop.run_in_executor(None, os.path.exists, path)
+
+##--------------------start-of-async_getsize()------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    async def async_getsize(self, path:str) -> int:
+
+        """
+
+        Gets the size of the given path.\n
+
+        Parameters:\n
+        path (str) : the path to check.\n
+
+        Returns:\n
+        await loop.run_in_executor(None, os.path.getsize, path) (int) : the size of the given path.\n
+
+        """
+
+        loop = asyncio.get_event_loop()
+
+        return await loop.run_in_executor(None, os.path.getsize, path)

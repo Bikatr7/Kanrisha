@@ -41,7 +41,6 @@ class adminCommandHandler:
 
         kanrisha_client = inc_kanrisha_client
 
-
 ##-------------------start-of-trigger_early-shutdown()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         async def trigger_early_shutdown_logic(interaction:discord.Interaction) -> None:
@@ -232,7 +231,7 @@ class adminCommandHandler:
             for member in marked_for_death:
                 
                 try:
-                    await member.send(f"You have been banned from Pig Game for the following reason:\n{ban_reason}\n\nNote: {ban_message}")
+                    await member.send(f"You have been banned from AIB Game for the following reason:\n{ban_reason}\n\nNote: {ban_message}")
                 
                 except:
                     pass
@@ -437,8 +436,6 @@ class adminCommandHandler:
 
             """
 
-            is_admin = True
-
             ## Check if the user is registered
             if(not await kanrisha_client.check_if_registered(interaction)):
                 return
@@ -447,8 +444,6 @@ class adminCommandHandler:
             if(not await kanrisha_client.interaction_handler.admin_check(interaction)):
                 return 
 
-            ## get the syndicateMember objects for the sender and the transfer target     
-            sender_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_aibg_member_object(interaction, interaction.user)
             transfer_target_member, _, _, _ = await kanrisha_client.remote_handler.member_handler.get_aibg_member_object(interaction, member)
 
             if(transfer_target_member == None):
