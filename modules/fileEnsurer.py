@@ -43,7 +43,7 @@ class fileEnsurer:
       else:  # Linux
          self.config_dir = os.path.join(os.path.expanduser("~"), "KanrishaConfig")
 
-      self.bot_details_dir = os.path.join(self.config_dir, "bot details")
+      self.bot_details_dir = os.path.join(self.config_dir, "bot_details")
       self.members_dir = os.path.join(self.config_dir, "members")
       self.images_dir = os.path.join(self.config_dir, "images")
       self.lib_dir = os.path.join(self.config_dir, "lib")
@@ -51,10 +51,10 @@ class fileEnsurer:
       ##----------------------------------------------------------------paths----------------------------------------------------------------
 
       ## log file
-      self.log_path = os.path.join(self.bot_details_dir, "debug log.txt")
+      self.log_path = os.path.join(self.bot_details_dir, "debug_log.txt")
 
       self.token_path = os.path.join(self.bot_details_dir, "token.txt")
-      self.user_name_path = os.path.join(self.bot_details_dir, "user name.txt")
+      self.user_name_path = os.path.join(self.bot_details_dir, "user_name.txt")
 
       self.bot_thumbnail_url = "https://cdn.discordapp.com/app-icons/1144166968979628072/7f4e6d14a104149d59624d5cc2897b94.png?size=256"
 
@@ -141,7 +141,7 @@ class fileEnsurer:
 
       self.credentials_path = os.path.join(self.bot_details_dir, "credentials.txt")
 
-      self.last_freebie_path = os.path.join(self.bot_details_dir, "last freebie.txt")
+      self.last_freebie_path = os.path.join(self.bot_details_dir, "last_freebie.txt")
 
       await self.file_handler.modified_create_file(self.token_path, "token")
       await self.file_handler.modified_create_file(self.user_name_path, "user_name")
@@ -168,7 +168,7 @@ class fileEnsurer:
 
       self.member_path = os.path.join(self.members_dir, "members.txt")
       self.card_path = os.path.join(self.members_dir, "cards.txt")
-      self.member_card_path = os.path.join(self.members_dir, "member cards.txt")
+      self.member_card_path = os.path.join(self.members_dir, "member_cards.txt")
       self.suit_path = os.path.join(self.members_dir, "suits.txt")
 
       await self.file_handler.standard_create_file(self.member_path)
@@ -217,25 +217,25 @@ class fileEnsurer:
       """
 
       ## overhead directories
-      self.bot_images_dir = os.path.join(self.images_dir, "bot images")
-      self.gacha_images_dir = os.path.join(self.images_dir, "gacha images")
+      self.bot_images_dir = os.path.join(self.images_dir, "bot_images")
+      self.gacha_images_dir = os.path.join(self.images_dir, "gacha_images")
 
       ## gacha subdirectories
       self.fonts_dir = os.path.join(self.gacha_images_dir, "Fonts")
       self.frames_dir = os.path.join(self.gacha_images_dir, "Frames")
-      self.rarity_dir = os.path.join(self.gacha_images_dir, "Rarity Images")
-      self.replica_dir = os.path.join(self.gacha_images_dir, "Replica Images")
+      self.rarity_dir = os.path.join(self.gacha_images_dir, "Rarity_Images")
+      self.replica_dir = os.path.join(self.gacha_images_dir, "Replica_Images")
 
       ## font paths
       self.title_font_path = os.path.join(self.fonts_dir, "impact.ttf")
       self.subtitle_font_path = os.path.join(self.fonts_dir, "verdanai.ttf")
 
       ## frame paths
-      self.standard_frame_path = os.path.join(self.frames_dir, "standard frame.png")
-      self.notable_frame_path = os.path.join(self.frames_dir, "notable frame.png")
-      self.distinguished_frame_path = os.path.join(self.frames_dir, "distinguished frame.png")
-      self.prime_frame_path = os.path.join(self.frames_dir, "prime frame.png")
-      self.exclusive_frame_path = os.path.join(self.frames_dir, "exclusive frame.png")
+      self.standard_frame_path = os.path.join(self.frames_dir, "standard_frame.png")
+      self.notable_frame_path = os.path.join(self.frames_dir, "notable_frame.png")
+      self.distinguished_frame_path = os.path.join(self.frames_dir, "distinguished_frame.png")
+      self.prime_frame_path = os.path.join(self.frames_dir, "prime_frame.png")
+      self.exclusive_frame_path = os.path.join(self.frames_dir, "exclusive_frame.png")
 
       ## rarity paths
       self.standard_rarity_path = os.path.join(self.rarity_dir, "standard.png")
