@@ -130,7 +130,7 @@ class Kanrisha(discord.Client):
 
         """
 
-        if(not self.check_if_ready(interaction)):
+        if(not await self.check_if_ready(interaction)):
             return False
 
         registered_member_ids = [member.member_id for member in self.remote_handler.member_handler.members]
