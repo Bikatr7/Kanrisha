@@ -235,7 +235,7 @@ class Kanrisha(discord.Client):
 
 ##-------------------start-of-sync_aibgMember_names()--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    @tasks.loop(minutes=15)
+    @tasks.loop(hours=3)
     async def sync_aibgMember_names(self):
 
         """
@@ -256,7 +256,7 @@ class Kanrisha(discord.Client):
         for member in self.remote_handler.member_handler.members:
             user = await self.fetch_user(member.member_id)
             member.member_name = user.name
-            await asyncio.sleep(3)
+            await asyncio.sleep(.1)
 
         await self.file_ensurer.logger.log_action("INFO", "Kanrisha", "aibgMember names synced.")
 
