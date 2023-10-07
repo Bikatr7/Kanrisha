@@ -188,11 +188,11 @@ class Kanrisha(discord.Client):
             self.log_channel_id = 1149433554170810459
 
         elif(self.user.id == 1146086016147538051): ## python bot id (what tommy uses to test)
-            ## tommy3's server GUILD ID
-            self.pg = 723974461988143135
+            ## Gamemaster Testing GUILD ID
+            self.pg = 1160239297266466966
 
-            ## gamemaster testing CHANNEL ID
-            self.log_channel_id = 1049144043008950322
+            ## bot-logs CHANNEL ID
+            self.log_channel_id = 1160239756081377401
         
         else:
             print(f"This client's ID is ${self.user.id}. ")
