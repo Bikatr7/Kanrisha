@@ -3,12 +3,14 @@
 
 Intended to be a substitute for Chairman Sakayanagi#5006.
 
-Work in Progress
+Discord Bot for playing AIBG style games.
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 ## Archived
 
 Archived.
+
+Ownership of project has been passed from Bikatr7 to Racekid16.
 
 See https://github.com/Racekid16/Kanrisha for further developments.
 
